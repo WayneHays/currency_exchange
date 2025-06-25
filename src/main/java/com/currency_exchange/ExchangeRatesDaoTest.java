@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ExchangeRatesDaoTest {
     public static void main(String[] args) {
-        updateTest();
+        System.out.println(findAllTest());
     }
 
     private static ExchangeRates createTest() {

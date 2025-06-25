@@ -5,7 +5,7 @@ import com.currency_exchange.entity.Currency;
 
 public class CurrencyDaoTest {
     public static void main(String[] args) {
-      updateTest();
+      selectTest();
     }
 
     private static Currency createTest() {

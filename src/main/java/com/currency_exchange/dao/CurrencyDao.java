@@ -15,7 +15,7 @@ public class CurrencyDao implements Dao<Long, Currency> {
 
     private static final CurrencyDao INSTANCE = new CurrencyDao();
 
-    private static final String CREATE_SQL = """
+    private static final String SAVE_SQL = """
             INSERT INTO currencies (code, full_name, sign) VALUES (?,?,?)
             """;
 
@@ -49,7 +49,7 @@ public class CurrencyDao implements Dao<Long, Currency> {
     @Override
     public Currency save(Currency currency) {
         try (var connection = ConnectionManager.open();
-             var preparedStatement = connection.prepareStatement(CREATE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+             var preparedStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, currency.getCode());
             preparedStatement.setString(2, currency.getFullName());
@@ -66,12 +66,12 @@ public class CurrencyDao implements Dao<Long, Currency> {
             return currency;
 
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("Failed to save currency " + e.getMessage());
         }
     }
 
     @Override
-    public List<Currency> findAll() {
+    public List<Currency> findAll() throws DaoException {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_ALL_SQL)) {
 
@@ -83,8 +83,8 @@ public class CurrencyDao implements Dao<Long, Currency> {
             }
 
             return currencies;
-        } catch (SQLException throwables) {
-            throw new DaoException(throwables);
+        } catch (SQLException e) {
+            throw new DaoException("Failed to get all currencies " + e.getMessage());
         }
     }
 
@@ -102,8 +102,8 @@ public class CurrencyDao implements Dao<Long, Currency> {
             }
             return Optional.ofNullable(currency);
 
-        } catch (SQLException throwables) {
-            throw new DaoException(throwables);
+        } catch (SQLException e) {
+            throw new DaoException("Failed to find currency " + e.getMessage());
         }
     }
 
@@ -118,8 +118,8 @@ public class CurrencyDao implements Dao<Long, Currency> {
 
             prepareStatement.executeUpdate();
 
-        } catch (SQLException throwables) {
-            throw new DaoException(throwables);
+        } catch (SQLException e) {
+            throw new DaoException("Failed to update currency " + e.getMessage());
         }
     }
 

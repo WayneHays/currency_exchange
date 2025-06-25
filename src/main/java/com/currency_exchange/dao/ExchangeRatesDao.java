@@ -61,7 +61,7 @@ public class ExchangeRatesDao implements Dao<Long, ExchangeRates> {
 
             return exchangeRates;
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("Failed to save exchange rate " + e.getMessage());
         }
     }
 
@@ -79,7 +79,7 @@ public class ExchangeRatesDao implements Dao<Long, ExchangeRates> {
 
             return exchangeRates;
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("Failed to get all exchange rates " + e.getMessage());
         }
     }
 
@@ -98,7 +98,7 @@ public class ExchangeRatesDao implements Dao<Long, ExchangeRates> {
 
             return Optional.ofNullable(exchangeRates);
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("Failed to get exchange rate " + e.getMessage());
         }
     }
 
@@ -113,7 +113,7 @@ public class ExchangeRatesDao implements Dao<Long, ExchangeRates> {
             prepareStatement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DaoException(e);
+            throw new DaoException("Failed to update exchange rate " + e.getMessage());
         }
     }
 
