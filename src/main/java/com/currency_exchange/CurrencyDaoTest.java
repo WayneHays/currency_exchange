@@ -3,9 +3,11 @@ package com.currency_exchange;
 import com.currency_exchange.dao.CurrencyDao;
 import com.currency_exchange.entity.Currency;
 
+import java.util.Optional;
+
 public class CurrencyDaoTest {
     public static void main(String[] args) {
-      selectTest();
+      findByCode("EUR");
     }
 
     private static Currency createTest() {
@@ -19,7 +21,7 @@ public class CurrencyDaoTest {
 
     private static void updateTest() {
         var currencyDao = CurrencyDao.getInstance();
-        var optionalCurrency = currencyDao.findById(2L);
+        var optionalCurrency = currencyDao.findByCode("EUR");
         System.out.println(optionalCurrency);
 
         optionalCurrency.ifPresent(currency -> {
@@ -31,5 +33,12 @@ public class CurrencyDaoTest {
     private static void selectTest() {
         var currencies = CurrencyDao.getInstance().findAll();
         System.out.println(currencies);
+    }
+
+    private static void findByCode(String code) {
+        Optional<Currency> eur = CurrencyDao.getInstance().findByCode(code);
+        if(eur.isPresent()) {
+            System.out.println(eur.get());
+        }
     }
 }

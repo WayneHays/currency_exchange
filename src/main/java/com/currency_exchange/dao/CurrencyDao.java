@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class CurrencyDao implements Dao<Long, Currency> {
+public class CurrencyDao implements Dao<String, Currency> {
 
     private static final CurrencyDao INSTANCE = new CurrencyDao();
 
@@ -27,8 +27,8 @@ public class CurrencyDao implements Dao<Long, Currency> {
             FROM currencies
             """;
 
-    private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + """
-            WHERE id = ?
+    private static final String FIND_BY_CODE_SQL = FIND_ALL_SQL + """
+            WHERE code = ?
             """;
 
     private static final String UPDATE_SQL = """
@@ -89,10 +89,10 @@ public class CurrencyDao implements Dao<Long, Currency> {
     }
 
     @Override
-    public Optional<Currency> findById(Long id) {
+    public Optional<Currency> findByCode(String code) {
         try (var connection = ConnectionManager.open();
-             var prepareStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
-            prepareStatement.setLong(1, id);
+             var prepareStatement = connection.prepareStatement(FIND_BY_CODE_SQL)) {
+            prepareStatement.setString(1, code.toUpperCase());
 
             var resultSet = prepareStatement.executeQuery();
             Currency currency = null;

@@ -7,7 +7,7 @@ public interface Dao<K, T> {
 
     List<T> findAll();
 
-    Optional<T> findById(K id);
+    Optional<T> findByCode(K id);
 
     void update(T entity);
 

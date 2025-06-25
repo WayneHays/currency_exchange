@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@WebServlet("/currency")
+@WebServlet("/currency/*")
 public class CurrencyServlet extends HttpServlet {
     private static final CurrencyService currencyService = CurrencyService.getInstance();
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -24,10 +24,18 @@ public class CurrencyServlet extends HttpServlet {
         resp.setContentType("application/json");
         resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
+        String pathInfo = req.getPathInfo();
+
         try {
-            List<CurrencyDtoResponse> currencies = currencyService.findAll();
-            resp.setStatus(HttpServletResponse.SC_OK);
-            gson.toJson(currencies, resp.getWriter());
+            if (pathInfo == null || pathInfo.equals("/")) {
+                List<CurrencyDtoResponse> currencies = currencyService.findAll();
+                resp.setStatus(HttpServletResponse.SC_OK);
+                gson.toJson(currencies, resp.getWriter());
+            }
+            else {
+                String code = pathInfo.substring(1);
+                gson.toJson(currencyService.findByCode(code), resp.getWriter());
+            }
         } catch (ServiceException e) {
             resp.setStatus(e.getHttpStatus());
             resp.getWriter().write("sosihue");

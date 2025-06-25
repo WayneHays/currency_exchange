@@ -26,7 +26,7 @@ public class ExchangeRatesDaoTest {
 
     private static void updateTest() {
         var exchangeRatesDao = ExchangeRatesDao.getInstance();
-        var optionalExchangeRates = exchangeRatesDao.findById(2L);
+        var optionalExchangeRates = exchangeRatesDao.findByCode(2L);
         System.out.println(optionalExchangeRates);
 
         optionalExchangeRates.ifPresent(exchangeRates -> {

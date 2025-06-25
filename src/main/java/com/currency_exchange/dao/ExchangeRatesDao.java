@@ -84,7 +84,7 @@ public class ExchangeRatesDao implements Dao<Long, ExchangeRates> {
     }
 
     @Override
-    public Optional<ExchangeRates> findById(Long id) {
+    public Optional<ExchangeRates> findByCode(Long id) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
             prepareStatement.setLong(1, id);

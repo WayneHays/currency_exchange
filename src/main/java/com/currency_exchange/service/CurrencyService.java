@@ -39,13 +39,13 @@ public class CurrencyService {
         }
     }
 
-    public CurrencyDtoResponse findById(Long id) {
-        if (id == null) {
-            throw new IllegalArgumentException("CurrencyID cannot be null");
+    public CurrencyDtoResponse findByCode(String code) {
+        if (code == null) {
+            throw new IllegalArgumentException("Currency code cannot be null");
         }
 
         try {
-            Optional<Currency> maybeCurrency = currencyDao.findById(id);
+            Optional<Currency> maybeCurrency = currencyDao.findByCode(code);
 
             if (maybeCurrency.isEmpty()) {
                 throw new ServiceException("Currency not found", HttpServletResponse.SC_NOT_FOUND);
