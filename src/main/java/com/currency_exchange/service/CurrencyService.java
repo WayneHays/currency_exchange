@@ -5,12 +5,11 @@ import com.currency_exchange.dto.request.CurrencyDtoRequest;
 import com.currency_exchange.dto.response.CurrencyDtoResponse;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.DaoException;
-import com.currency_exchange.exception.ServiceException;
-import jakarta.servlet.http.HttpServletResponse;
+import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
+import com.currency_exchange.exception.service_exception.InvalidCurrencyException;
+import com.currency_exchange.exception.service_exception.ServiceException;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class CurrencyService {
     private static final CurrencyService INSTANCE = new CurrencyService();
@@ -23,57 +22,46 @@ public class CurrencyService {
         return INSTANCE;
     }
 
-    public List<CurrencyDtoResponse> findAll() throws ServiceException {
+    public List<CurrencyDtoResponse> findAll() {
         try {
             List<Currency> currencies = currencyDao.findAll();
-
-            if (currencies.isEmpty()) {
-                return Collections.emptyList();
-            }
-
             return currencies.stream()
-                    .map(this::mapToDto
-                    ).toList();
+                    .map(this::mapToDto)
+                    .toList();
         } catch (DaoException e) {
-            throw new ServiceException("Database access error", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new ServiceException("Currencies list unavailable");
         }
     }
 
     public CurrencyDtoResponse findByCode(String code) {
-        if (code == null) {
-            throw new IllegalArgumentException("Currency code cannot be null");
+        if (code == null || code.isBlank()) {
+            throw new InvalidCurrencyException();
         }
-
         try {
-            Optional<Currency> maybeCurrency = currencyDao.findByCode(code);
-
-            if (maybeCurrency.isEmpty()) {
-                throw new ServiceException("Currency not found", HttpServletResponse.SC_NOT_FOUND);
-            }
-
-            Currency currency = maybeCurrency.get();
-            return mapToDto(currency);
+            return currencyDao.findByCode(code)
+                    .map(this::mapToDto)
+                    .orElseThrow(() -> new CurrencyNotFoundException(code));
         } catch (DaoException e) {
-            throw new ServiceException("Failed to fetch currency from database " + e.getMessage(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            throw new ServiceException("Currency service unavailable", e);
         }
     }
 
-    public CurrencyDtoResponse save(CurrencyDtoRequest dtoRequest) {
-        if (dtoRequest == null) {
-            throw new IllegalArgumentException("CurrencyDTO cannot be null");
-        }
-
-        validateCurrencyDto(dtoRequest);
-
-        try {
-            Currency currency = mapToCurrency(dtoRequest);
-            Currency savedCurrency = currencyDao.save(currency);
-            return mapToDto(savedCurrency);
-        } catch (DaoException e) {
-            throw new ServiceException("Failed to save currency", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-
-    }
+//    public CurrencyDtoResponse save(CurrencyDtoRequest dtoRequest) {
+//        if (dtoRequest == null) {
+//            throw new ServiceException();
+//        }
+//
+//        validateCurrencyDto(dtoRequest);
+//
+//        try {
+//            Currency currency = mapToCurrency(dtoRequest);
+//            Currency savedCurrency = currencyDao.save(currency);
+//            return mapToDto(savedCurrency);
+//        } catch (DatabaseException e) {
+//            throw new ServiceException("Failed to save currency");
+//        }
+//
+//    }
 
     private CurrencyDtoResponse mapToDto(Currency currency) {
         return new CurrencyDtoResponse(currency.getId(),
@@ -90,20 +78,20 @@ public class CurrencyService {
         return currency;
     }
 
-    private void validateCurrencyDto(CurrencyDtoRequest Request) {
-        if (Request.getCode() == null || Request.getCode().isBlank()) {
+    private void validateCurrencyDto(CurrencyDtoRequest request) {
+        if (request.getCode() == null || request.getCode().isBlank()) {
             throw new IllegalArgumentException("Currency code is required");
         }
 
-        if (Request.getFullName() == null || Request.getFullName().isBlank()) {
+        if (request.getFullName() == null || request.getFullName().isBlank()) {
             throw new IllegalArgumentException("Currency name is required");
         }
 
-        if (Request.getSign() == null || Request.getSign().isBlank()) {
+        if (request.getSign() == null || request.getSign().isBlank()) {
             throw new IllegalArgumentException("Currency sign required");
         }
 
-        if (!Request.getCode().matches("[A-Z]{3}")) {
+        if (!request.getCode().matches("[A-Z]{3}")) {
             throw new IllegalArgumentException("Currency code must be 3 uppercase letters");
         }
     }

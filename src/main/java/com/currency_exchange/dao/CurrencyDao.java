@@ -66,7 +66,7 @@ public class CurrencyDao implements Dao<String, Currency> {
             return currency;
 
         } catch (SQLException e) {
-            throw new DaoException("Failed to save currency " + e.getMessage());
+            throw new DaoException("Unable to save currency " + e);
         }
     }
 
@@ -84,7 +84,7 @@ public class CurrencyDao implements Dao<String, Currency> {
 
             return currencies;
         } catch (SQLException e) {
-            throw new DaoException("Failed to get all currencies " + e.getMessage());
+            throw new DaoException("Unable to find currencies " + e);
         }
     }
 
@@ -103,7 +103,7 @@ public class CurrencyDao implements Dao<String, Currency> {
             return Optional.ofNullable(currency);
 
         } catch (SQLException e) {
-            throw new DaoException("Failed to find currency " + e.getMessage());
+            throw new DaoException("Unable to find currency by code ", e);
         }
     }
 
@@ -119,7 +119,7 @@ public class CurrencyDao implements Dao<String, Currency> {
             prepareStatement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new DaoException("Failed to update currency " + e.getMessage());
+            throw new DaoException("Unable to update currency " + e);
         }
     }
 
