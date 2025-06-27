@@ -1,10 +1,13 @@
 package com.currency_exchange.servlet.currencies;
 
+import com.currency_exchange.dto.request.CurrencyDtoRequest;
 import com.currency_exchange.dto.response.CurrencyDtoResponse;
+import com.currency_exchange.exception.service_exception.CurrencyConflictException;
+import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
-import com.currency_exchange.exception.servlet_exception.BadRequestException;
 import com.currency_exchange.service.CurrencyService;
-import com.currency_exchange.util.Validator;
+import com.currency_exchange.util.CurrencyValidator;
+import com.currency_exchange.util.Mapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,11 +32,11 @@ public class CurrenciesServlet extends HttpServlet {
         resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         try {
-            Validator.validateNoParameters(req);
+            CurrencyValidator.validateNoParameters(req);
             List<CurrencyDtoResponse> currencies = currencyService.findAll();
             resp.setStatus(SC_OK);
             gson.toJson(currencies, resp.getWriter());
-        } catch (BadRequestException e) {
+        } catch (InvalidAttributeException e) {
             resp.setStatus(SC_BAD_REQUEST);
             resp.getWriter().write(("{\"message\":\"%s\"}".formatted(e.getMessage())));
         } catch (ServiceException e) {
@@ -42,25 +45,30 @@ public class CurrenciesServlet extends HttpServlet {
         }
     }
 
-//    @Override
-//    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-//
-//        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
-//        String name = req.getParameter("name");
-//        String code = req.getParameter("code");
-//        String sign = req.getParameter("sign");
-//
-//        try {
-//            Validator.validate(List.of(name, code, sign));
-//            CurrencyDtoRequest dtoRequest = Mapper.mapToDtoRequest(name, code, sign);
-//            currencyService.save(dtoRequest);
-//
-//        } catch (InvalidAttributeException e) {
-//            resp.setStatus(SC_BAD_REQUEST);
-//            resp.getWriter().write(("{\"message\":\"%s\"}".formatted(e.getMessage())));
-//        } catch (ServiceException e) {
-//            resp.setStatus(SC_INTERNAL_SERVER_ERROR);
-//            resp.getWriter().write(("{\"message\":\"%s\"}".formatted(e.getMessage())));
-//        }
-//    }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+        try {
+            CurrencyValidator.validate(req);
+
+            String name = req.getParameter("name");
+            String code = req.getParameter("code");
+            String sign = req.getParameter("sign");
+            CurrencyDtoRequest dtoRequest = Mapper.mapToDtoRequest(name, code, sign);
+            CurrencyDtoResponse saved = currencyService.save(dtoRequest);
+            resp.setStatus(SC_CREATED);
+            gson.toJson(saved, resp.getWriter());
+
+        } catch (InvalidAttributeException e) {
+            resp.setStatus(SC_BAD_REQUEST);
+            resp.getWriter().write(("{\"message\":\"%s\"}".formatted(e.getMessage())));
+        } catch (CurrencyConflictException e) {
+            resp.setStatus(SC_CONFLICT);
+            resp.getWriter().write(("{\"message\":\"%s\"}".formatted(e.getMessage())));
+        } catch (ServiceException e) {
+            resp.setStatus(SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write(("{\"message\":\"%s\"}".formatted(e.getMessage())));
+        }
+    }
 }

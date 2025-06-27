@@ -50,6 +50,6 @@ public class CurrencyServlet extends HttpServlet {
 
     private void sendError(HttpServletResponse resp, int status, String message) throws IOException {
         resp.setStatus(status);
-        resp.getWriter().write("{\"error\":\"" + message + "\"}");
+        resp.getWriter().write("{\"message\":\"" + message + "\"}");
     }
 }
