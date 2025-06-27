@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public final class CurrencyValidator {
     private static final Set<String> REQUIRED_CURRENCY_PARAMS = Set.of("name", "code", "sign");
-    private static final String CURRENCY_NAME_REGEX = "^[\\p{L}\\s\\-] {2,50}$";
+    private static final String CURRENCY_NAME_REGEX = "^[\\p{L}\\s\\-]{2,50}$";
     private static final String CURRENCY_CODE_REGEX = "^[A-Z]{3}$";
     private static final String CURRENCY_SIGN_REGEX = "^\\p{Sc}";
 
@@ -23,18 +23,27 @@ public final class CurrencyValidator {
 
     public static void validate(HttpServletRequest request) {
         validateMissingParameters(request);
+        validateCurrencyName(request);
+        validateCurrencyCode(request);
+        validateCurrencySign(request);
+    }
 
+    private static void validateCurrencyName(HttpServletRequest request) {
         if (!isValidCurrencyName(request.getParameter("name"))) {
             throw new InvalidAttributeException("Invalid currency name");
         }
+    }
+
+    private static void validateCurrencyCode(HttpServletRequest request) {
         if (!isValidCurrencyCode(request.getParameter("code"))) {
             throw new InvalidAttributeException("Invalid currency code");
         }
+    }
 
+    private static void validateCurrencySign(HttpServletRequest request) {
         if (!isValidCurrencySign(request.getParameter("sign"))) {
             throw new InvalidAttributeException("Invalid currency sign");
         }
-
     }
 
     public static void validateMissingParameters(HttpServletRequest request) throws InvalidAttributeException {
@@ -44,7 +53,7 @@ public final class CurrencyValidator {
                 .collect(Collectors.joining(", "));
 
         if (!missingParameters.isEmpty()) {
-            throw new InvalidAttributeException("Missing required parameters: %s".formatted(missingParameters));
+            throw new InvalidAttributeException("missing required parameters {%s}".formatted(missingParameters));
         }
     }
 

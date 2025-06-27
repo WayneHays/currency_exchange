@@ -47,19 +47,17 @@ public class CurrenciesServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        req.setCharacterEncoding(StandardCharsets.UTF_8.name());
-
         try {
             CurrencyValidator.validate(req);
 
             String name = req.getParameter("name");
             String code = req.getParameter("code");
             String sign = req.getParameter("sign");
+
             CurrencyDtoRequest dtoRequest = Mapper.mapToDtoRequest(name, code, sign);
             CurrencyDtoResponse saved = currencyService.save(dtoRequest);
             resp.setStatus(SC_CREATED);
             gson.toJson(saved, resp.getWriter());
-
         } catch (InvalidAttributeException e) {
             resp.setStatus(SC_BAD_REQUEST);
             resp.getWriter().write(("{\"message\":\"%s\"}".formatted(e.getMessage())));
