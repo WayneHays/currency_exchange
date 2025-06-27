@@ -2,7 +2,7 @@ package com.currency_exchange.servlet.currencies;
 
 import com.currency_exchange.dto.response.CurrencyDtoResponse;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
-import com.currency_exchange.exception.service_exception.InvalidCurrencyException;
+import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.google.gson.Gson;
@@ -37,12 +37,14 @@ public class CurrencyServlet extends HttpServlet {
             CurrencyDtoResponse dtoResponse = currencyService.findByCode(code);
             resp.setStatus(HttpServletResponse.SC_OK);
             gson.toJson(dtoResponse, resp.getWriter());
-        } catch (InvalidCurrencyException e) {
+        } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException e) {
             sendError(resp, SC_NOT_FOUND, e.getMessage());
         } catch (ServiceException e) {
             sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (Exception e) {
+            sendError(resp, SC_INTERNAL_SERVER_ERROR, "Internal error");
         }
     }
 

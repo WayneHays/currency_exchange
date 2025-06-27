@@ -1,7 +1,9 @@
 package com.currency_exchange.dao;
 
 import com.currency_exchange.entity.Currency;
-import com.currency_exchange.exception.DaoException;
+import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
+import com.currency_exchange.exception.dao_exception.DaoException;
+import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
 import com.currency_exchange.util.ConnectionManager;
 
 import java.sql.ResultSet;
@@ -66,8 +68,23 @@ public class CurrencyDao implements Dao<String, Currency> {
             return currency;
 
         } catch (SQLException e) {
-            throw new DaoException("Unable to save currency " + e);
+            if (isDuplicateKeyError(e)) {
+                throw new CurrencyAlreadyExistsException(currency.getCode(), e);
+            } else if (isConnectionError(e)) {
+                throw new DatabaseAccessException("Database connection problem", e);
+            } else {
+                throw new DaoException("Failed to save currency");
+            }
         }
+    }
+
+    private boolean isDuplicateKeyError(SQLException e) {
+        return e.getErrorCode() == 19 && e.getMessage().contains("UNIQUE constraint failed");
+    }
+
+    private boolean isConnectionError(SQLException e) {
+        int errorCode = e.getErrorCode();
+        return errorCode == 14 || errorCode == 10 || errorCode == 8 || errorCode == 7;
     }
 
     @Override

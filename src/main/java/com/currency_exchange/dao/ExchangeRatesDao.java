@@ -1,7 +1,7 @@
 package com.currency_exchange.dao;
 
 import com.currency_exchange.entity.ExchangeRates;
-import com.currency_exchange.exception.DaoException;
+import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.util.ConnectionManager;
 
 import java.sql.*;
