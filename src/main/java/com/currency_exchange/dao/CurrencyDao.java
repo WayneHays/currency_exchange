@@ -6,6 +6,7 @@ import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
 import com.currency_exchange.util.ConnectionManager;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class CurrencyDao implements Dao<String, Currency> {
+public class CurrencyDao implements Dao<Currency> {
 
     private static final CurrencyDao INSTANCE = new CurrencyDao();
 
@@ -31,6 +32,10 @@ public class CurrencyDao implements Dao<String, Currency> {
 
     private static final String FIND_BY_CODE_SQL = FIND_ALL_SQL + """
             WHERE code = ?
+            """;
+
+    private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + """
+            WHERE id = ?
             """;
 
     private static final String UPDATE_SQL = """
@@ -53,20 +58,10 @@ public class CurrencyDao implements Dao<String, Currency> {
         try (var connection = ConnectionManager.open();
              var preparedStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
-            preparedStatement.setString(1, currency.getCode());
-            preparedStatement.setString(2, currency.getFullName());
-            preparedStatement.setString(3, currency.getSign());
-
+            setSavingParameters(currency, preparedStatement);
             preparedStatement.executeUpdate();
-
-            var generatedKeys = preparedStatement.getGeneratedKeys();
-
-            if (generatedKeys.next()) {
-                currency.setId(generatedKeys.getLong(1));
-            }
-
+            setGeneratedId(currency, preparedStatement);
             return currency;
-
         } catch (SQLException e) {
             if (isDuplicateKeyError(e)) {
                 throw new CurrencyAlreadyExistsException(currency.getCode(), e);
@@ -78,66 +73,86 @@ public class CurrencyDao implements Dao<String, Currency> {
         }
     }
 
-    private boolean isDuplicateKeyError(SQLException e) {
-        return e.getErrorCode() == 19 && e.getMessage().contains("UNIQUE constraint failed");
+    private void setSavingParameters(Currency currency, PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setString(1, currency.getCode());
+        preparedStatement.setString(2, currency.getFullName());
+        preparedStatement.setString(3, currency.getSign());
     }
 
-    private boolean isConnectionError(SQLException e) {
-        int errorCode = e.getErrorCode();
-        return errorCode == 14 || errorCode == 10 || errorCode == 8 || errorCode == 7;
+    private void setGeneratedId(Currency currency, PreparedStatement preparedStatement) throws SQLException {
+        var generatedKeys = preparedStatement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            currency.setId(generatedKeys.getLong(1));
+        }
     }
 
     @Override
     public List<Currency> findAll() throws DaoException {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_ALL_SQL)) {
-
             var resultSet = prepareStatement.executeQuery();
-            List<Currency> currencies = new ArrayList<>();
-
-            while (resultSet.next()) {
-                currencies.add(buildCurrency(resultSet));
-            }
-
-            return currencies;
+            return getCurrencies(resultSet);
         } catch (SQLException e) {
-            throw new DaoException("Unable to find currencies " + e);
+            throw new DaoException("Failed to find currencies " + e);
         }
     }
 
-    @Override
+    private List<Currency> getCurrencies(ResultSet resultSet) throws SQLException {
+        List<Currency> currencies = new ArrayList<>();
+        while (resultSet.next()) {
+            currencies.add(buildCurrency(resultSet));
+        }
+        return currencies;
+    }
+
     public Optional<Currency> findByCode(String code) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_BY_CODE_SQL)) {
             prepareStatement.setString(1, code.toUpperCase());
-
             var resultSet = prepareStatement.executeQuery();
-            Currency currency = null;
-
-            if (resultSet.next()) {
-                currency = buildCurrency(resultSet);
-            }
-            return Optional.ofNullable(currency);
+            return getCurrency(resultSet);
 
         } catch (SQLException e) {
-            throw new DaoException("Unable to find currency by code ", e);
+            throw new DaoException("Failed to find currency by code ", e);
         }
+    }
+
+    public Optional<Currency> findById(Long id) {
+        try (var connection = ConnectionManager.open();
+             var prepareStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+            prepareStatement.setLong(1, id);
+            var resultSet = prepareStatement.executeQuery();
+            return getCurrency(resultSet);
+
+        } catch (SQLException e) {
+            throw new DaoException("Failed to find currency by id ", e);
+        }
+    }
+
+    private Optional<Currency> getCurrency(ResultSet resultSet) throws SQLException {
+        Currency currency = null;
+        if (resultSet.next()) {
+            currency = buildCurrency(resultSet);
+        }
+        return Optional.ofNullable(currency);
     }
 
     @Override
     public void update(Currency currency) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
-            prepareStatement.setString(1, currency.getCode());
-            prepareStatement.setString(2, currency.getFullName());
-            prepareStatement.setString(3, currency.getSign());
-            prepareStatement.setLong(4, currency.getId());
-
+            setUpdatedParameters(currency, prepareStatement);
             prepareStatement.executeUpdate();
-
         } catch (SQLException e) {
-            throw new DaoException("Unable to update currency " + e);
+            throw new DaoException("Failed to update currency " + e);
         }
+    }
+
+    private void setUpdatedParameters(Currency currency, PreparedStatement prepareStatement) throws SQLException {
+        prepareStatement.setString(1, currency.getCode());
+        prepareStatement.setString(2, currency.getFullName());
+        prepareStatement.setString(3, currency.getSign());
+        prepareStatement.setLong(4, currency.getId());
     }
 
     private Currency buildCurrency(ResultSet resultSet) throws SQLException {

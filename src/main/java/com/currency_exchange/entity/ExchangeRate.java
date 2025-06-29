@@ -3,16 +3,16 @@ package com.currency_exchange.entity;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class ExchangeRates {
+public class ExchangeRate {
     private Long id;
     private Long baseCurrencyId;
     private Long targetCurrencyId;
     private BigDecimal rate;
 
-    public ExchangeRates() {
+    public ExchangeRate() {
     }
 
-    public ExchangeRates(Long id, Long baseCurrencyId, Long targetCurrencyId, BigDecimal rate) {
+    public ExchangeRate(Long id, Long baseCurrencyId, Long targetCurrencyId, BigDecimal rate) {
         this.id = id;
         this.baseCurrencyId = baseCurrencyId;
         this.targetCurrencyId = targetCurrencyId;
@@ -55,7 +55,7 @@ public class ExchangeRates {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ExchangeRates that = (ExchangeRates) o;
+        ExchangeRate that = (ExchangeRate) o;
         return Objects.equals(id, that.id);
     }
 

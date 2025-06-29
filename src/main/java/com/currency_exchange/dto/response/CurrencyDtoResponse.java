@@ -4,14 +4,14 @@ import java.util.Objects;
 
 public class CurrencyDtoResponse {
     private Long id;
+    private String name;
     private String code;
-    private String fullName;
     private String sign;
 
-    public CurrencyDtoResponse(Long id, String code, String fullName, String sign) {
+    public CurrencyDtoResponse(Long id, String name, String code, String sign) {
         this.id = id;
+        this.name = name;
         this.code = code;
-        this.fullName = fullName;
         this.sign = sign;
     }
 
@@ -26,8 +26,8 @@ public class CurrencyDtoResponse {
         return code;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getName() {
+        return name;
     }
 
     public String getSign() {
@@ -42,8 +42,8 @@ public class CurrencyDtoResponse {
         this.code = code;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setSign(String sign) {
@@ -67,8 +67,8 @@ public class CurrencyDtoResponse {
     public String toString() {
         return "CurrencyDtoResponse{" +
                "id=" + id +
+               ", name='" + name + '\'' +
                ", code='" + code + '\'' +
-               ", fullName='" + fullName + '\'' +
                ", sign='" + sign + '\'' +
                '}';
     }

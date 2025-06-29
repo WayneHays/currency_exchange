@@ -1,14 +1,16 @@
-package com.currency_exchange.servlet.currencies;
+package com.currency_exchange.servlet.exchange_rates;
 
-import com.currency_exchange.dto.response.CurrencyDtoResponse;
+import com.currency_exchange.dto.response.ExchangeRateDtoResponse;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
+import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
-import com.currency_exchange.service.CurrencyService;
-import com.currency_exchange.util.validator.CurrencyValidator;
+import com.currency_exchange.service.ExchangeRateService;
+import com.currency_exchange.util.validator.ExchangeRateValidator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,28 +21,25 @@ import java.nio.charset.StandardCharsets;
 
 import static jakarta.servlet.http.HttpServletResponse.*;
 
-@WebServlet("/currency/*")
-public class CurrencyServlet extends HttpServlet {
-
-    private final CurrencyService currencyService = CurrencyService.getInstance();
+@WebServlet("/exchangeRate/*")
+public class ExchangeRateServlet extends HttpServlet {
+    private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("application/json");
         resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         try {
-            String pathInfo = req.getPathInfo();
-            CurrencyValidator.validate(pathInfo);
-            String code = pathInfo.substring(1);
-            CurrencyValidator.validateCode(code);
-            CurrencyDtoResponse dtoResponse = currencyService.findByCode(code);
-            resp.setStatus(HttpServletResponse.SC_OK);
+            String pair = req.getPathInfo().substring(1);
+            ExchangeRateValidator.validate(pair);
+            ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByPair(pair);
+            resp.setStatus(SC_OK);
             gson.toJson(dtoResponse, resp.getWriter());
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
-        } catch (CurrencyNotFoundException e) {
+        } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {
             sendError(resp, SC_NOT_FOUND, e.getMessage());
         } catch (ServiceException | JsonIOException | IOException e) {
             sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());

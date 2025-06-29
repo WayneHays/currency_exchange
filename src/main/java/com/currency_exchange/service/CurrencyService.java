@@ -27,7 +27,7 @@ public class CurrencyService {
         try {
             List<Currency> currencies = currencyDao.findAll();
             return currencies.stream()
-                    .map(Mapper::mapToDto)
+                    .map(Mapper::mapToCurrencyDtoResponse)
                     .toList();
         } catch (DatabaseAccessException e) {
             throw new ServiceUnavailableException(e.getMessage());
@@ -42,7 +42,7 @@ public class CurrencyService {
         }
         try {
             return currencyDao.findByCode(code)
-                    .map(Mapper::mapToDto)
+                    .map(Mapper::mapToCurrencyDtoResponse)
                     .orElseThrow(() -> new CurrencyNotFoundException(code));
         } catch (DatabaseAccessException e) {
             throw new ServiceUnavailableException(e.getMessage());
@@ -55,7 +55,7 @@ public class CurrencyService {
         try {
             Currency currency = Mapper.mapToCurrency(dtoRequest);
             Currency savedCurrency = currencyDao.save(currency);
-            return Mapper.mapToDto(savedCurrency);
+            return Mapper.mapToCurrencyDtoResponse(savedCurrency);
         } catch (CurrencyAlreadyExistsException e) {
             throw new CurrencyConflictException(e.getMessage());
         } catch (DatabaseAccessException e) {

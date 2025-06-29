@@ -1,15 +1,22 @@
 package com.currency_exchange.dao;
 
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
-public interface Dao<K, T> {
+public interface Dao<T> {
 
     List<T> findAll();
-
-    Optional<T> findByCode(K id);
 
     void update(T entity);
 
     T save(T entity);
+
+    default boolean isDuplicateKeyError(SQLException e) {
+        return e.getErrorCode() == 19 && e.getMessage().contains("UNIQUE constraint failed");
+    }
+
+    default boolean isConnectionError(SQLException e) {
+        int errorCode = e.getErrorCode();
+        return errorCode == 14 || errorCode == 10 || errorCode == 8 || errorCode == 7;
+    }
 }
