@@ -32,9 +32,11 @@ public class ExchangeRateServlet extends HttpServlet {
         resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         try {
-            String pair = req.getPathInfo().substring(1);
-            ExchangeRateValidator.validate(pair);
-            ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByPair(pair);
+            String pathInfo = req.getPathInfo();
+            ExchangeRateValidator.validate(pathInfo);
+            String baseCurrencyCode = pathInfo.substring(0, 3);
+            String targetCurrencyCode = pathInfo.substring(3, 6);
+            ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByPair(baseCurrencyCode, targetCurrencyCode);
             resp.setStatus(SC_OK);
             gson.toJson(dtoResponse, resp.getWriter());
         } catch (InvalidAttributeException e) {

@@ -49,17 +49,14 @@ public class ExchangeRateService {
         }
     }
 
-    public ExchangeRateDtoResponse findByPair(String pair) {
-        String baseCode = pair.substring(0, 3);
-        String targetCode = pair.substring(3, 6);
+    public ExchangeRateDtoResponse findByPair(String baseCurrencyCode, String targetCurrencyCode) {
+        Currency baseCurrency = currencyDao.findByCode(baseCurrencyCode).orElseThrow(() -> (new CurrencyNotFoundException(baseCurrencyCode)));
+        Currency targetCurrency = currencyDao.findByCode(targetCurrencyCode).orElseThrow(() -> new CurrencyNotFoundException(targetCurrencyCode));
 
-        Currency base = currencyDao.findByCode(baseCode).orElseThrow(() -> (new CurrencyNotFoundException(baseCode)));
-        Currency target = currencyDao.findByCode(targetCode).orElseThrow(() -> new CurrencyNotFoundException(targetCode));
+        CurrencyDtoResponse baseCurrencyDtoResponse = Mapper.mapToCurrencyDtoResponse(baseCurrency);
+        CurrencyDtoResponse targetCurrencyDtoResponse = Mapper.mapToCurrencyDtoResponse(targetCurrency);
 
-        CurrencyDtoResponse baseCurrencyDtoResponse = Mapper.mapToCurrencyDtoResponse(base);
-        CurrencyDtoResponse targetCurrencyDtoResponse = Mapper.mapToCurrencyDtoResponse(target);
-
-        ExchangeRate exchangeRate = exchangeRatesDao.findByPair(base.getId(), target.getId()).orElseThrow(() -> new ExchangeRateNotFoundException(pair));
+        ExchangeRate exchangeRate = exchangeRatesDao.findByPair(baseCurrency.getId(), targetCurrency.getId()).orElseThrow(() -> new ExchangeRateNotFoundException(baseCurrencyCode, targetCurrencyCode));
 
         return Mapper.mapToExchangeRateDtoResponse(exchangeRate, baseCurrencyDtoResponse, targetCurrencyDtoResponse);
     }

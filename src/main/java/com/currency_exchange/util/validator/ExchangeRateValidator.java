@@ -35,9 +35,10 @@ public final class ExchangeRateValidator {
         }
     }
 
-    public static void validate(String pair) {
-        String baseCurrency = pair.substring(0, 3);
-        String targetCurrency = pair.substring(3, 6);
+    public static void validate(String pathInfo) {
+        if (pathInfo == null || !pathInfo.matches("[A-Za-z]{6}")) {
+            throw new InvalidAttributeException("Currency pair must be 6 latin letters (e.g. USDRUB)");
+        }
     }
 
 
