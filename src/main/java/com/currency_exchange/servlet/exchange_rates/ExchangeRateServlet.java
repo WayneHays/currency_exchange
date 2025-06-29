@@ -33,9 +33,9 @@ public class ExchangeRateServlet extends HttpServlet {
 
         try {
             String pathInfo = req.getPathInfo();
-            ExchangeRateValidator.validate(pathInfo);
-            String baseCurrencyCode = pathInfo.substring(0, 3);
-            String targetCurrencyCode = pathInfo.substring(3, 6);
+            ExchangeRateValidator.validatePath(pathInfo);
+            String baseCurrencyCode = pathInfo.substring(1, 4);
+            String targetCurrencyCode = pathInfo.substring(4, 7);
             ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByPair(baseCurrencyCode, targetCurrencyCode);
             resp.setStatus(SC_OK);
             gson.toJson(dtoResponse, resp.getWriter());

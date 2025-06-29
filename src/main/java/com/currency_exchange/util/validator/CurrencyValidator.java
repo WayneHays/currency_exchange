@@ -11,6 +11,9 @@ public final class CurrencyValidator {
     public static final String MISSING_CURRENCY_CODE = "Currency code is missing in URL (expected format: /currency/USD)";
     public static final String WRONG_CURRENCY_CODE = "Currency code must be 3 latin letters (e.g. USD)";
     public static final String MISSING_REQUIRED_CURRENCY_PARAM = "Missing required currency param";
+    public static final String PARAMETERS_NOT_ALLOWED = "Parameters are not allowed here";
+    public static final String WRONG_PARAM_NAME = "Invalid request: wrong param name -> %s";
+    public static final String ONE_PARAM_REQUIRED = "Invalid request: only one param value required";
 
     public static final String CODE_REGEX = "[A-Za-z]{3}";
 
@@ -19,13 +22,14 @@ public final class CurrencyValidator {
             CurrencyRequest.CODE.getParamName(),
             CurrencyRequest.SIGN.getParamName()
     );
+    public static final String INVALID_REQUEST = "Invalid request: %s";
 
     private CurrencyValidator() {
     }
 
     public static void validateGet(HttpServletRequest request) {
         if (!request.getParameterMap().isEmpty()) {
-            throw new InvalidAttributeException("Parameters are not allowed here");
+            throw new InvalidAttributeException(PARAMETERS_NOT_ALLOWED);
         }
     }
 
@@ -58,13 +62,13 @@ public final class CurrencyValidator {
 
     private static void validateParamName(String paramName) {
         if (!REQUIRED_CURRENCY_PARAMS.contains(paramName)) {
-            throw new InvalidAttributeException("Invalid request: wrong param name -> %s".formatted(paramName));
+            throw new InvalidAttributeException(WRONG_PARAM_NAME.formatted(paramName));
         }
     }
 
     private static void validateSingleValueOfParam(String[] paramValues) {
         if (paramValues.length > 1) {
-            throw new InvalidAttributeException("Invalid request: only one param value required");
+            throw new InvalidAttributeException(ONE_PARAM_REQUIRED);
         }
     }
 
@@ -73,7 +77,7 @@ public final class CurrencyValidator {
         String paramValue = paramValues[0];
 
         if (!paramValue.matches(currencyRequest.getRegex())) {
-            throw new InvalidAttributeException("Invalid request: %s".formatted(currencyRequest.getErrorMessage()));
+            throw new InvalidAttributeException(INVALID_REQUEST.formatted(currencyRequest.getErrorMessage()));
         }
     }
 

@@ -36,7 +36,7 @@ public class ExchangeRatesServlet extends HttpServlet {
         resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         try {
-            ExchangeRateValidator.validateNoParameters(req);
+            ExchangeRateValidator.validateEmptyRequest(req);
             List<ExchangeRateDtoResponse> exchangeRateDtoResponses = exchangeRateService.findAll();
             resp.setStatus(SC_OK);
             gson.toJson(exchangeRateDtoResponses, resp.getWriter());

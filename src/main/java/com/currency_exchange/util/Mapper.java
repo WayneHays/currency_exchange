@@ -31,14 +31,14 @@ public final class Mapper {
         return exchangeRate;
     }
 
-    public static CurrencyDtoRequest mapToCurrencyDtoRequest(String name, String code, String sigh) {
-        return new CurrencyDtoRequest(code, name, sigh);
+    public static CurrencyDtoRequest mapToCurrencyDtoRequest(String name, String code, String sign) {
+        name = capitalizeFirstLetter(name);
+        code = capitalizeAllLetters(code);
+        return new CurrencyDtoRequest(code, name, sign);
     }
 
     public static ExchangeRateDtoRequest mapToExchangeRateDtoRequest(String baseCurrencyCode, String targetCurrencyCode, String rate) throws NumberFormatException {
-        double rateDouble = Double.parseDouble(rate);
-        BigDecimal rateDecimal = BigDecimal.valueOf(rateDouble);
-
+        BigDecimal rateDecimal = new BigDecimal(rate.trim());
         return new ExchangeRateDtoRequest(baseCurrencyCode, targetCurrencyCode, rateDecimal);
     }
 
@@ -55,5 +55,21 @@ public final class Mapper {
                 target,
                 exchangeRate.getRate()
         );
+    }
+
+    private static String capitalizeFirstLetter(String input) {
+        char[] chars = input.toCharArray();
+        chars[0] = Character.toUpperCase(chars[0]);
+        return new String(chars);
+    }
+
+    private static String capitalizeAllLetters(String input) {
+        char[] chars = input.toCharArray();
+        StringBuilder upperCaseWord = new StringBuilder();
+
+        for (char aChar : chars) {
+            upperCaseWord.append(Character.toUpperCase(aChar));
+        }
+        return upperCaseWord.toString();
     }
 }

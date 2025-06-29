@@ -29,10 +29,6 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
             FROM exchange_rates
             """;
 
-    private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + """
-            WHERE id = ?
-            """;
-
     private static final String FIND_BY_PAIR_SQL = FIND_ALL_SQL + """
             WHERE base_currency_id = ? AND target_currency_id = ?
             """;

@@ -3,9 +3,9 @@ package com.currency_exchange.util;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 
 public enum ExchangeRateRequest {
-    BASE_CURRENCY_CODE("baseCurrencyCode", "^[A-Z]{3}", "Currency code must be 3 uppercase letters"),
-    TARGET_CURRENCY_CODE("targetCurrencyCode", "^[A-Z]{3}", "Currency code must be 3 uppercase letters"),
-    RATE("rate", "^\\d+\\.\\d{2}$", "Rate must be a decimal number with exactly 2 digits after the point (e.g. 1.00 or 0.44)");
+    BASE_CURRENCY_CODE("baseCurrencyCode", "^[A-Za-z]{3}", "Currency code must be 3 uppercase letters"),
+    TARGET_CURRENCY_CODE("targetCurrencyCode", "^[A-Za-z]{3}", "Currency code must be 3 uppercase letters"),
+    RATE("rate", "^(?!0\\d)\\d+\\.\\d{1,6}$", "Rate must be a positive decimal number with 1 to 6 digits after the point (e.g., 0.1, 1.23456, or 123.456)");
 
     private final String name;
     private final String regex;
