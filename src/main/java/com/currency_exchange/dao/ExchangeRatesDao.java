@@ -4,7 +4,7 @@ import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
-import com.currency_exchange.util.ConnectionManager;
+import com.currency_exchange.util.connection.ConnectionManager;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -100,7 +100,7 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
         return exchangeRates;
     }
 
-    public Optional<ExchangeRate> findByPair(Long first, Long second) {
+    public Optional<ExchangeRate> findByCurrencyIds(Long first, Long second) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_BY_PAIR_SQL)) {
             setPairParameters(first, second, prepareStatement);

@@ -6,39 +6,29 @@ import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundExc
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
+import com.currency_exchange.servlet.BaseServlet;
 import com.currency_exchange.util.validator.ExchangeRateValidator;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static jakarta.servlet.http.HttpServletResponse.*;
 
 @WebServlet("/exchangeRate/*")
-public class ExchangeRateServlet extends HttpServlet {
+public class ExchangeRateServlet extends BaseServlet {
     private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        setResponseConfig(resp);
 
         try {
-            String pathInfo = req.getPathInfo();
-            ExchangeRateValidator.validatePath(pathInfo);
-            String baseCurrencyCode = pathInfo.substring(1, 4);
-            String targetCurrencyCode = pathInfo.substring(4, 7);
-            ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByPair(baseCurrencyCode, targetCurrencyCode);
-            resp.setStatus(SC_OK);
-            gson.toJson(dtoResponse, resp.getWriter());
+            String[] codes = extractCurrencyCodes(req);
+            ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByCurrencyCodes(codes[0], codes[1]);
+            sendSuccessJsonResponse(resp, dtoResponse);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {
@@ -48,8 +38,11 @@ public class ExchangeRateServlet extends HttpServlet {
         }
     }
 
-    private void sendError(HttpServletResponse resp, int status, String message) throws IOException {
-        resp.setStatus(status);
-        resp.getWriter().write(("{\"message\":\"%s\"}".formatted(message)));
+    private String[] extractCurrencyCodes(HttpServletRequest req) {
+        String pathInfo = req.getPathInfo();
+        ExchangeRateValidator.validatePath(pathInfo);
+        String baseCurrencyCode = pathInfo.substring(1, 4);
+        String targetCurrencyCode = pathInfo.substring(4, 7);
+        return new String[]{baseCurrencyCode, targetCurrencyCode};
     }
 }

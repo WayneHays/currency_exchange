@@ -13,7 +13,7 @@ import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsEx
 import com.currency_exchange.exception.service_exception.*;
 import com.currency_exchange.util.Mapper;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ExchangeRateService {
@@ -29,61 +29,105 @@ public class ExchangeRateService {
     }
 
     public List<ExchangeRateDtoResponse> findAll() {
-        List<ExchangeRateDtoResponse> result = new ArrayList<>();
+        List<ExchangeRateDtoResponse> result = new LinkedList<>();
         try {
             List<ExchangeRate> exchangeRates = exchangeRatesDao.findAll();
             for (ExchangeRate exchangeRate : exchangeRates) {
-                Long baseCurrencyId = exchangeRate.getBaseCurrencyId();
-                Long targetCurrencyId = exchangeRate.getTargetCurrencyId();
-                Currency baseCurrency = currencyDao.findById(baseCurrencyId).orElseThrow(() -> new CurrencyNotFoundException("%d".formatted(baseCurrencyId)));
-                Currency targetCurrency = currencyDao.findById(targetCurrencyId).orElseThrow(() -> new CurrencyNotFoundException("%d".formatted(targetCurrencyId)));
-                CurrencyDtoResponse baseCurrencyDtoResponse = Mapper.mapToCurrencyDtoResponse(baseCurrency);
-                CurrencyDtoResponse targetCurrencyDtoResponse = Mapper.mapToCurrencyDtoResponse(targetCurrency);
-                result.add(new ExchangeRateDtoResponse(exchangeRate.getId(), baseCurrencyDtoResponse, targetCurrencyDtoResponse, exchangeRate.getRate()));
+                Currency[] currencies = findPairByIds(exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId());
+                ExchangeRateDtoResponse dtoResponse = createDto(exchangeRate, currencies);
+                result.add(dtoResponse);
             }
             return result;
         } catch (DatabaseAccessException e) {
             throw new ServiceUnavailableException(e.getMessage());
         } catch (DaoException e) {
-            throw new ServiceException("ExchangeRate service error");
+            throw new ServiceException(e.getMessage());
         }
     }
 
-    public ExchangeRateDtoResponse findByPair(String baseCurrencyCode, String targetCurrencyCode) {
-        Currency baseCurrency = currencyDao.findByCode(baseCurrencyCode).orElseThrow(() -> (new CurrencyNotFoundException(baseCurrencyCode)));
-        Currency targetCurrency = currencyDao.findByCode(targetCurrencyCode).orElseThrow(() -> new CurrencyNotFoundException(targetCurrencyCode));
-
-        CurrencyDtoResponse baseCurrencyDtoResponse = Mapper.mapToCurrencyDtoResponse(baseCurrency);
-        CurrencyDtoResponse targetCurrencyDtoResponse = Mapper.mapToCurrencyDtoResponse(targetCurrency);
-
-        ExchangeRate exchangeRate = exchangeRatesDao.findByPair(baseCurrency.getId(), targetCurrency.getId()).orElseThrow(() -> new ExchangeRateNotFoundException(baseCurrencyCode, targetCurrencyCode));
-
-        return Mapper.mapToExchangeRateDtoResponse(exchangeRate, baseCurrencyDtoResponse, targetCurrencyDtoResponse);
+    public ExchangeRateDtoResponse findByCurrencyCodes(String baseCode, String targetCode) {
+        try {
+            Currency[] currencies = findPairByCodes(baseCode, targetCode);
+            CurrencyDtoResponse[] dtoResponses = convertToDtoResponse(currencies);
+            ExchangeRate exchangeRate = findByCurrencyIds(currencies);
+            return Mapper.mapToExchangeRateDtoResponse(exchangeRate, dtoResponses);
+        } catch (DatabaseAccessException e) {
+            throw new ServiceUnavailableException(e.getMessage());
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
+        }
     }
 
-    public ExchangeRateDtoResponse save(ExchangeRateDtoRequest dtoRequest) throws CurrencyNotFoundException {
+    private CurrencyDtoResponse[] convertToDtoResponse(Currency[] currencies) {
+        CurrencyDtoResponse baseDto = Mapper.mapToCurrencyDtoResponse(currencies[0]);
+        CurrencyDtoResponse targetDto = Mapper.mapToCurrencyDtoResponse(currencies[1]);
+        return new CurrencyDtoResponse[]{baseDto, targetDto};
+    }
+
+    private Currency[] findPairByCodes(String baseCode, String targetCode) {
+        Currency base = findCurrencyByCode(baseCode);
+        Currency target = findCurrencyByCode(targetCode);
+        return new Currency[]{base, target};
+    }
+
+    private Currency[] findPairByIds(Long baseId, Long targetId) {
+        Currency base = findCurrencyById(baseId);
+        Currency target = findCurrencyById(targetId);
+        return new Currency[]{base, target};
+    }
+
+    public ExchangeRateDtoResponse save(ExchangeRateDtoRequest dto) throws CurrencyNotFoundException {
         try {
-            String baseCurrencyCode = dtoRequest.getBaseCurrencyCode();
-            String targetCurrencyCode = dtoRequest.getTargetCurrencyCode();
-
-            Currency base = currencyDao.findByCode(baseCurrencyCode).orElseThrow(() -> new CurrencyNotFoundException(baseCurrencyCode));
-            Currency target = currencyDao.findByCode(targetCurrencyCode).orElseThrow(() -> new CurrencyNotFoundException(targetCurrencyCode));
-
-            CurrencyDtoResponse baseCurrencyResponse = Mapper.mapToCurrencyDtoResponse(base);
-            CurrencyDtoResponse targetCurrencyResponse = Mapper.mapToCurrencyDtoResponse(target);
-
-            ExchangeRate exchangeRate = Mapper.mapToExchangeRate(dtoRequest, base.getId(), target.getId());
+            String baseCode = dto.getBaseCurrencyCode();
+            String targetCode = dto.getTargetCurrencyCode();
+            Currency base = findCurrencyByCode(baseCode);
+            Currency target = findCurrencyByCode(targetCode);
+            CurrencyDtoResponse baseDto = Mapper.mapToCurrencyDtoResponse(base);
+            CurrencyDtoResponse targetDto = Mapper.mapToCurrencyDtoResponse(target);
+            ExchangeRate exchangeRate = Mapper.mapToExchangeRate(dto, base.getId(), target.getId());
             ExchangeRate saved = exchangeRatesDao.save(exchangeRate);
-
-            return Mapper.mapToExchangeRateDtoResponse(saved, baseCurrencyResponse, targetCurrencyResponse);
+            return Mapper.mapToExchangeRateDtoResponse(saved, baseDto, targetDto);
         } catch (ExchangeRateAlreadyExistsException e) {
-            String message = e.getMessage();
-            String newMessage = message.formatted(dtoRequest.getBaseCurrencyCode(), dtoRequest.getTargetCurrencyCode());
+            String newMessage = getErrorMessage(dto, e);
             throw new ExchangeRateConflictException(newMessage);
         } catch (DatabaseAccessException e) {
             throw new ServiceUnavailableException(e.getMessage());
         } catch (DaoException e) {
             throw new ServiceException("Currency service error");
         }
+    }
+
+    private String getErrorMessage(ExchangeRateDtoRequest dto, ExchangeRateAlreadyExistsException e) {
+        String message = e.getMessage();
+        return message.formatted(dto.getBaseCurrencyCode(), dto.getTargetCurrencyCode());
+    }
+
+    private ExchangeRate findByCurrencyIds(Currency[] currencies) {
+        Currency base = currencies[0];
+        Currency target = currencies[1];
+        return exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId())
+                .orElseThrow(() -> new ExchangeRateNotFoundException(base.getCode(), target.getCode()));
+    }
+
+    private ExchangeRateDtoResponse createDto(ExchangeRate exchangeRate, Currency[] currencies) {
+        Currency base = currencies[0];
+        Currency target = currencies[1];
+        return new ExchangeRateDtoResponse(exchangeRate.getId(),
+                Mapper.mapToCurrencyDtoResponse(base),
+                Mapper.mapToCurrencyDtoResponse(target),
+                exchangeRate.getRate());
+    }
+
+    private Currency findCurrencyByCode(String code) {
+        return currencyDao.findByCode(code)
+                .orElseThrow(() -> new CurrencyNotFoundException("%s".formatted(code)));
+    }
+
+    private Currency findCurrencyById(Long id) {
+        return currencyDao.findById(id)
+                .orElseThrow(() -> new CurrencyNotFoundException("%d".formatted(id)));
+    }
+
+    private record CurrencyPair(Currency base, Currency target) {
     }
 }

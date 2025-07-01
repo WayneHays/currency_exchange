@@ -7,13 +7,17 @@ import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
-import com.currency_exchange.exception.service_exception.*;
+import com.currency_exchange.exception.service_exception.CurrencyConflictException;
+import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
+import com.currency_exchange.exception.service_exception.ServiceException;
+import com.currency_exchange.exception.service_exception.ServiceUnavailableException;
 import com.currency_exchange.util.Mapper;
 
 import java.util.List;
 
 public class CurrencyService {
     private static final CurrencyService INSTANCE = new CurrencyService();
+    public static final String CURRENCY_SERVICE_ERROR = "Currency service error";
     private final CurrencyDao currencyDao = CurrencyDao.getInstance();
 
     private CurrencyService() {
@@ -25,21 +29,18 @@ public class CurrencyService {
 
     public List<CurrencyDtoResponse> findAll() {
         try {
-            List<Currency> currencies = currencyDao.findAll();
-            return currencies.stream()
+            return currencyDao.findAll()
+                    .stream()
                     .map(Mapper::mapToCurrencyDtoResponse)
                     .toList();
         } catch (DatabaseAccessException e) {
             throw new ServiceUnavailableException(e.getMessage());
         } catch (DaoException e) {
-            throw new ServiceException("Currency service error");
+            throw new ServiceException(CURRENCY_SERVICE_ERROR);
         }
     }
 
     public CurrencyDtoResponse findByCode(String code) {
-        if (code == null || code.isBlank()) {
-            throw new InvalidAttributeException(code);
-        }
         try {
             return currencyDao.findByCode(code)
                     .map(Mapper::mapToCurrencyDtoResponse)
@@ -47,7 +48,7 @@ public class CurrencyService {
         } catch (DatabaseAccessException e) {
             throw new ServiceUnavailableException(e.getMessage());
         } catch (DaoException e) {
-            throw new ServiceException("Currency service error");
+            throw new ServiceException(CURRENCY_SERVICE_ERROR);
         }
     }
 
@@ -61,7 +62,7 @@ public class CurrencyService {
         } catch (DatabaseAccessException e) {
             throw new ServiceUnavailableException(e.getMessage());
         } catch (DaoException e) {
-            throw new ServiceException("Currency service error");
+            throw new ServiceException(CURRENCY_SERVICE_ERROR);
         }
     }
 }

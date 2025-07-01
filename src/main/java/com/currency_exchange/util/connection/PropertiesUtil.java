@@ -1,4 +1,4 @@
-package com.currency_exchange.util;
+package com.currency_exchange.util.connection;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ public final class PropertiesUtil {
     private static final Properties PROPERTIES = new Properties();
 
     static {
-            loadProperties();
+        loadProperties();
     }
 
     private PropertiesUtil() {

@@ -2,7 +2,7 @@ package com.currency_exchange.dto.response;
 
 import java.util.Objects;
 
-public class CurrencyDtoResponse {
+public class CurrencyDtoResponse implements DtoResponse {
     private Long id;
     private String name;
     private String code;

@@ -48,13 +48,13 @@ public final class CurrencyValidator {
         }
     }
 
-    public static void validate(String pathInfo) {
+    public static void validatePathInfo(String pathInfo) {
         if (pathInfo == null || pathInfo.matches("/")) {
             throw new InvalidAttributeException(MISSING_CURRENCY_CODE);
         }
     }
 
-    public static void validateCode(String code) {
+    public static void validate(String code) {
         if (!code.matches(CODE_REGEX)) {
             throw new InvalidAttributeException(WRONG_CURRENCY_CODE);
         }

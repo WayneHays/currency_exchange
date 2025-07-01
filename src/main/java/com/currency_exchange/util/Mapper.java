@@ -48,11 +48,11 @@ public final class Mapper {
                 currency.getSign());
     }
 
-    public static ExchangeRateDtoResponse mapToExchangeRateDtoResponse(ExchangeRate exchangeRate, CurrencyDtoResponse base, CurrencyDtoResponse target) {
+    public static ExchangeRateDtoResponse mapToExchangeRateDtoResponse(ExchangeRate exchangeRate, CurrencyDtoResponse[] dtoResponses) {
         return new ExchangeRateDtoResponse(
                 exchangeRate.getId(),
-                base,
-                target,
+                dtoResponses[0],
+                dtoResponses[1],
                 exchangeRate.getRate()
         );
     }
