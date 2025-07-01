@@ -103,17 +103,13 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
     public Optional<ExchangeRate> findByCurrencyIds(Long first, Long second) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_BY_PAIR_SQL)) {
-            setPairParameters(first, second, prepareStatement);
+            prepareStatement.setLong(1, first);
+            prepareStatement.setLong(2, second);
             var resultSet = prepareStatement.executeQuery();
             return getExchangeRate(resultSet);
         } catch (SQLException e) {
             throw new DaoException("Failed to find exchange rate " + e.getMessage());
         }
-    }
-
-    private void setPairParameters(Long first, Long second, PreparedStatement prepareStatement) throws SQLException {
-        prepareStatement.setLong(1, first);
-        prepareStatement.setLong(2, second);
     }
 
     private Optional<ExchangeRate> getExchangeRate(ResultSet resultSet) throws SQLException {
@@ -128,18 +124,14 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
     public void update(ExchangeRate exchangeRate) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
-            setUpdatedParameters(exchangeRate, prepareStatement);
+            prepareStatement.setLong(1, exchangeRate.getBaseCurrencyId());
+            prepareStatement.setLong(2, exchangeRate.getTargetCurrencyId());
+            prepareStatement.setBigDecimal(3, exchangeRate.getRate());
+            prepareStatement.setLong(4, exchangeRate.getId());
             prepareStatement.executeUpdate();
         } catch (SQLException e) {
             throw new DaoException("Failed to update exchange rate " + e.getMessage());
         }
-    }
-
-    private void setUpdatedParameters(ExchangeRate exchangeRate, PreparedStatement prepareStatement) throws SQLException {
-        prepareStatement.setLong(1, exchangeRate.getBaseCurrencyId());
-        prepareStatement.setLong(2, exchangeRate.getTargetCurrencyId());
-        prepareStatement.setBigDecimal(3, exchangeRate.getRate());
-        prepareStatement.setLong(4, exchangeRate.getId());
     }
 
     private ExchangeRate buildExchangeRate(ResultSet resultSet) throws SQLException {

@@ -52,6 +52,18 @@ public class CurrencyService {
         }
     }
 
+    public CurrencyDtoResponse findById(Long id) {
+        try {
+            return currencyDao.findById(id)
+                    .map(Mapper::mapToCurrencyDtoResponse)
+                    .orElseThrow(() -> new CurrencyNotFoundException(String.valueOf(id)));
+        } catch (DatabaseAccessException e) {
+            throw new ServiceUnavailableException(e.getMessage());
+        } catch (DaoException e) {
+            throw new ServiceException(CURRENCY_SERVICE_ERROR);
+        }
+    }
+
     public CurrencyDtoResponse save(CurrencyDtoRequest dtoRequest) {
         try {
             Currency currency = Mapper.mapToCurrency(dtoRequest);

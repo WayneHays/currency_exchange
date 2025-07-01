@@ -6,7 +6,7 @@ import com.currency_exchange.exception.service_exception.InvalidAttributeExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.validator.CurrencyValidator;
+import com.currency_exchange.util.RequestParser;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,10 +25,9 @@ public class CurrencyServlet extends BaseServlet {
         setResponseConfig(resp);
 
         try {
-            String code = extractCode(req);
-            CurrencyValidator.validate(code);
+            String code = RequestParser.extractCurrencyCode(req);
             CurrencyDtoResponse dtoResponse = currencyService.findByCode(code);
-            sendSuccessJsonResponse(resp, dtoResponse);
+            sendSuccessGetJsonResponse(resp, dtoResponse);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException e) {
@@ -36,11 +35,5 @@ public class CurrencyServlet extends BaseServlet {
         } catch (ServiceException | JsonIOException | IOException e) {
             sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
-    }
-
-    private String extractCode(HttpServletRequest req) {
-        String pathInfo = req.getPathInfo();
-        CurrencyValidator.validatePathInfo(pathInfo);
-        return pathInfo.substring(1);
     }
 }

@@ -6,6 +6,7 @@ import com.currency_exchange.dto.response.CurrencyDtoResponse;
 import com.currency_exchange.dto.response.ExchangeRateDtoResponse;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.math.BigDecimal;
 
@@ -31,7 +32,10 @@ public final class Mapper {
         return exchangeRate;
     }
 
-    public static CurrencyDtoRequest mapToCurrencyDtoRequest(String name, String code, String sign) {
+    public static CurrencyDtoRequest mapToCurrencyDtoRequest(HttpServletRequest req) {
+        String name = req.getParameter(CurrencyRequest.NAME.getParamName());
+        String code = req.getParameter(CurrencyRequest.CODE.getParamName());
+        String sign = req.getParameter(CurrencyRequest.SIGN.getParamName());
         name = capitalizeFirstLetter(name);
         code = capitalizeAllLetters(code);
         return new CurrencyDtoRequest(code, name, sign);
@@ -43,16 +47,18 @@ public final class Mapper {
     }
 
     public static CurrencyDtoResponse mapToCurrencyDtoResponse(Currency currency) {
-        return new CurrencyDtoResponse(currency.getId(),
-                currency.getFullName(), currency.getCode(),
+        return new CurrencyDtoResponse(
+                currency.getId(),
+                currency.getFullName(),
+                currency.getCode(),
                 currency.getSign());
     }
 
-    public static ExchangeRateDtoResponse mapToExchangeRateDtoResponse(ExchangeRate exchangeRate, CurrencyDtoResponse[] dtoResponses) {
+    public static ExchangeRateDtoResponse mapToExchangeRateDtoResponse(ExchangeRate exchangeRate, CurrencyDtoResponse base, CurrencyDtoResponse target) {
         return new ExchangeRateDtoResponse(
                 exchangeRate.getId(),
-                dtoResponses[0],
-                dtoResponses[1],
+                base,
+                target,
                 exchangeRate.getRate()
         );
     }

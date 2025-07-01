@@ -7,7 +7,6 @@ import com.currency_exchange.exception.service_exception.InvalidAttributeExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.CurrencyRequest;
 import com.currency_exchange.util.Mapper;
 import com.currency_exchange.util.validator.CurrencyValidator;
 import com.google.gson.JsonIOException;
@@ -31,7 +30,7 @@ public class CurrenciesServlet extends BaseServlet {
         try {
             CurrencyValidator.validateGet(req);
             List<CurrencyDtoResponse> currencies = currencyService.findAll();
-            sendSuccessJsonResponse(resp, currencies);
+            sendSuccessGetJsonResponse(resp, currencies);
         } catch (ServiceException | JsonIOException | IOException e) {
             sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -41,15 +40,9 @@ public class CurrenciesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             CurrencyValidator.validatePost(req);
-
-            String name = req.getParameter(CurrencyRequest.NAME.getParamName());
-            String code = req.getParameter(CurrencyRequest.CODE.getParamName());
-            String sign = req.getParameter(CurrencyRequest.SIGN.getParamName());
-
-            CurrencyDtoRequest dtoRequest = Mapper.mapToCurrencyDtoRequest(name, code, sign);
-            CurrencyDtoResponse saved = currencyService.save(dtoRequest);
-            resp.setStatus(SC_CREATED);
-            gson.toJson(saved, resp.getWriter());
+            CurrencyDtoRequest dto = Mapper.mapToCurrencyDtoRequest(req);
+            CurrencyDtoResponse saved = currencyService.save(dto);
+            sendSuccessCreatedJsonResponse(resp, saved);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyConflictException e) {

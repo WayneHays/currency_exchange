@@ -48,21 +48,21 @@ public final class CurrencyValidator {
         }
     }
 
-    public static void validatePathInfo(String pathInfo) {
-        if (pathInfo == null || pathInfo.matches("/")) {
+    public static void validatePathInfo(String input) {
+        if (input == null || input.matches("/")) {
             throw new InvalidAttributeException(MISSING_CURRENCY_CODE);
         }
     }
 
-    public static void validate(String code) {
-        if (!code.matches(CODE_REGEX)) {
+    public static void validateCode(String input) {
+        if (!input.matches(CODE_REGEX)) {
             throw new InvalidAttributeException(WRONG_CURRENCY_CODE);
         }
     }
 
-    private static void validateParamName(String paramName) {
-        if (!REQUIRED_CURRENCY_PARAMS.contains(paramName)) {
-            throw new InvalidAttributeException(WRONG_PARAM_NAME.formatted(paramName));
+    private static void validateParamName(String input) {
+        if (!REQUIRED_CURRENCY_PARAMS.contains(input)) {
+            throw new InvalidAttributeException(WRONG_PARAM_NAME.formatted(input));
         }
     }
 

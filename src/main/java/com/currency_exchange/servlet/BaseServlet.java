@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
+import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
+
 public class BaseServlet extends HttpServlet {
     protected final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
@@ -24,8 +26,15 @@ public class BaseServlet extends HttpServlet {
         }
     }
 
-    protected void sendSuccessJsonResponse(HttpServletResponse resp, Object responseData) throws IOException {
+    protected void sendSuccessGetJsonResponse(HttpServletResponse resp, Object responseData) throws IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
+        try (PrintWriter writer = resp.getWriter()) {
+            gson.toJson(responseData, writer);
+        }
+    }
+
+    protected void sendSuccessCreatedJsonResponse(HttpServletResponse resp, Object responseData) throws IOException {
+        resp.setStatus(SC_CREATED);
         try (PrintWriter writer = resp.getWriter()) {
             gson.toJson(responseData, writer);
         }

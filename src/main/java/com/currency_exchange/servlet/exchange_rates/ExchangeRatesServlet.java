@@ -8,8 +8,8 @@ import com.currency_exchange.exception.service_exception.InvalidAttributeExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.ExchangeRateRequest;
 import com.currency_exchange.util.Mapper;
+import com.currency_exchange.util.RequestParser;
 import com.currency_exchange.util.validator.ExchangeRateValidator;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.ServletException;
@@ -32,8 +32,8 @@ public class ExchangeRatesServlet extends BaseServlet {
 
         try {
             ExchangeRateValidator.validateEmptyRequest(req);
-            List<ExchangeRateDtoResponse> exchangeRateDtoResponses = exchangeRateService.findAll();
-            sendSuccessJsonResponse(resp, exchangeRateDtoResponses);
+            List<ExchangeRateDtoResponse> result = exchangeRateService.findAll();
+            sendSuccessGetJsonResponse(resp, result);
         } catch (ServiceException | JsonIOException | IOException e) {
             sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -43,13 +43,13 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             ExchangeRateValidator.validateRequestParameters(req);
-            String[] exchangeRateData = extractExchangeRateData(req);
+            String[] exchangeRateData = RequestParser.extractExchangeRateData(req);
             ExchangeRateDtoRequest dtoRequest = Mapper.mapToExchangeRateDtoRequest(
                     exchangeRateData[0],
                     exchangeRateData[1],
                     exchangeRateData[2]);
             ExchangeRateDtoResponse saved = exchangeRateService.save(dtoRequest);
-            sendSuccessJsonResponse(resp, saved);
+            sendSuccessCreatedJsonResponse(resp, saved);
         } catch (NumberFormatException | InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (ExchangeRateConflictException e) {
@@ -59,13 +59,6 @@ public class ExchangeRatesServlet extends BaseServlet {
         } catch (ServiceException | JsonIOException | IOException e) {
             sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
-    }
-
-    private String[] extractExchangeRateData(HttpServletRequest req) {
-        String baseCurrencyCode = req.getParameter(ExchangeRateRequest.BASE_CURRENCY_CODE.getName());
-        String targetCurrencyCode = req.getParameter(ExchangeRateRequest.TARGET_CURRENCY_CODE.getName());
-        String rate = req.getParameter(ExchangeRateRequest.RATE.getName());
-        return new String[]{baseCurrencyCode, targetCurrencyCode, rate};
     }
 }
 

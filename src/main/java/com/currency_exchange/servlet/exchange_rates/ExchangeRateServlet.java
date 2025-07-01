@@ -7,7 +7,7 @@ import com.currency_exchange.exception.service_exception.InvalidAttributeExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.validator.ExchangeRateValidator;
+import com.currency_exchange.util.RequestParser;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,9 +26,9 @@ public class ExchangeRateServlet extends BaseServlet {
         setResponseConfig(resp);
 
         try {
-            String[] codes = extractCurrencyCodes(req);
-            ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByCurrencyCodes(codes[0], codes[1]);
-            sendSuccessJsonResponse(resp, dtoResponse);
+            String[] currencyCodes = RequestParser.extractCurrencyPairCodes(req);
+            ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByCurrencyCodes(currencyCodes[0], currencyCodes[1]);
+            sendSuccessGetJsonResponse(resp, dtoResponse);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {
@@ -36,13 +36,5 @@ public class ExchangeRateServlet extends BaseServlet {
         } catch (ServiceException | JsonIOException | IOException e) {
             sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
-    }
-
-    private String[] extractCurrencyCodes(HttpServletRequest req) {
-        String pathInfo = req.getPathInfo();
-        ExchangeRateValidator.validatePath(pathInfo);
-        String baseCurrencyCode = pathInfo.substring(1, 4);
-        String targetCurrencyCode = pathInfo.substring(4, 7);
-        return new String[]{baseCurrencyCode, targetCurrencyCode};
     }
 }

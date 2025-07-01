@@ -57,8 +57,9 @@ public class CurrencyDao implements Dao<Currency> {
     public Currency save(Currency currency) {
         try (var connection = ConnectionManager.open();
              var preparedStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-
-            setSavingParameters(currency, preparedStatement);
+            preparedStatement.setString(1, currency.getCode());
+            preparedStatement.setString(2, currency.getFullName());
+            preparedStatement.setString(3, currency.getSign());
             preparedStatement.executeUpdate();
             setGeneratedId(currency, preparedStatement);
             return currency;
@@ -73,19 +74,6 @@ public class CurrencyDao implements Dao<Currency> {
         }
     }
 
-    private void setSavingParameters(Currency currency, PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setString(1, currency.getCode());
-        preparedStatement.setString(2, currency.getFullName());
-        preparedStatement.setString(3, currency.getSign());
-    }
-
-    private void setGeneratedId(Currency currency, PreparedStatement preparedStatement) throws SQLException {
-        var generatedKeys = preparedStatement.getGeneratedKeys();
-        if (generatedKeys.next()) {
-            currency.setId(generatedKeys.getLong(1));
-        }
-    }
-
     @Override
     public List<Currency> findAll() throws DaoException {
         try (var connection = ConnectionManager.open();
@@ -97,12 +85,15 @@ public class CurrencyDao implements Dao<Currency> {
         }
     }
 
-    private List<Currency> getCurrencies(ResultSet resultSet) throws SQLException {
-        List<Currency> currencies = new ArrayList<>();
-        while (resultSet.next()) {
-            currencies.add(buildCurrency(resultSet));
+    @Override
+    public void update(Currency currency) {
+        try (var connection = ConnectionManager.open();
+             var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
+            setUpdatedParameters(currency, prepareStatement);
+            prepareStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DaoException("Failed to update currency " + e);
         }
-        return currencies;
     }
 
     public Optional<Currency> findByCode(String code) {
@@ -129,23 +120,27 @@ public class CurrencyDao implements Dao<Currency> {
         }
     }
 
+    private List<Currency> getCurrencies(ResultSet resultSet) throws SQLException {
+        List<Currency> currencies = new ArrayList<>();
+        while (resultSet.next()) {
+            currencies.add(buildCurrency(resultSet));
+        }
+        return currencies;
+    }
+
+    private void setGeneratedId(Currency currency, PreparedStatement preparedStatement) throws SQLException {
+        var generatedKeys = preparedStatement.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            currency.setId(generatedKeys.getLong(1));
+        }
+    }
+
     private Optional<Currency> getCurrency(ResultSet resultSet) throws SQLException {
         Currency currency = null;
         if (resultSet.next()) {
             currency = buildCurrency(resultSet);
         }
         return Optional.ofNullable(currency);
-    }
-
-    @Override
-    public void update(Currency currency) {
-        try (var connection = ConnectionManager.open();
-             var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
-            setUpdatedParameters(currency, prepareStatement);
-            prepareStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new DaoException("Failed to update currency " + e);
-        }
     }
 
     private void setUpdatedParameters(Currency currency, PreparedStatement prepareStatement) throws SQLException {

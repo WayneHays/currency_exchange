@@ -1,5 +1,8 @@
 package com.currency_exchange.dto.request;
 
+import com.currency_exchange.util.CurrencyRequest;
+import jakarta.servlet.http.HttpServletRequest;
+
 public class CurrencyDtoRequest {
     private String code;
     private String fullName;
@@ -11,7 +14,12 @@ public class CurrencyDtoRequest {
         this.sign = sign;
     }
 
-    public CurrencyDtoRequest() {
+    public static CurrencyDtoRequest from(HttpServletRequest req) {
+        return new CurrencyDtoRequest(
+                req.getParameter(CurrencyRequest.NAME.getParamName()),
+                req.getParameter(CurrencyRequest.CODE.getParamName()),
+                req.getParameter(CurrencyRequest.SIGN.getParamName())
+        );
     }
 
     public void setCode(String code) {
