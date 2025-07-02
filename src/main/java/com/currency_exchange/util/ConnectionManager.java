@@ -1,4 +1,4 @@
-package com.currency_exchange.util.connection;
+package com.currency_exchange.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

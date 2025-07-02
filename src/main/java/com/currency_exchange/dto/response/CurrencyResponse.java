@@ -2,20 +2,20 @@ package com.currency_exchange.dto.response;
 
 import java.util.Objects;
 
-public class CurrencyDtoResponse implements DtoResponse {
+public class CurrencyResponse {
     private Long id;
     private String name;
     private String code;
     private String sign;
 
-    public CurrencyDtoResponse(Long id, String name, String code, String sign) {
+    public CurrencyResponse(Long id, String name, String code, String sign) {
         this.id = id;
         this.name = name;
         this.code = code;
         this.sign = sign;
     }
 
-    public CurrencyDtoResponse() {
+    public CurrencyResponse() {
     }
 
     public Long getId() {
@@ -54,7 +54,7 @@ public class CurrencyDtoResponse implements DtoResponse {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CurrencyDtoResponse that = (CurrencyDtoResponse) o;
+        CurrencyResponse that = (CurrencyResponse) o;
         return Objects.equals(id, that.id);
     }
 
@@ -65,7 +65,7 @@ public class CurrencyDtoResponse implements DtoResponse {
 
     @Override
     public String toString() {
-        return "CurrencyDtoResponse{" +
+        return "CurrencyResponse{" +
                "id=" + id +
                ", name='" + name + '\'' +
                ", code='" + code + '\'' +

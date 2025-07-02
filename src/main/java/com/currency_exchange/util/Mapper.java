@@ -1,12 +1,11 @@
 package com.currency_exchange.util;
 
-import com.currency_exchange.dto.request.CurrencyDtoRequest;
-import com.currency_exchange.dto.request.ExchangeRateDtoRequest;
-import com.currency_exchange.dto.response.CurrencyDtoResponse;
-import com.currency_exchange.dto.response.ExchangeRateDtoResponse;
+import com.currency_exchange.dto.request.CurrencyRequest;
+import com.currency_exchange.dto.request.ExchangeRateRequest;
+import com.currency_exchange.dto.response.CurrencyResponse;
+import com.currency_exchange.dto.response.ExchangeRateResponse;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.math.BigDecimal;
 
@@ -15,7 +14,7 @@ public final class Mapper {
     private Mapper() {
     }
 
-    public static Currency mapToCurrency(CurrencyDtoRequest dtoRequest) {
+    public static Currency mapToCurrency(CurrencyRequest dtoRequest) {
         Currency currency = new Currency();
         currency.setCode(dtoRequest.getCode());
         currency.setSign(dtoRequest.getSign());
@@ -23,7 +22,7 @@ public final class Mapper {
         return currency;
     }
 
-    public static ExchangeRate mapToExchangeRate(ExchangeRateDtoRequest dtoRequest, Long baseId, Long targetId) {
+    public static ExchangeRate mapToExchangeRate(ExchangeRateRequest dtoRequest, Long baseId, Long targetId) {
         ExchangeRate exchangeRate = new ExchangeRate();
         exchangeRate.setBaseCurrencyId(baseId);
         exchangeRate.setTargetCurrencyId(targetId);
@@ -32,30 +31,33 @@ public final class Mapper {
         return exchangeRate;
     }
 
-    public static CurrencyDtoRequest mapToCurrencyDtoRequest(HttpServletRequest req) {
-        String name = req.getParameter(CurrencyRequest.NAME.getParamName());
-        String code = req.getParameter(CurrencyRequest.CODE.getParamName());
-        String sign = req.getParameter(CurrencyRequest.SIGN.getParamName());
+    public static CurrencyRequest mapToCurrencyDtoRequest(String[] currencyData) {
+        String name = currencyData[0];
+        String code = currencyData[1];
+        String sign = currencyData[2];
         name = capitalizeFirstLetter(name);
         code = capitalizeAllLetters(code);
-        return new CurrencyDtoRequest(code, name, sign);
+        return new CurrencyRequest(code, name, sign);
     }
 
-    public static ExchangeRateDtoRequest mapToExchangeRateDtoRequest(String baseCurrencyCode, String targetCurrencyCode, String rate) throws NumberFormatException {
+    public static ExchangeRateRequest mapToExchangeRateDtoRequest(String[] exchangeRateData) throws NumberFormatException {
+        String baseCurrencyCode = exchangeRateData[0];
+        String targetCurrencyCode = exchangeRateData[1];
+        String rate = exchangeRateData[2];
         BigDecimal rateDecimal = new BigDecimal(rate.trim());
-        return new ExchangeRateDtoRequest(baseCurrencyCode, targetCurrencyCode, rateDecimal);
+        return new ExchangeRateRequest(baseCurrencyCode, targetCurrencyCode, rateDecimal);
     }
 
-    public static CurrencyDtoResponse mapToCurrencyDtoResponse(Currency currency) {
-        return new CurrencyDtoResponse(
+    public static CurrencyResponse mapToCurrencyDtoResponse(Currency currency) {
+        return new CurrencyResponse(
                 currency.getId(),
                 currency.getFullName(),
                 currency.getCode(),
                 currency.getSign());
     }
 
-    public static ExchangeRateDtoResponse mapToExchangeRateDtoResponse(ExchangeRate exchangeRate, CurrencyDtoResponse base, CurrencyDtoResponse target) {
-        return new ExchangeRateDtoResponse(
+    public static ExchangeRateResponse mapToExchangeRateDtoResponse(ExchangeRate exchangeRate, CurrencyResponse base, CurrencyResponse target) {
+        return new ExchangeRateResponse(
                 exchangeRate.getId(),
                 base,
                 target,

@@ -4,7 +4,7 @@ import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
-import com.currency_exchange.util.connection.ConnectionManager;
+import com.currency_exchange.util.ConnectionManager;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,7 +53,9 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
     public ExchangeRate save(ExchangeRate exchangeRate) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
-            setSavingParameters(exchangeRate, prepareStatement);
+            prepareStatement.setLong(1, exchangeRate.getBaseCurrencyId());
+            prepareStatement.setLong(2, exchangeRate.getTargetCurrencyId());
+            prepareStatement.setBigDecimal(3, exchangeRate.getRate());
             prepareStatement.executeUpdate();
             return getExchangeRate(exchangeRate, prepareStatement);
         } catch (SQLException e) {
@@ -65,12 +67,6 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
                 throw new DaoException("Failed to save currency");
             }
         }
-    }
-
-    private void setSavingParameters(ExchangeRate exchangeRate, PreparedStatement prepareStatement) throws SQLException {
-        prepareStatement.setLong(1, exchangeRate.getBaseCurrencyId());
-        prepareStatement.setLong(2, exchangeRate.getTargetCurrencyId());
-        prepareStatement.setBigDecimal(3, exchangeRate.getRate());
     }
 
     private ExchangeRate getExchangeRate(ExchangeRate exchangeRate, PreparedStatement prepareStatement) throws SQLException {

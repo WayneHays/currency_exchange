@@ -1,9 +1,9 @@
 package com.currency_exchange.service;
 
 import com.currency_exchange.dao.ExchangeRatesDao;
-import com.currency_exchange.dto.request.ExchangeRateDtoRequest;
-import com.currency_exchange.dto.response.CurrencyDtoResponse;
-import com.currency_exchange.dto.response.ExchangeRateDtoResponse;
+import com.currency_exchange.dto.request.ExchangeRateRequest;
+import com.currency_exchange.dto.response.CurrencyResponse;
+import com.currency_exchange.dto.response.ExchangeRateResponse;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
@@ -28,7 +28,7 @@ public class ExchangeRateService {
         return INSTANCE;
     }
 
-    public List<ExchangeRateDtoResponse> findAll() {
+    public List<ExchangeRateResponse> findAll() {
         try {
             return exchangeRatesDao.findAll().stream()
                     .map(this::convertToDto)
@@ -40,7 +40,7 @@ public class ExchangeRateService {
         }
     }
 
-    public ExchangeRateDtoResponse findByCurrencyCodes(String baseCode, String targetCode) {
+    public ExchangeRateResponse findByCurrencyCodes(String baseCode, String targetCode) {
         try {
             CurrencyDtoPair pair = findCurrencyPair(baseCode, targetCode);
             ExchangeRate exchangeRate = findExchangeRate(pair);
@@ -52,7 +52,7 @@ public class ExchangeRateService {
         }
     }
 
-    public ExchangeRateDtoResponse save(ExchangeRateDtoRequest dto) throws CurrencyNotFoundException {
+    public ExchangeRateResponse save(ExchangeRateRequest dto) throws CurrencyNotFoundException {
         try {
             CurrencyDtoPair pair = findCurrencyPair(dto.getBaseCurrencyCode(), dto.getTargetCurrencyCode());
             ExchangeRate exchangeRate = Mapper.mapToExchangeRate(dto, pair.base.getId(), pair.target.getId());
@@ -67,7 +67,7 @@ public class ExchangeRateService {
         }
     }
 
-    private ExchangeRateDtoResponse convertToDto(ExchangeRate exchangeRate) {
+    private ExchangeRateResponse convertToDto(ExchangeRate exchangeRate) {
         CurrencyDtoPair pair = findCurrencyPair(
                 exchangeRate.getBaseCurrencyId(),
                 exchangeRate.getTargetCurrencyId()
@@ -89,7 +89,7 @@ public class ExchangeRateService {
         );
     }
 
-    private String buildErrorMessage(ExchangeRateDtoRequest dto, ExchangeRateAlreadyExistsException e) {
+    private String buildErrorMessage(ExchangeRateRequest dto, ExchangeRateAlreadyExistsException e) {
         return EXCHANGE_RATE_ALREADY_EXISTS
                 .formatted(dto.getBaseCurrencyCode(), dto.getTargetCurrencyCode());
     }
@@ -104,6 +104,6 @@ public class ExchangeRateService {
         );
     }
 
-    private record CurrencyDtoPair(CurrencyDtoResponse base, CurrencyDtoResponse target) {
+    private record CurrencyDtoPair(CurrencyResponse base, CurrencyResponse target) {
     }
 }

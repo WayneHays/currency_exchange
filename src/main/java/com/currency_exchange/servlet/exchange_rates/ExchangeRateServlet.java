@@ -1,13 +1,13 @@
 package com.currency_exchange.servlet.exchange_rates;
 
-import com.currency_exchange.dto.response.ExchangeRateDtoResponse;
+import com.currency_exchange.dto.response.ExchangeRateResponse;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.RequestParser;
+import com.currency_exchange.util.RequestDataExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,12 +23,12 @@ public class ExchangeRateServlet extends BaseServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        setResponseConfig(resp);
+        prepareJsonResponse(resp);
 
         try {
-            String[] currencyCodes = RequestParser.extractCurrencyPairCodes(req);
-            ExchangeRateDtoResponse dtoResponse = exchangeRateService.findByCurrencyCodes(currencyCodes[0], currencyCodes[1]);
-            sendSuccessGetJsonResponse(resp, dtoResponse);
+            String[] currencyCodes = RequestDataExtractor.extractCurrencyPairCodes(req);
+            ExchangeRateResponse dtoResponse = exchangeRateService.findByCurrencyCodes(currencyCodes[0], currencyCodes[1]);
+            sendSuccessResponse(resp, dtoResponse);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {

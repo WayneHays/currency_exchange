@@ -1,6 +1,10 @@
-package com.currency_exchange.util;
+package com.currency_exchange;
 
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
+
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public enum CurrencyRequest {
     NAME("name", "^[\\p{L}\\s\\-]{2,50}$", "Currency name must be 2-50 letters"),
@@ -24,6 +28,12 @@ public enum CurrencyRequest {
             }
         }
         throw new InvalidAttributeException("Unknown currency parameter: %s".formatted(paramName));
+    }
+
+    public static Set<String> getRequiredParamNames() {
+        return Arrays.stream(values())
+                .map(CurrencyRequest::getParamName)
+                .collect(Collectors.toSet());
     }
 
     public String getParamName() {

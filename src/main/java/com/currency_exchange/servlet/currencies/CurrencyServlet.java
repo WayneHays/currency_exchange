@@ -1,12 +1,12 @@
 package com.currency_exchange.servlet.currencies;
 
-import com.currency_exchange.dto.response.CurrencyDtoResponse;
+import com.currency_exchange.dto.response.CurrencyResponse;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.RequestParser;
+import com.currency_exchange.util.RequestDataExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,12 +22,12 @@ public class CurrencyServlet extends BaseServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        setResponseConfig(resp);
+        prepareJsonResponse(resp);
 
         try {
-            String code = RequestParser.extractCurrencyCode(req);
-            CurrencyDtoResponse dtoResponse = currencyService.findByCode(code);
-            sendSuccessGetJsonResponse(resp, dtoResponse);
+            String code = RequestDataExtractor.extractCurrencyCode(req);
+            CurrencyResponse dtoResponse = currencyService.findByCode(code);
+            sendSuccessResponse(resp, dtoResponse);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException e) {
