@@ -6,7 +6,6 @@ import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
 import com.currency_exchange.util.ConnectionManager;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -54,20 +53,26 @@ public class CurrencyDao implements Dao<Currency> {
     }
 
     @Override
-    public Currency save(Currency currency) {
+    public Currency saveAndSetId(Currency currency) {
         try (var connection = ConnectionManager.open();
              var preparedStatement = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+
             preparedStatement.setString(1, currency.getCode());
             preparedStatement.setString(2, currency.getFullName());
             preparedStatement.setString(3, currency.getSign());
             preparedStatement.executeUpdate();
-            setGeneratedId(currency, preparedStatement);
+
+            var generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                currency.setId(generatedKeys.getLong(1));
+            }
+
             return currency;
         } catch (SQLException e) {
             if (isDuplicateKeyError(e)) {
                 throw new CurrencyAlreadyExistsException(currency.getCode(), e);
             } else if (isConnectionError(e)) {
-                throw new DatabaseAccessException("Database connection problem", e);
+                throw new DatabaseAccessException(e);
             } else {
                 throw new DaoException("Failed to save currency");
             }
@@ -78,10 +83,19 @@ public class CurrencyDao implements Dao<Currency> {
     public List<Currency> findAll() throws DaoException {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_ALL_SQL)) {
+
             var resultSet = prepareStatement.executeQuery();
-            return getCurrencies(resultSet);
+            List<Currency> currencies = new ArrayList<>();
+            while (resultSet.next()) {
+                currencies.add(buildCurrency(resultSet));
+            }
+            return currencies;
         } catch (SQLException e) {
-            throw new DaoException("Failed to find currencies " + e);
+            if (isConnectionError(e)) {
+                throw new DatabaseAccessException(e);
+            } else {
+                throw new DaoException("Failed to find all currencies " + e);
+            }
         }
     }
 
@@ -89,10 +103,19 @@ public class CurrencyDao implements Dao<Currency> {
     public void update(Currency currency) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
-            setUpdatedParameters(currency, prepareStatement);
+
+            prepareStatement.setString(1, currency.getCode());
+            prepareStatement.setString(2, currency.getFullName());
+            prepareStatement.setString(3, currency.getSign());
+            prepareStatement.setLong(4, currency.getId());
+
             prepareStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new DaoException("Failed to update currency " + e);
+            if (isConnectionError(e)) {
+                throw new DatabaseAccessException(e);
+            } else {
+                throw new DaoException("Failed to update currency " + e);
+            }
         }
     }
 
@@ -102,9 +125,12 @@ public class CurrencyDao implements Dao<Currency> {
             prepareStatement.setString(1, code.toUpperCase());
             var resultSet = prepareStatement.executeQuery();
             return getCurrency(resultSet);
-
         } catch (SQLException e) {
-            throw new DaoException("Failed to find currency by code ", e);
+            if (isConnectionError(e)) {
+                throw new DatabaseAccessException(e);
+            } else {
+                throw new DaoException("Failed to find currency with code %s".formatted(code), e);
+            }
         }
     }
 
@@ -114,24 +140,12 @@ public class CurrencyDao implements Dao<Currency> {
             prepareStatement.setLong(1, id);
             var resultSet = prepareStatement.executeQuery();
             return getCurrency(resultSet);
-
         } catch (SQLException e) {
-            throw new DaoException("Failed to find currency by id ", e);
-        }
-    }
-
-    private List<Currency> getCurrencies(ResultSet resultSet) throws SQLException {
-        List<Currency> currencies = new ArrayList<>();
-        while (resultSet.next()) {
-            currencies.add(buildCurrency(resultSet));
-        }
-        return currencies;
-    }
-
-    private void setGeneratedId(Currency currency, PreparedStatement preparedStatement) throws SQLException {
-        var generatedKeys = preparedStatement.getGeneratedKeys();
-        if (generatedKeys.next()) {
-            currency.setId(generatedKeys.getLong(1));
+            if (isConnectionError(e)) {
+                throw new DatabaseAccessException(e);
+            } else {
+                throw new DaoException("Failed to find currency with id %d".formatted(id), e);
+            }
         }
     }
 
@@ -141,13 +155,6 @@ public class CurrencyDao implements Dao<Currency> {
             currency = buildCurrency(resultSet);
         }
         return Optional.ofNullable(currency);
-    }
-
-    private void setUpdatedParameters(Currency currency, PreparedStatement prepareStatement) throws SQLException {
-        prepareStatement.setString(1, currency.getCode());
-        prepareStatement.setString(2, currency.getFullName());
-        prepareStatement.setString(3, currency.getSign());
-        prepareStatement.setLong(4, currency.getId());
     }
 
     private Currency buildCurrency(ResultSet resultSet) throws SQLException {

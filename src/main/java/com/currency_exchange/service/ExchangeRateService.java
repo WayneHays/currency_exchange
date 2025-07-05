@@ -8,14 +8,18 @@ import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
-import com.currency_exchange.exception.service_exception.*;
+import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
+import com.currency_exchange.exception.service_exception.ExchangeRateConflictException;
+import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
+import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.util.Mapper;
 
 import java.util.List;
 
 public class ExchangeRateService {
-    private static final String SERVICE_ERROR_MSG = "ExchangeRate service error";
     public static final String EXCHANGE_RATE_ALREADY_EXISTS = "Exchange rate already exists for pair: %s/%s";
+    public static final String EXCHANGE_RATE_SERVICE_ERROR = "ExchangeRate service temporarily unavailable";
+
     private static final ExchangeRateService INSTANCE = new ExchangeRateService();
 
     private final ExchangeRatesDao exchangeRatesDao = ExchangeRatesDao.getInstance();
@@ -28,13 +32,28 @@ public class ExchangeRateService {
         return INSTANCE;
     }
 
+    public ExchangeRateResponse save(ExchangeRateRequest dto) throws CurrencyNotFoundException {
+        try {
+            CurrencyDtoPair pair = findCurrencyPair(dto.getBaseCurrencyCode(), dto.getTargetCurrencyCode());
+            ExchangeRate exchangeRate = Mapper.mapToExchangeRate(dto, pair.base.getId(), pair.target.getId());
+            ExchangeRate saved = exchangeRatesDao.saveAndSetId(exchangeRate);
+            return Mapper.mapToExchangeRateDtoResponse(saved, pair.base, pair.target);
+        } catch (ExchangeRateAlreadyExistsException e) {
+            throw new ExchangeRateConflictException(buildErrorMessage(dto));
+        } catch (DatabaseAccessException e) {
+            throw new ServiceException(EXCHANGE_RATE_SERVICE_ERROR, e);
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
+        }
+    }
+
     public List<ExchangeRateResponse> findAll() {
         try {
             return exchangeRatesDao.findAll().stream()
                     .map(this::convertToDto)
                     .toList();
         } catch (DatabaseAccessException e) {
-            throw new ServiceUnavailableException(e.getMessage());
+            throw new ServiceException(EXCHANGE_RATE_SERVICE_ERROR, e);
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -46,24 +65,9 @@ public class ExchangeRateService {
             ExchangeRate exchangeRate = findExchangeRate(pair);
             return Mapper.mapToExchangeRateDtoResponse(exchangeRate, pair.base, pair.target);
         } catch (DatabaseAccessException e) {
-            throw new ServiceUnavailableException(e.getMessage());
+            throw new ServiceException(EXCHANGE_RATE_SERVICE_ERROR, e);
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
-        }
-    }
-
-    public ExchangeRateResponse save(ExchangeRateRequest dto) throws CurrencyNotFoundException {
-        try {
-            CurrencyDtoPair pair = findCurrencyPair(dto.getBaseCurrencyCode(), dto.getTargetCurrencyCode());
-            ExchangeRate exchangeRate = Mapper.mapToExchangeRate(dto, pair.base.getId(), pair.target.getId());
-            ExchangeRate saved = exchangeRatesDao.save(exchangeRate);
-            return Mapper.mapToExchangeRateDtoResponse(saved, pair.base, pair.target);
-        } catch (ExchangeRateAlreadyExistsException e) {
-            throw new ExchangeRateConflictException(buildErrorMessage(dto, e));
-        } catch (DatabaseAccessException e) {
-            throw new ServiceUnavailableException(e.getMessage());
-        } catch (DaoException e) {
-            throw new ServiceException(SERVICE_ERROR_MSG);
         }
     }
 
@@ -89,7 +93,7 @@ public class ExchangeRateService {
         );
     }
 
-    private String buildErrorMessage(ExchangeRateRequest dto, ExchangeRateAlreadyExistsException e) {
+    private String buildErrorMessage(ExchangeRateRequest dto) {
         return EXCHANGE_RATE_ALREADY_EXISTS
                 .formatted(dto.getBaseCurrencyCode(), dto.getTargetCurrencyCode());
     }

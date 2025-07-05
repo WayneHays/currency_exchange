@@ -9,7 +9,7 @@ public interface Dao<T> {
 
     void update(T entity);
 
-    T save(T entity);
+    T saveAndSetId(T entity);
 
     default boolean isDuplicateKeyError(SQLException e) {
         return e.getErrorCode() == 19 && e.getMessage().contains("UNIQUE constraint failed");

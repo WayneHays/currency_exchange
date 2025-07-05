@@ -1,12 +1,10 @@
 package com.currency_exchange.dto.response;
 
-import java.util.Objects;
-
 public class CurrencyResponse {
-    private Long id;
-    private String name;
-    private String code;
-    private String sign;
+    private final Long id;
+    private final String name;
+    private final String code;
+    private final String sign;
 
     public CurrencyResponse(Long id, String name, String code, String sign) {
         this.id = id;
@@ -15,61 +13,19 @@ public class CurrencyResponse {
         this.sign = sign;
     }
 
-    public CurrencyResponse() {
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public String getCode() {
-        return code;
     }
 
     public String getName() {
         return name;
     }
 
+    public String getCode() {
+        return code;
+    }
+
     public String getSign() {
         return sign;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setSign(String sign) {
-        this.sign = sign;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CurrencyResponse that = (CurrencyResponse) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "CurrencyResponse{" +
-               "id=" + id +
-               ", name='" + name + '\'' +
-               ", code='" + code + '\'' +
-               ", sign='" + sign + '\'' +
-               '}';
     }
 }

@@ -7,17 +7,15 @@ import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
-import com.currency_exchange.exception.service_exception.CurrencyConflictException;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ServiceException;
-import com.currency_exchange.exception.service_exception.ServiceUnavailableException;
 import com.currency_exchange.util.Mapper;
 
 import java.util.List;
 
 public class CurrencyService {
     private static final CurrencyService INSTANCE = new CurrencyService();
-    public static final String CURRENCY_SERVICE_ERROR = "Currency service error";
+    public static final String CURRENCY_SERVICE_ERROR = "Service temporarily unavailable";
     private final CurrencyDao currencyDao = CurrencyDao.getInstance();
 
     private CurrencyService() {
@@ -27,6 +25,20 @@ public class CurrencyService {
         return INSTANCE;
     }
 
+    public CurrencyResponse save(CurrencyRequest dtoRequest) {
+        try {
+            Currency currency = Mapper.mapToCurrency(dtoRequest);
+            Currency savedCurrency = currencyDao.saveAndSetId(currency);
+            return Mapper.mapToCurrencyDtoResponse(savedCurrency);
+        } catch (CurrencyAlreadyExistsException e) {
+            throw e;
+        } catch (DatabaseAccessException e) {
+            throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
+        }
+    }
+
     public List<CurrencyResponse> findAll() {
         try {
             return currencyDao.findAll()
@@ -34,9 +46,9 @@ public class CurrencyService {
                     .map(Mapper::mapToCurrencyDtoResponse)
                     .toList();
         } catch (DatabaseAccessException e) {
-            throw new ServiceUnavailableException(e.getMessage());
+            throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
         } catch (DaoException e) {
-            throw new ServiceException(CURRENCY_SERVICE_ERROR);
+            throw new ServiceException(e.getMessage());
         }
     }
 
@@ -46,9 +58,9 @@ public class CurrencyService {
                     .map(Mapper::mapToCurrencyDtoResponse)
                     .orElseThrow(() -> new CurrencyNotFoundException(code));
         } catch (DatabaseAccessException e) {
-            throw new ServiceUnavailableException(e.getMessage());
+            throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
         } catch (DaoException e) {
-            throw new ServiceException(CURRENCY_SERVICE_ERROR);
+            throw new ServiceException(e.getMessage());
         }
     }
 
@@ -58,23 +70,9 @@ public class CurrencyService {
                     .map(Mapper::mapToCurrencyDtoResponse)
                     .orElseThrow(() -> new CurrencyNotFoundException(String.valueOf(id)));
         } catch (DatabaseAccessException e) {
-            throw new ServiceUnavailableException(e.getMessage());
+            throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
         } catch (DaoException e) {
-            throw new ServiceException(CURRENCY_SERVICE_ERROR);
-        }
-    }
-
-    public CurrencyResponse save(CurrencyRequest dtoRequest) {
-        try {
-            Currency currency = Mapper.mapToCurrency(dtoRequest);
-            Currency savedCurrency = currencyDao.save(currency);
-            return Mapper.mapToCurrencyDtoResponse(savedCurrency);
-        } catch (CurrencyAlreadyExistsException e) {
-            throw new CurrencyConflictException(e.getMessage());
-        } catch (DatabaseAccessException e) {
-            throw new ServiceUnavailableException(e.getMessage());
-        } catch (DaoException e) {
-            throw new ServiceException(CURRENCY_SERVICE_ERROR);
+            throw new ServiceException(e.getMessage());
         }
     }
 }

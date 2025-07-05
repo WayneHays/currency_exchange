@@ -14,4 +14,20 @@ public class ExchangeRateResponse {
         this.targetCurrency = targetCurrencyDto;
         this.rate = rate;
     }
+
+    public CurrencyResponse getTargetCurrency() {
+        return targetCurrency;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public CurrencyResponse getBaseCurrency() {
+        return baseCurrency;
+    }
+
+    public BigDecimal getRate() {
+        return rate;
+    }
 }
