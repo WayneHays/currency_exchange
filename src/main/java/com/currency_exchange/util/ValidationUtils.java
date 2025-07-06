@@ -100,4 +100,16 @@ public final class ValidationUtils {
             throw new InvalidAttributeException(WRONG_CURRENCY_PAIR_PATH);
         }
     }
+
+    public static void validateRate(String rate) {
+        if (!rate.matches(ExchangeRateRequest.RATE.getRegex())) {
+            throw new InvalidAttributeException(ExchangeRateRequest.RATE.getErrorMessage());
+        }
+    }
+
+    public static void validateRequiredPatchParameters(HttpServletRequest req) {
+        if (req.getParameter(ExchangeRateRequest.RATE.getParamName()) == null) {
+            throw new InvalidAttributeException(MISSING_REQUIRED_PARAMS.formatted(ExchangeRateRequest.RATE.getParamName()));
+        }
+    }
 }

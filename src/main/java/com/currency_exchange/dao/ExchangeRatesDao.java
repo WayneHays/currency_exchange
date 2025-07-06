@@ -6,7 +6,7 @@ import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
 import com.currency_exchange.util.ConnectionManager;
 
-import java.sql.PreparedStatement;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,9 +35,10 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
 
     private static final String UPDATE_SQL = """
             UPDATE exchange_rates
-            SET base_currency_id = ?,
-            target_currency_id = ?,
-            rate = ?
+            SET rate = ?
+            WHERE id = ?
+            """;
+    private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + """
             WHERE id = ?
             """;
 
@@ -59,7 +60,11 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
             prepareStatement.setBigDecimal(3, exchangeRate.getRate());
             prepareStatement.executeUpdate();
 
-            return getExchangeRate(exchangeRate, prepareStatement);
+            var generatedKeys = prepareStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                exchangeRate.setId(generatedKeys.getLong(1));
+            }
+            return exchangeRate;
         } catch (SQLException e) {
             if (isDuplicateKeyError(e)) {
                 throw new ExchangeRateAlreadyExistsException("%s -> %s", e);
@@ -71,38 +76,50 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
         }
     }
 
+    public Optional<ExchangeRate> update(ExchangeRate exchangeRate, BigDecimal newRate) {
+        try (var connection = ConnectionManager.open();
+             var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
+
+            prepareStatement.setBigDecimal(1, newRate);
+            prepareStatement.setLong(2, exchangeRate.getId());
+
+            int rowsAffected = prepareStatement.executeUpdate();
+
+            if (rowsAffected == 0) {
+                return Optional.empty();
+            }
+
+            try (var selectStatement = connection.prepareStatement(FIND_BY_ID_SQL)) {
+                selectStatement.setLong(1, exchangeRate.getId());
+                ResultSet resultSet = selectStatement.executeQuery();
+                return getExchangeRate(resultSet);
+            }
+        } catch (SQLException e) {
+            if (isConnectionError(e)) {
+                throw new DatabaseAccessException(e);
+            } else {
+                throw new DaoException("Failed to update exchange rate " + e);
+            }
+        }
+    }
+
     @Override
     public List<ExchangeRate> findAll() {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_ALL_SQL)) {
 
             var resultSet = prepareStatement.executeQuery();
-            return getExchangeRates(resultSet);
+            List<ExchangeRate> exchangeRates = new ArrayList<>();
+
+            while (resultSet.next()) {
+                exchangeRates.add(buildExchangeRate(resultSet));
+            }
+            return exchangeRates;
         } catch (SQLException e) {
             if (isConnectionError(e)) {
                 throw new DatabaseAccessException(e);
             } else {
                 throw new DaoException("Failed to find all exchange rates " + e);
-            }
-        }
-    }
-
-    @Override
-    public void update(ExchangeRate exchangeRate) {
-        try (var connection = ConnectionManager.open();
-             var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
-
-            prepareStatement.setLong(1, exchangeRate.getBaseCurrencyId());
-            prepareStatement.setLong(2, exchangeRate.getTargetCurrencyId());
-            prepareStatement.setBigDecimal(3, exchangeRate.getRate());
-            prepareStatement.setLong(4, exchangeRate.getId());
-
-            prepareStatement.executeUpdate();
-        } catch (SQLException e) {
-            if (isConnectionError(e)) {
-                throw new DatabaseAccessException(e);
-            } else {
-                throw new DaoException("Failed to update exchange rate " + e);
             }
         }
     }
@@ -124,22 +141,6 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
                 throw new DaoException("Failed to find exchange rate with ids %d -> %d".formatted(first, second), e);
             }
         }
-    }
-
-    private ExchangeRate getExchangeRate(ExchangeRate exchangeRate, PreparedStatement prepareStatement) throws SQLException {
-        var generatedKeys = prepareStatement.getGeneratedKeys();
-        if (generatedKeys.next()) {
-            exchangeRate.setId(generatedKeys.getLong(1));
-        }
-        return exchangeRate;
-    }
-
-    private List<ExchangeRate> getExchangeRates(ResultSet resultSet) throws SQLException {
-        List<ExchangeRate> exchangeRates = new ArrayList<>();
-        while (resultSet.next()) {
-            exchangeRates.add(buildExchangeRate(resultSet));
-        }
-        return exchangeRates;
     }
 
     private Optional<ExchangeRate> getExchangeRate(ResultSet resultSet) throws SQLException {

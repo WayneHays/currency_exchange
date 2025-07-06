@@ -99,26 +99,6 @@ public class CurrencyDao implements Dao<Currency> {
         }
     }
 
-    @Override
-    public void update(Currency currency) {
-        try (var connection = ConnectionManager.open();
-             var prepareStatement = connection.prepareStatement(UPDATE_SQL)) {
-
-            prepareStatement.setString(1, currency.getCode());
-            prepareStatement.setString(2, currency.getFullName());
-            prepareStatement.setString(3, currency.getSign());
-            prepareStatement.setLong(4, currency.getId());
-
-            prepareStatement.executeUpdate();
-        } catch (SQLException e) {
-            if (isConnectionError(e)) {
-                throw new DatabaseAccessException(e);
-            } else {
-                throw new DaoException("Failed to update currency " + e);
-            }
-        }
-    }
-
     public Optional<Currency> findByCode(String code) {
         try (var connection = ConnectionManager.open();
              var prepareStatement = connection.prepareStatement(FIND_BY_CODE_SQL)) {

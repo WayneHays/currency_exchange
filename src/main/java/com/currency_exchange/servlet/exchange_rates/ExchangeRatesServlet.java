@@ -41,7 +41,7 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            String[] exchangeRateData = RequestDataExtractor.extractExchangeRateData(req);
+            String[] exchangeRateData = RequestDataExtractor.extractExchangeRatePostData(req);
             ExchangeRateRequest dto = Mapper.mapToExchangeRateDtoRequest(exchangeRateData);
             ExchangeRateResponse saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);

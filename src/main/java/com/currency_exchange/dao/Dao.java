@@ -7,8 +7,6 @@ public interface Dao<T> {
 
     List<T> findAll();
 
-    void update(T entity);
-
     T saveAndSetId(T entity);
 
     default boolean isDuplicateKeyError(SQLException e) {

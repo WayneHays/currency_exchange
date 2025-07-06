@@ -27,12 +27,20 @@ public final class RequestDataExtractor {
         return new String[]{path.substring(1, 4).toUpperCase(), path.substring(4, 7).toUpperCase()};
     }
 
-    public static String[] extractExchangeRateData(HttpServletRequest req) {
+    public static String[] extractExchangeRatePostData(HttpServletRequest req) {
         ValidationUtils.validateExchangeRatePostRequest(req);
         String baseCurrencyCode = req.getParameter(ExchangeRateRequest.BASE_CURRENCY_CODE.getParamName()).toUpperCase();
         String targetCurrencyCode = req.getParameter(ExchangeRateRequest.TARGET_CURRENCY_CODE.getParamName()).toUpperCase();
         String rate = req.getParameter(ExchangeRateRequest.RATE.getParamName());
         return new String[]{baseCurrencyCode, targetCurrencyCode, rate};
+    }
+
+    public static String[] extractExchangeRatePatchData(HttpServletRequest req) {
+        String[] currencyCodes = extractCurrencyPairCodes(req);
+        ValidationUtils.validateRequiredPatchParameters(req);
+        String rate = req.getParameter(ExchangeRateRequest.RATE.getParamName());
+        ValidationUtils.validateRate(rate);
+        return new String[]{currencyCodes[0], currencyCodes[1], rate};
     }
 
     public static String[] extractCurrencyData(HttpServletRequest req) {
