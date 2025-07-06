@@ -25,7 +25,7 @@ public class CurrencyServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            String code = RequestDataExtractor.extractCurrencyCode(req);
+            String code = RequestDataExtractor.extractValidCurrencyCode(req);
             CurrencyResponse dto = currencyService.findByCode(code);
             sendSuccessResponse(resp, dto);
         } catch (InvalidAttributeException e) {

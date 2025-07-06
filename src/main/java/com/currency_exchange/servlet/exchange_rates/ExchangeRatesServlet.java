@@ -40,7 +40,7 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            ExchangeRateCreateRequest dto = RequestDataExtractor.extractExchangeRatePostData(req);
+            ExchangeRateCreateRequest dto = RequestDataExtractor.extractValidExchangeRatePostData(req);
             ExchangeRateResponse saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);
         } catch (NumberFormatException | InvalidAttributeException e) {

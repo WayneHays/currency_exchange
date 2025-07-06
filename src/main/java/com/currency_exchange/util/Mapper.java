@@ -2,6 +2,7 @@ package com.currency_exchange.util;
 
 import com.currency_exchange.dto.currency.CurrencyCreateRequest;
 import com.currency_exchange.dto.currency.CurrencyResponse;
+import com.currency_exchange.dto.currency_exchange.ExchangeCalculationRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
@@ -78,5 +79,10 @@ public final class Mapper {
 
     public static ExchangeRateUpdateRequest mapToExchangeRateUpdateRequest(String rate) {
         return new ExchangeRateUpdateRequest(new BigDecimal(rate));
+    }
+
+    public static ExchangeCalculationRequest mapToExchangeCalculationRequest(String from, String to, String amount) {
+        BigDecimal rateDecimal = new BigDecimal(amount);
+        return new ExchangeCalculationRequest(from, to, rateDecimal);
     }
 }

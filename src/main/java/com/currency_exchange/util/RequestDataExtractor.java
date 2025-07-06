@@ -1,9 +1,11 @@
 package com.currency_exchange.util;
 
+import com.currency_exchange.CurrencyExchangeRequest;
 import com.currency_exchange.CurrencyRequest;
 import com.currency_exchange.ExchangeRateRequest;
 import com.currency_exchange.dto.currency.CurrencyCreateRequest;
 import com.currency_exchange.dto.currency.CurrencyPairDto;
+import com.currency_exchange.dto.currency_exchange.ExchangeCalculationRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +17,7 @@ public final class RequestDataExtractor {
     private RequestDataExtractor() {
     }
 
-    public static String extractCurrencyCode(HttpServletRequest req) {
+    public static String extractValidCurrencyCode(HttpServletRequest req) {
         String path = req.getPathInfo();
         ValidationUtils.validatePath(path, MISSING_CURRENCY_CODE);
         String code = path.substring(1).toUpperCase();
@@ -33,7 +35,7 @@ public final class RequestDataExtractor {
         return new CurrencyPairDto(baseCurrencyCode, targetCurrencyCode);
     }
 
-    public static ExchangeRateCreateRequest extractExchangeRatePostData(HttpServletRequest req) {
+    public static ExchangeRateCreateRequest extractValidExchangeRatePostData(HttpServletRequest req) {
         ValidationUtils.validateExchangeRatePostRequest(req);
         String baseCurrencyCode = req.getParameter(ExchangeRateRequest.BASE_CURRENCY_CODE.getParamName()).toUpperCase();
         String targetCurrencyCode = req.getParameter(ExchangeRateRequest.TARGET_CURRENCY_CODE.getParamName()).toUpperCase();
@@ -55,5 +57,13 @@ public final class RequestDataExtractor {
         String code = req.getParameter(CurrencyRequest.CODE.getParamName()).toUpperCase();
         String sign = req.getParameter(CurrencyRequest.SIGN.getParamName());
         return new CurrencyCreateRequest(name, code, sign);
+    }
+
+    public static ExchangeCalculationRequest extractValidExchangeData(HttpServletRequest req) {
+        ValidationUtils.validateCurrencyExchangeRequest(req);
+        String from = req.getParameter(CurrencyExchangeRequest.FROM.getParamName());
+        String to = req.getParameter(CurrencyExchangeRequest.TO.getParamName());
+        String amount = req.getParameter(CurrencyExchangeRequest.AMOUNT.getParamName());
+        return Mapper.mapToExchangeCalculationRequest(from, to, amount);
     }
 }

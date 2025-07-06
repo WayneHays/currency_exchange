@@ -1,5 +1,6 @@
 package com.currency_exchange.util;
 
+import com.currency_exchange.CurrencyExchangeRequest;
 import com.currency_exchange.CurrencyRequest;
 import com.currency_exchange.ExchangeRateRequest;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
@@ -66,20 +67,34 @@ public final class ValidationUtils {
         });
     }
 
+    public static void validateCurrencyExchangeRequest(HttpServletRequest req) {
+        Map<String, String[]> params = req.getParameterMap();
+        validateRequiredParameters(params, CurrencyExchangeRequest.getRequiredParamNames());
+
+        params.forEach((param, values) -> {
+            validateSingleValue(param, values);
+            validateCurrencyExchangeParameter(param, values[0]);
+        });
+    }
+
+    private static void validateCurrencyExchangeParameter(String paramName, String value) {
+        CurrencyExchangeRequest param = CurrencyExchangeRequest.fromParamName(paramName);
+        if (!value.trim().matches(param.getRegex())) {
+            throw new InvalidAttributeException(INVALID_REQUEST.formatted(param.getErrorMessage()));
+        }
+    }
+
     private static void validateCurrencyParameter(String paramName, String value) {
         CurrencyRequest param = CurrencyRequest.fromParamName(paramName);
         if (!value.trim().matches(param.getRegex())) {
-            throw new InvalidAttributeException(
-                    String.format(INVALID_REQUEST, param.getErrorMessage())
-            );
+            throw new InvalidAttributeException(INVALID_REQUEST.formatted(param.getErrorMessage()));
         }
     }
 
     private static void validateExchangeRateParameter(String paramName, String value) {
         ExchangeRateRequest param = ExchangeRateRequest.fromParamName(paramName);
         if (!value.trim().matches(param.getRegex())) {
-            throw new InvalidAttributeException(
-                    String.format(INVALID_REQUEST, param.getErrorMessage()));
+            throw new InvalidAttributeException(INVALID_REQUEST.formatted(param.getErrorMessage()));
         }
     }
 
