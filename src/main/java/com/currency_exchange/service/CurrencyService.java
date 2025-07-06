@@ -1,8 +1,8 @@
 package com.currency_exchange.service;
 
 import com.currency_exchange.dao.CurrencyDao;
-import com.currency_exchange.dto.request.CurrencyRequest;
-import com.currency_exchange.dto.response.CurrencyResponse;
+import com.currency_exchange.dto.currency.CurrencyCreateRequest;
+import com.currency_exchange.dto.currency.CurrencyResponse;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.dao_exception.DaoException;
@@ -11,11 +11,12 @@ import com.currency_exchange.exception.service_exception.CurrencyNotFoundExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.util.Mapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CurrencyService {
-    private static final CurrencyService INSTANCE = new CurrencyService();
     public static final String CURRENCY_SERVICE_ERROR = "Service temporarily unavailable";
+    private static final CurrencyService INSTANCE = new CurrencyService();
     private final CurrencyDao currencyDao = CurrencyDao.getInstance();
 
     private CurrencyService() {
@@ -25,11 +26,11 @@ public class CurrencyService {
         return INSTANCE;
     }
 
-    public CurrencyResponse save(CurrencyRequest dtoRequest) {
+    public CurrencyResponse save(CurrencyCreateRequest dto) {
         try {
-            Currency currency = Mapper.mapToCurrency(dtoRequest);
+            Currency currency = Mapper.mapToCurrency(dto);
             Currency savedCurrency = currencyDao.saveAndSetId(currency);
-            return Mapper.mapToCurrencyDtoResponse(savedCurrency);
+            return Mapper.mapToCurrencyResponse(savedCurrency);
         } catch (CurrencyAlreadyExistsException e) {
             throw e;
         } catch (DatabaseAccessException e) {
@@ -41,10 +42,13 @@ public class CurrencyService {
 
     public List<CurrencyResponse> findAll() {
         try {
-            return currencyDao.findAll()
-                    .stream()
-                    .map(Mapper::mapToCurrencyDtoResponse)
-                    .toList();
+            List<CurrencyResponse> result = new ArrayList<>();
+            List<Currency> currencies = currencyDao.findAll();
+
+            for (Currency currency : currencies) {
+                result.add(Mapper.mapToCurrencyResponse(currency));
+            }
+            return result;
         } catch (DatabaseAccessException e) {
             throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
         } catch (DaoException e) {
@@ -53,9 +57,13 @@ public class CurrencyService {
     }
 
     public CurrencyResponse findByCode(String code) {
+        Currency currency = findCurrencyEntityByCode(code);
+        return Mapper.mapToCurrencyResponse(currency);
+    }
+
+    public Currency findCurrencyEntityByCode(String code) {
         try {
             return currencyDao.findByCode(code)
-                    .map(Mapper::mapToCurrencyDtoResponse)
                     .orElseThrow(() -> new CurrencyNotFoundException(code));
         } catch (DatabaseAccessException e) {
             throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
@@ -64,10 +72,9 @@ public class CurrencyService {
         }
     }
 
-    public CurrencyResponse findById(Long id) {
+    public Currency findById(Long id) {
         try {
             return currencyDao.findById(id)
-                    .map(Mapper::mapToCurrencyDtoResponse)
                     .orElseThrow(() -> new CurrencyNotFoundException(String.valueOf(id)));
         } catch (DatabaseAccessException e) {
             throw new ServiceException(CURRENCY_SERVICE_ERROR, e);

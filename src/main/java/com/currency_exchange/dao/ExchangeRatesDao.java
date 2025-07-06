@@ -159,4 +159,9 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
                 resultSet.getBigDecimal("rate")
         );
     }
+
+    public boolean existsByPair(Long baseId, Long targetId) {
+        Optional<ExchangeRate> byCurrencyIds = findByCurrencyIds(baseId, targetId);
+        return byCurrencyIds.isPresent();
+    }
 }

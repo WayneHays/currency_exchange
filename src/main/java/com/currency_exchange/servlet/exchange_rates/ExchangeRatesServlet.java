@@ -1,14 +1,13 @@
 package com.currency_exchange.servlet.exchange_rates;
 
-import com.currency_exchange.dto.request.ExchangeRateRequest;
-import com.currency_exchange.dto.response.ExchangeRateResponse;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ExchangeRateConflictException;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.Mapper;
 import com.currency_exchange.util.RequestDataExtractor;
 import com.currency_exchange.util.ValidationUtils;
 import com.google.gson.JsonIOException;
@@ -41,8 +40,7 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            String[] exchangeRateData = RequestDataExtractor.extractExchangeRatePostData(req);
-            ExchangeRateRequest dto = Mapper.mapToExchangeRateDtoRequest(exchangeRateData);
+            ExchangeRateCreateRequest dto = RequestDataExtractor.extractExchangeRatePostData(req);
             ExchangeRateResponse saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);
         } catch (NumberFormatException | InvalidAttributeException e) {

@@ -1,14 +1,14 @@
 package com.currency_exchange.servlet.exchange_rates;
 
-import com.currency_exchange.dto.request.ExchangeRateRequest;
-import com.currency_exchange.dto.response.ExchangeRateResponse;
+import com.currency_exchange.dto.currency.CurrencyPairDto;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.Mapper;
 import com.currency_exchange.util.RequestDataExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.ServletException;
@@ -29,8 +29,8 @@ public class ExchangeRateServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            String[] currencyCodes = RequestDataExtractor.extractCurrencyPairCodes(req);
-            ExchangeRateResponse dtoResponse = exchangeRateService.findByCurrencyCodes(currencyCodes);
+            CurrencyPairDto currencyPairDto = RequestDataExtractor.extractValidCurrencyPairData(req);
+            ExchangeRateResponse dtoResponse = exchangeRateService.findByPair(currencyPairDto);
             sendSuccessResponse(resp, dtoResponse);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
@@ -42,15 +42,12 @@ public class ExchangeRateServlet extends BaseServlet {
     }
 
     @Override
-    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-//            String[] exchangeRatePatchData = RequestDataExtractor.extractExchangeRatePatchData(req);
-//            ExchangeRateResponse updated = exchangeRateService.update(exchangeRatePatchData);
-//            sendSuccessResponse(resp, updated);
-
-            ExchangeRateRequest dto = Mapper.mapToExchangeRateDtoRequest(exchangeRatePatchData);
-            ExchangeRateResponse updated = exchangeRateService.update(dto);
+            CurrencyPairDto currencyPairDto = RequestDataExtractor.extractValidCurrencyPairData(req);
+            ExchangeRateUpdateRequest rateDto = RequestDataExtractor.extractValidPatchData(req);
+            ExchangeRateResponse updated = exchangeRateService.update(currencyPairDto, rateDto);
             sendSuccessResponse(resp, updated);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());

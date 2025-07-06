@@ -1,13 +1,12 @@
 package com.currency_exchange.servlet.currencies;
 
-import com.currency_exchange.dto.request.CurrencyRequest;
-import com.currency_exchange.dto.response.CurrencyResponse;
+import com.currency_exchange.dto.currency.CurrencyCreateRequest;
+import com.currency_exchange.dto.currency.CurrencyResponse;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.Mapper;
 import com.currency_exchange.util.RequestDataExtractor;
 import com.currency_exchange.util.ValidationUtils;
 import com.google.gson.JsonIOException;
@@ -41,10 +40,9 @@ public class CurrenciesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            String[] currencyData = RequestDataExtractor.extractCurrencyData(req);
-            CurrencyRequest dto = Mapper.mapToCurrencyDtoRequest(currencyData);
-            CurrencyResponse saved = currencyService.save(dto);
-            sendCreatedResponse(resp, saved);
+            CurrencyCreateRequest dto = RequestDataExtractor.extractCurrencyData(req);
+            CurrencyResponse savedCurrency = currencyService.save(dto);
+            sendCreatedResponse(resp, savedCurrency);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyAlreadyExistsException e) {

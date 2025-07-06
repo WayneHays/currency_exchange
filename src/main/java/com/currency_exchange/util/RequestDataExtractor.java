@@ -2,6 +2,10 @@ package com.currency_exchange.util;
 
 import com.currency_exchange.CurrencyRequest;
 import com.currency_exchange.ExchangeRateRequest;
+import com.currency_exchange.dto.currency.CurrencyCreateRequest;
+import com.currency_exchange.dto.currency.CurrencyPairDto;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
 import jakarta.servlet.http.HttpServletRequest;
 
 public final class RequestDataExtractor {
@@ -19,35 +23,37 @@ public final class RequestDataExtractor {
         return code;
     }
 
-    public static String[] extractCurrencyPairCodes(HttpServletRequest req) {
+    public static CurrencyPairDto extractValidCurrencyPairData(HttpServletRequest req) {
         String path = req.getPathInfo();
         ValidationUtils.validatePath(path, MISSING_CURRENCY_PAIR_CODE);
         ValidationUtils.validateCurrencyPair(path);
+        String baseCurrencyCode = path.substring(1, 4).toUpperCase();
+        String targetCurrencyCode = path.substring(4, 7).toUpperCase();
 
-        return new String[]{path.substring(1, 4).toUpperCase(), path.substring(4, 7).toUpperCase()};
+        return new CurrencyPairDto(baseCurrencyCode, targetCurrencyCode);
     }
 
-    public static String[] extractExchangeRatePostData(HttpServletRequest req) {
+    public static ExchangeRateCreateRequest extractExchangeRatePostData(HttpServletRequest req) {
         ValidationUtils.validateExchangeRatePostRequest(req);
         String baseCurrencyCode = req.getParameter(ExchangeRateRequest.BASE_CURRENCY_CODE.getParamName()).toUpperCase();
         String targetCurrencyCode = req.getParameter(ExchangeRateRequest.TARGET_CURRENCY_CODE.getParamName()).toUpperCase();
         String rate = req.getParameter(ExchangeRateRequest.RATE.getParamName());
-        return new String[]{baseCurrencyCode, targetCurrencyCode, rate};
+        return Mapper.mapToExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, rate);
+
     }
 
-    public static String[] extractExchangeRatePatchData(HttpServletRequest req) {
-        String[] currencyCodes = extractCurrencyPairCodes(req);
+    public static ExchangeRateUpdateRequest extractValidPatchData(HttpServletRequest req) {
         ValidationUtils.validateRequiredPatchParameters(req);
         String rate = req.getParameter(ExchangeRateRequest.RATE.getParamName());
         ValidationUtils.validateRate(rate);
-        return new String[]{currencyCodes[0], currencyCodes[1], rate};
+        return Mapper.mapToExchangeRateUpdateRequest(rate);
     }
 
-    public static String[] extractCurrencyData(HttpServletRequest req) {
+    public static CurrencyCreateRequest extractCurrencyData(HttpServletRequest req) {
         ValidationUtils.validateCurrenciesPostRequest(req);
         String name = req.getParameter(CurrencyRequest.NAME.getParamName()).toUpperCase();
         String code = req.getParameter(CurrencyRequest.CODE.getParamName()).toUpperCase();
         String sign = req.getParameter(CurrencyRequest.SIGN.getParamName());
-        return new String[]{name, code, sign};
+        return new CurrencyCreateRequest(name, code, sign);
     }
 }

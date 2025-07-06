@@ -1,9 +1,10 @@
 package com.currency_exchange.util;
 
-import com.currency_exchange.dto.request.CurrencyRequest;
-import com.currency_exchange.dto.request.ExchangeRateRequest;
-import com.currency_exchange.dto.response.CurrencyResponse;
-import com.currency_exchange.dto.response.ExchangeRateResponse;
+import com.currency_exchange.dto.currency.CurrencyCreateRequest;
+import com.currency_exchange.dto.currency.CurrencyResponse;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
 
@@ -14,56 +15,31 @@ public final class Mapper {
     private Mapper() {
     }
 
-    public static Currency mapToCurrency(CurrencyRequest dtoRequest) {
+    public static Currency mapToCurrency(CurrencyCreateRequest dto) {
         Currency currency = new Currency();
-        currency.setCode(dtoRequest.getCode());
-        currency.setSign(dtoRequest.getSign());
-        currency.setFullName(dtoRequest.getFullName());
+        currency.setCode(dto.code());
+        currency.setSign(dto.sign());
+        currency.setFullName(dto.name());
         return currency;
     }
 
-    public static ExchangeRate mapToExchangeRate(ExchangeRateRequest dtoRequest, Long baseId, Long targetId) {
+    public static ExchangeRate mapToExchangeRate(ExchangeRateCreateRequest dto, Currency baseCurrency, Currency targetCurrency) {
         ExchangeRate exchangeRate = new ExchangeRate();
-        exchangeRate.setBaseCurrencyId(baseId);
-        exchangeRate.setTargetCurrencyId(targetId);
-        exchangeRate.setRate(dtoRequest.getRate());
+        exchangeRate.setBaseCurrencyId(baseCurrency.getId());
+        exchangeRate.setTargetCurrencyId(targetCurrency.getId());
+        exchangeRate.setRate(dto.rate());
 
         return exchangeRate;
     }
 
-    public static CurrencyRequest mapToCurrencyDtoRequest(String[] currencyData) {
-        String name = currencyData[0];
-        String code = currencyData[1];
-        String sign = currencyData[2];
-        name = capitalizeFirstLetter(name);
-        code = capitalizeAllLetters(code);
-        return new CurrencyRequest(code, name, sign);
-    }
-
-    public static ExchangeRateRequest mapToExchangeRateDtoRequest(String[] exchangeRateData) throws NumberFormatException {
-        String baseCurrencyCode = exchangeRateData[0];
-        String targetCurrencyCode = exchangeRateData[1];
-        String rate = exchangeRateData[2];
-        BigDecimal rateDecimal = new BigDecimal(rate.trim());
-        return new ExchangeRateRequest(baseCurrencyCode, targetCurrencyCode, rateDecimal);
-    }
-
-    public static CurrencyResponse mapToCurrencyDtoResponse(Currency currency) {
-        return new CurrencyResponse(
-                currency.getId(),
-                currency.getFullName(),
-                currency.getCode(),
-                currency.getSign());
-    }
-
-    public static ExchangeRateResponse mapToExchangeRateDtoResponse(ExchangeRate exchangeRate, CurrencyResponse base, CurrencyResponse target) {
-        return new ExchangeRateResponse(
-                exchangeRate.getId(),
-                base,
-                target,
-                exchangeRate.getRate()
-        );
-    }
+//    public static CurrencyRequestDto mapToCurrencyDtoRequest(String[] currencyData) {
+//        String name = currencyData[0];
+//        String code = currencyData[1];
+//        String sign = currencyData[2];
+//        name = capitalizeFirstLetter(name);
+//        code = capitalizeAllLetters(code);
+//        return new CurrencyRequestDto(code, name, sign);
+//    }
 
     private static String capitalizeFirstLetter(String input) {
         char[] chars = input.toCharArray();
@@ -79,5 +55,28 @@ public final class Mapper {
             upperCaseWord.append(Character.toUpperCase(aChar));
         }
         return upperCaseWord.toString();
+    }
+
+    public static CurrencyResponse mapToCurrencyResponse(Currency currency) {
+        return new CurrencyResponse(
+                currency.getId(),
+                currency.getCode(),
+                currency.getFullName(),
+                currency.getSign());
+    }
+
+    public static ExchangeRateResponse mapToExchangeRateResponse(ExchangeRate exchangeRate, Currency base, Currency target) {
+        CurrencyResponse baseCurrency = Mapper.mapToCurrencyResponse(base);
+        CurrencyResponse targetCurrency = Mapper.mapToCurrencyResponse(target);
+        return new ExchangeRateResponse(exchangeRate.getId(), baseCurrency, targetCurrency, exchangeRate.getRate());
+    }
+
+    public static ExchangeRateCreateRequest mapToExchangeRateCreateRequest(String baseCurrencyCode, String targetCurrencyCode, String rate) {
+        BigDecimal rateDecimal = new BigDecimal(rate.trim());
+        return new ExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, rateDecimal);
+    }
+
+    public static ExchangeRateUpdateRequest mapToExchangeRateUpdateRequest(String rate) {
+        return new ExchangeRateUpdateRequest(new BigDecimal(rate));
     }
 }

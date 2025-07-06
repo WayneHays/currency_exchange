@@ -1,6 +1,6 @@
 package com.currency_exchange.servlet.currencies;
 
-import com.currency_exchange.dto.response.CurrencyResponse;
+import com.currency_exchange.dto.currency.CurrencyResponse;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidAttributeException;
 import com.currency_exchange.exception.service_exception.ServiceException;
@@ -26,8 +26,8 @@ public class CurrencyServlet extends BaseServlet {
 
         try {
             String code = RequestDataExtractor.extractCurrencyCode(req);
-            CurrencyResponse dtoResponse = currencyService.findByCode(code);
-            sendSuccessResponse(resp, dtoResponse);
+            CurrencyResponse dto = currencyService.findByCode(code);
+            sendSuccessResponse(resp, dto);
         } catch (InvalidAttributeException e) {
             sendError(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException e) {
