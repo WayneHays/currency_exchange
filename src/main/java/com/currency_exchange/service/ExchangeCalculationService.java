@@ -4,6 +4,7 @@ import com.currency_exchange.dto.currency.CurrencyResponse;
 import com.currency_exchange.dto.currency.CurrencyResponsePair;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
+import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.service.calculation_strategy.CalculationStrategy;
@@ -33,9 +34,11 @@ public class ExchangeCalculationService {
     }
 
     public ExchangeCalculationResponse calculate(ExchangeCalculationRequest calculationRequest) {
-        CurrencyPair currencyPair = exchangeRateService.findCurrencyPair(calculationRequest);
-        CurrencyResponsePair responsePair = mapToResponse(currencyPair);
-        return executeCalculationStrategy(currencyPair, calculationRequest.amount(), responsePair);
+        Currency base = currencyService.findCurrencyEntityByCode(calculationRequest.from());
+        Currency target = currencyService.findCurrencyEntityByCode(calculationRequest.to());
+        CurrencyPair pair = new CurrencyPair(base, target);
+        CurrencyResponsePair responsePair = mapToResponse(pair);
+        return executeCalculationStrategy(pair, calculationRequest.amount(), responsePair);
     }
 
     private CurrencyResponsePair mapToResponse(CurrencyPair currencyPair) {
@@ -48,7 +51,7 @@ public class ExchangeCalculationService {
                                                                    BigDecimal amount,
                                                                    CurrencyResponsePair responsePair) {
         return strategies.stream()
-                .filter(strategy -> strategy.canHandle(currencyPair.base(), currencyPair.target()))
+                .filter(strategy -> strategy.canHandle(currencyPair))
                 .findFirst()
                 .map(strategy -> strategy.calculate(
                         currencyPair.base(),
