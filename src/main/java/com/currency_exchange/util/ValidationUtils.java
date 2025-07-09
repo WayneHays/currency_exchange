@@ -1,9 +1,9 @@
 package com.currency_exchange.util;
 
-import com.currency_exchange.CurrencyExchangeRequest;
-import com.currency_exchange.CurrencyRequest;
-import com.currency_exchange.ExchangeRateRequest;
-import com.currency_exchange.exception.service_exception.InvalidAttributeException;
+import com.currency_exchange.CurrencyRequiredParams;
+import com.currency_exchange.ExchangeCalculationRequiredParams;
+import com.currency_exchange.ExchangeRateRequiredParams;
+import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.HashSet;
@@ -23,7 +23,7 @@ public final class ValidationUtils {
 
     public static void validateGetRequest(HttpServletRequest request) {
         if (!request.getParameterMap().isEmpty()) {
-            throw new InvalidAttributeException(PARAMETERS_NOT_ALLOWED);
+            throw new InvalidParameterException(PARAMETERS_NOT_ALLOWED);
         }
     }
 
@@ -33,7 +33,7 @@ public final class ValidationUtils {
         missingParams.removeAll(parameters.keySet());
 
         if (!missingParams.isEmpty()) {
-            throw new InvalidAttributeException(
+            throw new InvalidParameterException(
                     String.format(MISSING_REQUIRED_PARAMS, String.join(", ", missingParams))
             );
         }
@@ -41,7 +41,7 @@ public final class ValidationUtils {
 
     public static void validateSingleValue(String paramName, String[] values) {
         if (values == null || values.length != 1) {
-            throw new InvalidAttributeException(
+            throw new InvalidParameterException(
                     String.format(SINGLE_PARAMETER_VALUE_REQUIRED, paramName)
             );
         }
@@ -49,7 +49,7 @@ public final class ValidationUtils {
 
     public static void validateCurrenciesPostRequest(HttpServletRequest request) {
         Map<String, String[]> params = request.getParameterMap();
-        validateRequiredParameters(params, CurrencyRequest.getRequiredParamNames());
+        validateRequiredParameters(params, CurrencyRequiredParams.getRequiredParamNames());
 
         params.forEach((param, values) -> {
             validateSingleValue(param, values);
@@ -59,7 +59,7 @@ public final class ValidationUtils {
 
     public static void validateExchangeRatePostRequest(HttpServletRequest request) {
         Map<String, String[]> params = request.getParameterMap();
-        validateRequiredParameters(params, ExchangeRateRequest.getRequiredParamNames());
+        validateRequiredParameters(params, ExchangeRateRequiredParams.getRequiredParamNames());
 
         params.forEach((param, values) -> {
             validateSingleValue(param, values);
@@ -67,64 +67,64 @@ public final class ValidationUtils {
         });
     }
 
-    public static void validateCurrencyExchangeRequest(HttpServletRequest req) {
+    public static void validateCalculationRequest(HttpServletRequest req) {
         Map<String, String[]> params = req.getParameterMap();
-        validateRequiredParameters(params, CurrencyExchangeRequest.getRequiredParamNames());
+        validateRequiredParameters(params, ExchangeCalculationRequiredParams.getRequiredParamNames());
 
         params.forEach((param, values) -> {
             validateSingleValue(param, values);
-            validateCurrencyExchangeParameter(param, values[0]);
+            validateCalculationParameter(param, values[0]);
         });
-    }
-
-    private static void validateCurrencyExchangeParameter(String paramName, String value) {
-        CurrencyExchangeRequest param = CurrencyExchangeRequest.fromParamName(paramName);
-        if (!value.trim().matches(param.getRegex())) {
-            throw new InvalidAttributeException(INVALID_REQUEST.formatted(param.getErrorMessage()));
-        }
-    }
-
-    private static void validateCurrencyParameter(String paramName, String value) {
-        CurrencyRequest param = CurrencyRequest.fromParamName(paramName);
-        if (!value.trim().matches(param.getRegex())) {
-            throw new InvalidAttributeException(INVALID_REQUEST.formatted(param.getErrorMessage()));
-        }
-    }
-
-    private static void validateExchangeRateParameter(String paramName, String value) {
-        ExchangeRateRequest param = ExchangeRateRequest.fromParamName(paramName);
-        if (!value.trim().matches(param.getRegex())) {
-            throw new InvalidAttributeException(INVALID_REQUEST.formatted(param.getErrorMessage()));
-        }
     }
 
     public static void validatePath(String input, String errorMessage) {
         if (input == null || input.equals("/")) {
-            throw new InvalidAttributeException(errorMessage);
+            throw new InvalidParameterException(errorMessage);
         }
     }
 
     public static void validateCurrencyCode(String code) {
-        if (!code.matches(CurrencyRequest.CODE.getRegex())) {
-            throw new InvalidAttributeException(CurrencyRequest.CODE.getErrorMessage());
+        if (!code.matches(CurrencyRequiredParams.CODE.getRegex())) {
+            throw new InvalidParameterException(CurrencyRequiredParams.CODE.getErrorMessage());
         }
     }
 
     public static void validateCurrencyPair(String pair) {
         if (!pair.matches(CURRENCY_PAIR_PATTERN)) {
-            throw new InvalidAttributeException(WRONG_CURRENCY_PAIR_PATH);
+            throw new InvalidParameterException(WRONG_CURRENCY_PAIR_PATH);
         }
     }
 
     public static void validateRate(String rate) {
-        if (!rate.matches(ExchangeRateRequest.RATE.getRegex())) {
-            throw new InvalidAttributeException(ExchangeRateRequest.RATE.getErrorMessage());
+        if (!rate.matches(ExchangeRateRequiredParams.RATE.getRegex())) {
+            throw new InvalidParameterException(ExchangeRateRequiredParams.RATE.getErrorMessage());
         }
     }
 
     public static void validateRequiredPatchParameters(HttpServletRequest req) {
-        if (req.getParameter(ExchangeRateRequest.RATE.getParamName()) == null) {
-            throw new InvalidAttributeException(MISSING_REQUIRED_PARAMS.formatted(ExchangeRateRequest.RATE.getParamName()));
+        if (req.getParameter(ExchangeRateRequiredParams.RATE.getParamName()) == null) {
+            throw new InvalidParameterException(MISSING_REQUIRED_PARAMS.formatted(ExchangeRateRequiredParams.RATE.getParamName()));
+        }
+    }
+
+    private static void validateCalculationParameter(String paramName, String value) {
+        ExchangeCalculationRequiredParams param = ExchangeCalculationRequiredParams.fromParamName(paramName);
+        if (!value.trim().matches(param.getRegex())) {
+            throw new InvalidParameterException(INVALID_REQUEST.formatted(param.getErrorMessage()));
+        }
+    }
+
+    private static void validateCurrencyParameter(String paramName, String value) {
+        CurrencyRequiredParams param = CurrencyRequiredParams.fromParamName(paramName);
+        if (!value.trim().matches(param.getRegex())) {
+            throw new InvalidParameterException(INVALID_REQUEST.formatted(param.getErrorMessage()));
+        }
+    }
+
+    private static void validateExchangeRateParameter(String paramName, String value) {
+        ExchangeRateRequiredParams param = ExchangeRateRequiredParams.fromParamName(paramName);
+        if (!value.trim().matches(param.getRegex())) {
+            throw new InvalidParameterException(INVALID_REQUEST.formatted(param.getErrorMessage()));
         }
     }
 }

@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 
 public class BaseServlet extends HttpServlet {
-    public static final String TEMPLATE = "{\"message\":\"%s\"}";
+    protected static final String TEMPLATE = "{\"message\":\"%s\"}";
     protected final Gson gsonFormatter = new GsonBuilder().setPrettyPrinting().create();
 
     protected void prepareJsonResponse(HttpServletResponse resp) {
@@ -20,7 +20,7 @@ public class BaseServlet extends HttpServlet {
         resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
     }
 
-    protected void sendError(HttpServletResponse resp, int status, String message) throws IOException {
+    protected void sendErrorResponse(HttpServletResponse resp, int status, String message) throws IOException {
         resp.setStatus(status);
         try (PrintWriter writer = resp.getWriter()) {
             writer.write(TEMPLATE.formatted(message));

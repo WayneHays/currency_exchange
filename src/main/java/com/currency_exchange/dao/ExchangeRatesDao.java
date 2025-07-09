@@ -1,5 +1,6 @@
 package com.currency_exchange.dao;
 
+import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.DatabaseAccessException;
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRatesDao implements Dao<ExchangeRate> {
+    public static final long USD = 2;
+
     private static final ExchangeRatesDao INSTANCE = new ExchangeRatesDao();
 
     private static final String SAVE_SQL = """
@@ -41,7 +44,6 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
     private static final String FIND_BY_ID_SQL = FIND_ALL_SQL + """
             WHERE id = ?
             """;
-
 
     private ExchangeRatesDao() {
     }
@@ -143,6 +145,27 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
         }
     }
 
+    public boolean isExchangeRateExists(Long baseId, Long targetId) {
+        Optional<ExchangeRate> direct = findByCurrencyIds(baseId, targetId);
+        return direct.isPresent();
+    }
+
+    public boolean isReversedExchangeRateExists(Currency base, Currency target) {
+        Optional<ExchangeRate> reversed = findByCurrencyIds(target.getId(), base.getId());
+        return reversed.isPresent();
+    }
+
+    public boolean isCrossCourseExists(Currency base, Currency target) {
+        Optional<ExchangeRate> baseCross = findByCurrencyIds(USD, base.getId());
+        Optional<ExchangeRate> targetCross = findByCurrencyIds(USD, target.getId());
+
+        return baseCross.isPresent() && targetCross.isPresent();
+    }
+
+    public Optional<ExchangeRate> findByUsd(Currency currency) {
+        return findByCurrencyIds(USD, currency.getId());
+    }
+
     private Optional<ExchangeRate> getExchangeRate(ResultSet resultSet) throws SQLException {
         ExchangeRate exchangeRate = null;
         if (resultSet.next()) {
@@ -158,10 +181,5 @@ public class ExchangeRatesDao implements Dao<ExchangeRate> {
                 resultSet.getLong("target_currency_id"),
                 resultSet.getBigDecimal("rate")
         );
-    }
-
-    public boolean existsByPair(Long baseId, Long targetId) {
-        Optional<ExchangeRate> byCurrencyIds = findByCurrencyIds(baseId, targetId);
-        return byCurrencyIds.isPresent();
     }
 }

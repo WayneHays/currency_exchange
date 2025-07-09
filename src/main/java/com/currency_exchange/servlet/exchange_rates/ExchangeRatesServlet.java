@@ -4,7 +4,7 @@ import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ExchangeRateConflictException;
-import com.currency_exchange.exception.service_exception.InvalidAttributeException;
+import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
@@ -32,7 +32,7 @@ public class ExchangeRatesServlet extends BaseServlet {
             List<ExchangeRateResponse> exchangeRates = exchangeRateService.findAll();
             sendSuccessResponse(resp, exchangeRates);
         } catch (ServiceException | JsonIOException | IOException e) {
-            sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -40,17 +40,17 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            ExchangeRateCreateRequest dto = RequestDataExtractor.extractValidExchangeRatePostData(req);
+            ExchangeRateCreateRequest dto = RequestDataExtractor.extractValidExchangeRateData(req);
             ExchangeRateResponse saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);
-        } catch (NumberFormatException | InvalidAttributeException e) {
-            sendError(resp, SC_BAD_REQUEST, e.getMessage());
+        } catch (NumberFormatException | InvalidParameterException e) {
+            sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (ExchangeRateConflictException e) {
-            sendError(resp, SC_CONFLICT, e.getMessage());
+            sendErrorResponse(resp, SC_CONFLICT, e.getMessage());
         } catch (CurrencyNotFoundException e) {
-            sendError(resp, SC_NOT_FOUND, e.getMessage());
+            sendErrorResponse(resp, SC_NOT_FOUND, e.getMessage());
         } catch (ServiceException | JsonIOException | IOException e) {
-            sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

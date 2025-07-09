@@ -1,4 +1,4 @@
-package com.currency_exchange.dto.currency_exchange;
+package com.currency_exchange.dto.exchange_calculation;
 
 import java.math.BigDecimal;
 

@@ -1,11 +1,11 @@
 package com.currency_exchange.servlet.exchange_rates;
 
-import com.currency_exchange.dto.currency.CurrencyPairDto;
+import com.currency_exchange.dto.currency.CurrencyPairRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
-import com.currency_exchange.exception.service_exception.InvalidAttributeException;
+import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
@@ -29,15 +29,15 @@ public class ExchangeRateServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            CurrencyPairDto currencyPairDto = RequestDataExtractor.extractValidCurrencyPairData(req);
-            ExchangeRateResponse dtoResponse = exchangeRateService.findByPair(currencyPairDto);
+            CurrencyPairRequest currencyPairRequest = RequestDataExtractor.extractValidCurrencyPairData(req);
+            ExchangeRateResponse dtoResponse = exchangeRateService.findByPair(currencyPairRequest);
             sendSuccessResponse(resp, dtoResponse);
-        } catch (InvalidAttributeException e) {
-            sendError(resp, SC_BAD_REQUEST, e.getMessage());
+        } catch (InvalidParameterException e) {
+            sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {
-            sendError(resp, SC_NOT_FOUND, e.getMessage());
+            sendErrorResponse(resp, SC_NOT_FOUND, e.getMessage());
         } catch (ServiceException | JsonIOException | IOException e) {
-            sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -45,16 +45,16 @@ public class ExchangeRateServlet extends BaseServlet {
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            CurrencyPairDto currencyPairDto = RequestDataExtractor.extractValidCurrencyPairData(req);
+            CurrencyPairRequest currencyPairRequest = RequestDataExtractor.extractValidCurrencyPairData(req);
             ExchangeRateUpdateRequest rateDto = RequestDataExtractor.extractValidPatchData(req);
-            ExchangeRateResponse updated = exchangeRateService.update(currencyPairDto, rateDto);
+            ExchangeRateResponse updated = exchangeRateService.update(currencyPairRequest, rateDto);
             sendSuccessResponse(resp, updated);
-        } catch (InvalidAttributeException e) {
-            sendError(resp, SC_BAD_REQUEST, e.getMessage());
+        } catch (InvalidParameterException e) {
+            sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (ExchangeRateNotFoundException e) {
-            sendError(resp, SC_NOT_FOUND, e.getMessage());
+            sendErrorResponse(resp, SC_NOT_FOUND, e.getMessage());
         } catch (ServiceException | JsonIOException | IOException e) {
-            sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

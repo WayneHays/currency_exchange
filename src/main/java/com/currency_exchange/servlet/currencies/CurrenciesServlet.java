@@ -3,7 +3,7 @@ package com.currency_exchange.servlet.currencies;
 import com.currency_exchange.dto.currency.CurrencyCreateRequest;
 import com.currency_exchange.dto.currency.CurrencyResponse;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
-import com.currency_exchange.exception.service_exception.InvalidAttributeException;
+import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
@@ -32,7 +32,7 @@ public class CurrenciesServlet extends BaseServlet {
             List<CurrencyResponse> currencies = currencyService.findAll();
             sendSuccessResponse(resp, currencies);
         } catch (ServiceException | JsonIOException | IOException e) {
-            sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -40,15 +40,15 @@ public class CurrenciesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            CurrencyCreateRequest dto = RequestDataExtractor.extractCurrencyData(req);
+            CurrencyCreateRequest dto = RequestDataExtractor.extractValidCurrencyData(req);
             CurrencyResponse savedCurrency = currencyService.save(dto);
             sendCreatedResponse(resp, savedCurrency);
-        } catch (InvalidAttributeException e) {
-            sendError(resp, SC_BAD_REQUEST, e.getMessage());
+        } catch (InvalidParameterException e) {
+            sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyAlreadyExistsException e) {
-            sendError(resp, SC_CONFLICT, e.getMessage());
+            sendErrorResponse(resp, SC_CONFLICT, e.getMessage());
         } catch (ServiceException | JsonIOException | IOException e) {
-            sendError(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

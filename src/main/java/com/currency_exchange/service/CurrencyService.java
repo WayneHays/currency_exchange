@@ -56,7 +56,7 @@ public class CurrencyService {
         }
     }
 
-    public CurrencyResponse findByCode(String code) {
+    public CurrencyResponse prepareCurrencyResponseByCode(String code) {
         Currency currency = findCurrencyEntityByCode(code);
         return Mapper.mapToCurrencyResponse(currency);
     }
@@ -72,7 +72,7 @@ public class CurrencyService {
         }
     }
 
-    public Currency findById(Long id) {
+    public Currency findCurrencyEntityById(Long id) {
         try {
             return currencyDao.findById(id)
                     .orElseThrow(() -> new CurrencyNotFoundException(String.valueOf(id)));

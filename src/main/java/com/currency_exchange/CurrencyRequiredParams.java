@@ -1,12 +1,12 @@
 package com.currency_exchange;
 
-import com.currency_exchange.exception.service_exception.InvalidAttributeException;
+import com.currency_exchange.exception.service_exception.InvalidParameterException;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public enum CurrencyRequest {
+public enum CurrencyRequiredParams {
     NAME("name", "^[\\p{L}\\s\\-]{2,50}$", "Currency name must be 2-50 letters"),
     CODE("code", "^[A-Za-z]{3}$", "Currency code must be 3 latin letters"),
     SIGN("sign", "^\\p{Sc}", "Currency sign must be a valid symbol (e.g. $, €...");
@@ -15,24 +15,24 @@ public enum CurrencyRequest {
     private final String regex;
     private final String errorMessage;
 
-    CurrencyRequest(String paramName, String regex, String errorMessage) {
+    CurrencyRequiredParams(String paramName, String regex, String errorMessage) {
         this.paramName = paramName;
         this.regex = regex;
         this.errorMessage = errorMessage;
     }
 
-    public static CurrencyRequest fromParamName(String paramName) {
-        for (CurrencyRequest param : values()) {
+    public static CurrencyRequiredParams fromParamName(String paramName) {
+        for (CurrencyRequiredParams param : values()) {
             if (param.paramName.equals(paramName)) {
                 return param;
             }
         }
-        throw new InvalidAttributeException("Unknown currency parameter: %s".formatted(paramName));
+        throw new InvalidParameterException("Unknown currency parameter: %s".formatted(paramName));
     }
 
     public static Set<String> getRequiredParamNames() {
         return Arrays.stream(values())
-                .map(CurrencyRequest::getParamName)
+                .map(CurrencyRequiredParams::getParamName)
                 .collect(Collectors.toSet());
     }
 

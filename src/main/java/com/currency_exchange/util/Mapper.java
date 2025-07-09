@@ -2,7 +2,8 @@ package com.currency_exchange.util;
 
 import com.currency_exchange.dto.currency.CurrencyCreateRequest;
 import com.currency_exchange.dto.currency.CurrencyResponse;
-import com.currency_exchange.dto.currency_exchange.ExchangeCalculationRequest;
+import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
+import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
@@ -33,31 +34,6 @@ public final class Mapper {
         return exchangeRate;
     }
 
-//    public static CurrencyRequestDto mapToCurrencyDtoRequest(String[] currencyData) {
-//        String name = currencyData[0];
-//        String code = currencyData[1];
-//        String sign = currencyData[2];
-//        name = capitalizeFirstLetter(name);
-//        code = capitalizeAllLetters(code);
-//        return new CurrencyRequestDto(code, name, sign);
-//    }
-
-    private static String capitalizeFirstLetter(String input) {
-        char[] chars = input.toCharArray();
-        chars[0] = Character.toUpperCase(chars[0]);
-        return new String(chars);
-    }
-
-    private static String capitalizeAllLetters(String input) {
-        char[] chars = input.toCharArray();
-        StringBuilder upperCaseWord = new StringBuilder();
-
-        for (char aChar : chars) {
-            upperCaseWord.append(Character.toUpperCase(aChar));
-        }
-        return upperCaseWord.toString();
-    }
-
     public static CurrencyResponse mapToCurrencyResponse(Currency currency) {
         return new CurrencyResponse(
                 currency.getId(),
@@ -72,7 +48,10 @@ public final class Mapper {
         return new ExchangeRateResponse(exchangeRate.getId(), baseCurrency, targetCurrency, exchangeRate.getRate());
     }
 
-    public static ExchangeRateCreateRequest mapToExchangeRateCreateRequest(String baseCurrencyCode, String targetCurrencyCode, String rate) {
+    public static ExchangeRateCreateRequest mapToExchangeRateCreateRequest(
+            String baseCurrencyCode,
+            String targetCurrencyCode,
+            String rate) {
         BigDecimal rateDecimal = new BigDecimal(rate.trim());
         return new ExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, rateDecimal);
     }
@@ -84,5 +63,20 @@ public final class Mapper {
     public static ExchangeCalculationRequest mapToExchangeCalculationRequest(String from, String to, String amount) {
         BigDecimal rateDecimal = new BigDecimal(amount);
         return new ExchangeCalculationRequest(from, to, rateDecimal);
+    }
+
+    public static ExchangeCalculationResponse mapToExchangeCalculationResponse(
+            BigDecimal rate,
+            CurrencyResponse baseResponse,
+            CurrencyResponse targetResponse,
+            BigDecimal amount,
+            BigDecimal convertedAmount) {
+        return new ExchangeCalculationResponse(
+                baseResponse,
+                targetResponse,
+                rate,
+                amount,
+                convertedAmount
+        );
     }
 }

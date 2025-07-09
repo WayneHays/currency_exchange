@@ -63,14 +63,4 @@ public class ExchangeRate {
     public int hashCode() {
         return Objects.hashCode(id);
     }
-
-    @Override
-    public String toString() {
-        return "ExchangeRates{" +
-               "id=" + id +
-               ", baseCurrencyId=" + baseCurrencyId +
-               ", targetCurrencyId=" + targetCurrencyId +
-               ", rate=" + rate +
-               '}';
-    }
 }

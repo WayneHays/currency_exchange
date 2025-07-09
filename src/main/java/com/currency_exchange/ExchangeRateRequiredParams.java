@@ -1,38 +1,38 @@
 package com.currency_exchange;
 
-import com.currency_exchange.exception.service_exception.InvalidAttributeException;
+import com.currency_exchange.exception.service_exception.InvalidParameterException;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public enum ExchangeRateRequest {
-    BASE_CURRENCY_CODE("baseCurrencyCode", CurrencyRequest.CODE.getRegex(), CurrencyRequest.CODE.getErrorMessage()),
-    TARGET_CURRENCY_CODE("targetCurrencyCode", CurrencyRequest.CODE.getRegex(), CurrencyRequest.CODE.getErrorMessage()),
+public enum ExchangeRateRequiredParams {
+    BASE_CURRENCY_CODE("baseCurrencyCode", CurrencyRequiredParams.CODE.getRegex(), CurrencyRequiredParams.CODE.getErrorMessage()),
+    TARGET_CURRENCY_CODE("targetCurrencyCode", CurrencyRequiredParams.CODE.getRegex(), CurrencyRequiredParams.CODE.getErrorMessage()),
     RATE("rate", "^(?!0\\d)\\d+\\.\\d{1,6}$", "Rate must be a positive decimal number with 1 to 6 digits after the point (e.g., 0.1, 1.23456, or 123.456)");
 
     private final String paramName;
     private final String regex;
     private final String errorMessage;
 
-    ExchangeRateRequest(String paramName, String regex, String errorMessage) {
+    ExchangeRateRequiredParams(String paramName, String regex, String errorMessage) {
         this.paramName = paramName;
         this.regex = regex;
         this.errorMessage = errorMessage;
     }
 
-    public static ExchangeRateRequest fromParamName(String paramName) {
-        for (ExchangeRateRequest param : values()) {
+    public static ExchangeRateRequiredParams fromParamName(String paramName) {
+        for (ExchangeRateRequiredParams param : values()) {
             if (param.paramName.equals(paramName)) {
                 return param;
             }
         }
-        throw new InvalidAttributeException("Unknown exchange rate parameter: %s".formatted(paramName));
+        throw new InvalidParameterException("Unknown exchange rate parameter: %s".formatted(paramName));
     }
 
     public static Set<String> getRequiredParamNames() {
         return Arrays.stream(values())
-                .map(ExchangeRateRequest::getParamName)
+                .map(ExchangeRateRequiredParams::getParamName)
                 .collect(Collectors.toSet());
     }
 
