@@ -45,18 +45,13 @@ public class ExchangeCalculationService {
         throw new ExchangeRateNotFoundException(base.getCode(), target.getCode());
     }
 
-    private ExchangeCalculationResponse calculateCrossRate(Currency base, Currency target, BigDecimal amount) {
-        ExchangeRate usdToBase = exchangeRateService.findByUsd(base);
-        ExchangeRate usdToTarget = exchangeRateService.findByUsd(target);
-
-        BigDecimal usdToBaseRate = usdToBase.getRate();
-        BigDecimal usdToTargetRate = usdToTarget.getRate();
-        BigDecimal calculatedRate = usdToBaseRate.multiply(usdToTargetRate);
-        BigDecimal convertedAmount = amount.multiply(calculatedRate);
-
+    private ExchangeCalculationResponse calculateDirectRate(Currency base, Currency target, BigDecimal amount) {
+        ExchangeRate exchangeRate = exchangeRateService.findEntityByPair(base, target);
         CurrencyResponse baseResponse = Mapper.mapToCurrencyResponse(base);
         CurrencyResponse targetResponse = Mapper.mapToCurrencyResponse(target);
-        return new ExchangeCalculationResponse(baseResponse, targetResponse, calculatedRate, amount, convertedAmount);
+
+        BigDecimal convertedAmount = amount.multiply(exchangeRate.getRate());
+        return Mapper.mapToExchangeCalculationResponse(exchangeRate.getRate(), baseResponse, targetResponse, amount, convertedAmount);
     }
 
     private ExchangeCalculationResponse calculateReverseRate(Currency base, Currency target, BigDecimal amount) {
@@ -71,12 +66,17 @@ public class ExchangeCalculationService {
         return Mapper.mapToExchangeCalculationResponse(reversedRate, baseResponse, targetResponse, amount, convertedAmount);
     }
 
-    private ExchangeCalculationResponse calculateDirectRate(Currency base, Currency target, BigDecimal amount) {
-        ExchangeRate exchangeRate = exchangeRateService.findEntityByPair(base, target);
+    private ExchangeCalculationResponse calculateCrossRate(Currency base, Currency target, BigDecimal amount) {
+        ExchangeRate usdToBase = exchangeRateService.findByUsd(base);
+        ExchangeRate usdToTarget = exchangeRateService.findByUsd(target);
+
+        BigDecimal usdToBaseRate = usdToBase.getRate();
+        BigDecimal usdToTargetRate = usdToTarget.getRate();
+        BigDecimal calculatedRate = usdToBaseRate.multiply(usdToTargetRate);
+        BigDecimal convertedAmount = amount.multiply(calculatedRate);
+
         CurrencyResponse baseResponse = Mapper.mapToCurrencyResponse(base);
         CurrencyResponse targetResponse = Mapper.mapToCurrencyResponse(target);
-
-        BigDecimal convertedAmount = amount.multiply(exchangeRate.getRate());
-        return Mapper.mapToExchangeCalculationResponse(exchangeRate.getRate(), baseResponse, targetResponse, amount, convertedAmount);
+        return new ExchangeCalculationResponse(baseResponse, targetResponse, calculatedRate, amount, convertedAmount);
     }
 }
