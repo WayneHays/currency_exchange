@@ -38,7 +38,7 @@ public class ExchangeCalculationService {
         if (isExchangeRateExists) {
             return calculateDirectRate(base, target, amount);
         } else if (isReversedExchangeRateExists) {
-            return calculateReversedRate(base, target, amount);
+            return calculateReverseRate(base, target, amount);
         } else if (isCrossCourseExists) {
             return calculateCrossRate(base, target, amount);
         }
@@ -59,7 +59,7 @@ public class ExchangeCalculationService {
         return new ExchangeCalculationResponse(baseResponse, targetResponse, calculatedRate, amount, convertedAmount);
     }
 
-    private ExchangeCalculationResponse calculateReversedRate(Currency base, Currency target, BigDecimal amount) {
+    private ExchangeCalculationResponse calculateReverseRate(Currency base, Currency target, BigDecimal amount) {
         ExchangeRate exchangeRate = exchangeRateService.findEntityByPair(target, base);
         CurrencyResponse baseResponse = Mapper.mapToCurrencyResponse(base);
         CurrencyResponse targetResponse = Mapper.mapToCurrencyResponse(target);
