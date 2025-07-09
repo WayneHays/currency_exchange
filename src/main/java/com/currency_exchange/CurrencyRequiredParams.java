@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum CurrencyRequiredParams {
-    NAME("name", "^[\\p{L}\\s\\-]{2,50}$", "Currency name must be 2-50 letters"),
+    NAME("name", "^[\\p{L}\\s\\-]{2,30}$", "Currency name must be 2-30 latin letters"),
     CODE("code", "^[A-Za-z]{3}$", "Currency code must be 3 latin letters"),
     SIGN("sign", "^\\p{Sc}", "Currency sign must be a valid symbol (e.g. $, €...");
 

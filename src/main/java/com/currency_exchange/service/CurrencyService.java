@@ -11,11 +11,10 @@ import com.currency_exchange.exception.service_exception.CurrencyNotFoundExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.util.Mapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class CurrencyService {
-    public static final String CURRENCY_SERVICE_ERROR = "Service temporarily unavailable";
+    public static final String SERVICE_ERROR = "Service temporarily unavailable: %s";
     private static final CurrencyService INSTANCE = new CurrencyService();
     private final CurrencyDao currencyDao = CurrencyDao.getInstance();
 
@@ -28,13 +27,13 @@ public class CurrencyService {
 
     public CurrencyResponse save(CurrencyCreateRequest dto) {
         try {
-            Currency currency = Mapper.mapToCurrency(dto);
-            Currency savedCurrency = currencyDao.saveAndSetId(currency);
-            return Mapper.mapToCurrencyResponse(savedCurrency);
+            Currency fromDto = Mapper.mapToCurrency(dto);
+            Currency savedToDatabase = currencyDao.saveAndSetId(fromDto);
+            return Mapper.mapToCurrencyResponse(savedToDatabase);
         } catch (CurrencyAlreadyExistsException e) {
             throw e;
         } catch (DatabaseAccessException e) {
-            throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
+            throw new ServiceException(SERVICE_ERROR.formatted(e.getMessage()));
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -42,15 +41,12 @@ public class CurrencyService {
 
     public List<CurrencyResponse> findAll() {
         try {
-            List<CurrencyResponse> result = new ArrayList<>();
             List<Currency> currencies = currencyDao.findAll();
-
-            for (Currency currency : currencies) {
-                result.add(Mapper.mapToCurrencyResponse(currency));
-            }
-            return result;
+            return currencies.stream()
+                    .map(Mapper::mapToCurrencyResponse)
+                    .toList();
         } catch (DatabaseAccessException e) {
-            throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
+            throw new ServiceException(SERVICE_ERROR.formatted(e.getMessage()));
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -66,7 +62,7 @@ public class CurrencyService {
             return currencyDao.findByCode(code)
                     .orElseThrow(() -> new CurrencyNotFoundException(code));
         } catch (DatabaseAccessException e) {
-            throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
+            throw new ServiceException(SERVICE_ERROR.formatted(e.getMessage()));
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -77,7 +73,7 @@ public class CurrencyService {
             return currencyDao.findById(id)
                     .orElseThrow(() -> new CurrencyNotFoundException(String.valueOf(id)));
         } catch (DatabaseAccessException e) {
-            throw new ServiceException(CURRENCY_SERVICE_ERROR, e);
+            throw new ServiceException(SERVICE_ERROR.formatted(e.getMessage()));
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }

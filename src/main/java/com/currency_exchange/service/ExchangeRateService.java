@@ -21,7 +21,7 @@ import java.util.List;
 
 public class ExchangeRateService {
     public static final String EXCHANGE_RATE_ALREADY_EXISTS = "Exchange rate already exists for pair: %s/%s";
-    public static final String EXCHANGE_RATE_SERVICE_ERROR = "ExchangeRate service temporarily unavailable";
+    public static final String SERVICE_ERROR = "ExchangeRate service temporarily unavailable: %s";
 
     private static final ExchangeRateService INSTANCE = new ExchangeRateService();
 
@@ -49,7 +49,7 @@ public class ExchangeRateService {
         } catch (ExchangeRateAlreadyExistsException e) {
             throw new ExchangeRateConflictException(buildErrorMessage(dto));
         } catch (DatabaseAccessException e) {
-            throw new ServiceException(EXCHANGE_RATE_SERVICE_ERROR, e);
+            throw new ServiceException(SERVICE_ERROR.formatted(e.getMessage()));
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -73,7 +73,7 @@ public class ExchangeRateService {
             }
             return result;
         } catch (DatabaseAccessException e) {
-            throw new ServiceException(EXCHANGE_RATE_SERVICE_ERROR, e);
+            throw new ServiceException(SERVICE_ERROR.formatted(e.getMessage()));
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -91,7 +91,7 @@ public class ExchangeRateService {
 
             return Mapper.mapToExchangeRateResponse(updated, base, target);
         } catch (DatabaseAccessException e) {
-            throw new ServiceException(EXCHANGE_RATE_SERVICE_ERROR, e);
+            throw new ServiceException(SERVICE_ERROR.formatted(e.getMessage()));
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -119,7 +119,7 @@ public class ExchangeRateService {
 
             return Mapper.mapToExchangeRateResponse(exchangeRate, base, target);
         } catch (DatabaseAccessException e) {
-            throw new ServiceException(EXCHANGE_RATE_SERVICE_ERROR, e);
+            throw new ServiceException(SERVICE_ERROR.formatted(e.getMessage()));
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }

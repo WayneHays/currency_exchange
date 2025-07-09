@@ -1,0 +1,34 @@
+package com.currency_exchange.service.calculation_strategy;
+
+import com.currency_exchange.dto.currency.CurrencyResponse;
+import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
+import com.currency_exchange.entity.Currency;
+import com.currency_exchange.entity.ExchangeRate;
+import com.currency_exchange.service.ExchangeRateService;
+
+import java.math.BigDecimal;
+
+public class CrossRateStrategy extends CalculationStrategy {
+
+    public CrossRateStrategy(ExchangeRateService exchangeRateService) {
+        super(exchangeRateService);
+    }
+
+    @Override
+    public boolean canHandle(Currency base, Currency target) {
+        return exchangeRateService.isCrossCourseExists(base, target);
+    }
+
+    @Override
+    public ExchangeCalculationResponse calculate(Currency base, Currency target, BigDecimal amount, CurrencyResponse baseResponse, CurrencyResponse targetResponse) {
+        ExchangeRate usdToBase = exchangeRateService.findByUsd(base);
+        ExchangeRate usdToTarget = exchangeRateService.findByUsd(target);
+
+        BigDecimal usdToBaseRate = usdToBase.getRate();
+        BigDecimal usdToTargetRate = usdToTarget.getRate();
+        BigDecimal calculatedRate = usdToBaseRate.multiply(usdToTargetRate);
+        BigDecimal convertedAmount = amount.multiply(calculatedRate);
+
+        return new ExchangeCalculationResponse(baseResponse, targetResponse, calculatedRate, amount, convertedAmount);
+    }
+}

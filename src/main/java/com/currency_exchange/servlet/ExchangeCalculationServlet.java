@@ -1,4 +1,4 @@
-package com.currency_exchange.servlet.exchange_calculation;
+package com.currency_exchange.servlet;
 
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
@@ -6,7 +6,6 @@ import com.currency_exchange.exception.service_exception.CurrencyNotFoundExcepti
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.service.ExchangeCalculationService;
-import com.currency_exchange.servlet.BaseServlet;
 import com.currency_exchange.util.RequestDataExtractor;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,9 +23,9 @@ public class ExchangeCalculationServlet extends BaseServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
-            ExchangeCalculationRequest currencyExchange = RequestDataExtractor.extractValidCalculationData(req);
-            ExchangeCalculationResponse calculated = exchangeCalculationService.calculate(currencyExchange);
-            sendSuccessResponse(resp, calculated);
+            ExchangeCalculationRequest calculationRequest = RequestDataExtractor.extractValidCalculationData(req);
+            ExchangeCalculationResponse calculatedResponse = exchangeCalculationService.calculate(calculationRequest);
+            sendSuccessResponse(resp, calculatedResponse);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {
