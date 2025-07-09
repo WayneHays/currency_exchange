@@ -26,7 +26,7 @@ public class CurrencyServlet extends BaseServlet {
 
         try {
             String code = RequestDataExtractor.extractValidCurrencyCode(req);
-            CurrencyResponse dto = currencyService.prepareCurrencyResponseByCode(code);
+            CurrencyResponse dto = currencyService.getByCode(code);
             sendSuccessResponse(resp, dto);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

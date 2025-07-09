@@ -1,9 +1,10 @@
 package com.currency_exchange.service;
 
 import com.currency_exchange.dto.currency.CurrencyResponse;
+import com.currency_exchange.dto.currency.CurrencyResponsePair;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
-import com.currency_exchange.entity.Currency;
+import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.service.calculation_strategy.CalculationStrategy;
 import com.currency_exchange.service.calculation_strategy.CrossRateStrategy;
@@ -32,20 +33,31 @@ public class ExchangeCalculationService {
     }
 
     public ExchangeCalculationResponse calculate(ExchangeCalculationRequest calculationRequest) {
-        String codeBase = calculationRequest.from();
-        String codeTarget = calculationRequest.to();
-        BigDecimal amount = calculationRequest.amount();
+        CurrencyPair currencyPair = exchangeRateService.findCurrencyPair(calculationRequest);
+        CurrencyResponsePair responsePair = mapToResponse(currencyPair);
+        return executeCalculationStrategy(currencyPair, calculationRequest.amount(), responsePair);
+    }
 
-        Currency base = currencyService.findCurrencyEntityByCode(codeBase);
-        Currency target = currencyService.findCurrencyEntityByCode(codeTarget);
+    private CurrencyResponsePair mapToResponse(CurrencyPair currencyPair) {
+        CurrencyResponse baseResponse = Mapper.toCurrencyResponse(currencyPair.base());
+        CurrencyResponse targetResponse = Mapper.toCurrencyResponse(currencyPair.target());
+        return new CurrencyResponsePair(baseResponse, targetResponse);
+    }
 
-        CurrencyResponse baseResponse = Mapper.mapToCurrencyResponse(base);
-        CurrencyResponse targetResponse = Mapper.mapToCurrencyResponse(target);
-
+    private ExchangeCalculationResponse executeCalculationStrategy(CurrencyPair currencyPair,
+                                                                   BigDecimal amount,
+                                                                   CurrencyResponsePair responsePair) {
         return strategies.stream()
-                .filter(strategy -> strategy.canHandle(base, target))
+                .filter(strategy -> strategy.canHandle(currencyPair.base(), currencyPair.target()))
                 .findFirst()
-                .map(strategy -> strategy.calculate(base, target, amount, baseResponse, targetResponse))
-                .orElseThrow(() -> new ExchangeRateNotFoundException(base.getCode(), target.getCode()));
+                .map(strategy -> strategy.calculate(
+                        currencyPair.base(),
+                        currencyPair.target(),
+                        amount,
+                        responsePair.baseResponse(),
+                        responsePair.targetResponse()))
+                .orElseThrow(() -> new ExchangeRateNotFoundException(
+                        currencyPair.base().getCode(),
+                        currencyPair.target().getCode()));
     }
 }

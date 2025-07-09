@@ -39,7 +39,7 @@ public final class RequestDataExtractor {
         String baseCurrencyCode = req.getParameter(ExchangeRateRequiredParams.BASE_CURRENCY_CODE.getParamName()).toUpperCase();
         String targetCurrencyCode = req.getParameter(ExchangeRateRequiredParams.TARGET_CURRENCY_CODE.getParamName()).toUpperCase();
         String rate = req.getParameter(ExchangeRateRequiredParams.RATE.getParamName());
-        return Mapper.mapToExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, rate);
+        return Mapper.toExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, rate);
 
     }
 
@@ -47,7 +47,7 @@ public final class RequestDataExtractor {
         ValidationUtils.validateRequiredPatchParameters(req);
         String rate = req.getParameter(ExchangeRateRequiredParams.RATE.getParamName());
         ValidationUtils.validateRate(rate);
-        return Mapper.mapToExchangeRateUpdateRequest(rate);
+        return Mapper.toExchangeRateUpdateRequest(rate);
     }
 
     public static CurrencyCreateRequest extractValidCurrencyData(HttpServletRequest req) {
@@ -63,6 +63,6 @@ public final class RequestDataExtractor {
         String from = req.getParameter(ExchangeCalculationRequiredParams.FROM.getParamName());
         String to = req.getParameter(ExchangeCalculationRequiredParams.TO.getParamName());
         String amount = req.getParameter(ExchangeCalculationRequiredParams.AMOUNT.getParamName());
-        return Mapper.mapToExchangeCalculationRequest(from, to, amount);
+        return Mapper.toExchangeCalculationRequest(from, to, amount);
     }
 }
