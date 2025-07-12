@@ -21,21 +21,21 @@ public final class RequestDataExtractor {
         String path = req.getPathInfo();
         ValidationUtils.validatePath(path, MISSING_CURRENCY_CODE);
         String code = path.substring(1).toUpperCase();
-        ValidationUtils.validateCurrencyCode(code);
+        CurrencyValidator.validateCurrencyCode(code);
         return code;
     }
 
     public static CurrencyCodesRequest extractValidCurrencyPairData(HttpServletRequest req) {
         String path = req.getPathInfo();
         ValidationUtils.validatePath(path, MISSING_CURRENCY_PAIR_CODE);
-        ValidationUtils.validateCurrencyPair(path);
+        ExchangeRateValidator.validateCurrencyPair(path);
         String baseCurrencyCode = path.substring(1, 4).toUpperCase();
         String targetCurrencyCode = path.substring(4, 7).toUpperCase();
         return new CurrencyCodesRequest(baseCurrencyCode, targetCurrencyCode);
     }
 
     public static ExchangeRateCreateRequest extractValidPostData(HttpServletRequest req) {
-        ValidationUtils.validateExchangeRatePostRequest(req);
+        ExchangeRateValidator.validateExchangeRatePostRequest(req);
         String baseName = ExchangeRateParam.BASE_CURRENCY_CODE.getParamName();
         String requiredTargetCurrencyParamName = ExchangeRateParam.TARGET_CURRENCY_CODE.getParamName();
 
@@ -48,14 +48,14 @@ public final class RequestDataExtractor {
     }
 
     public static ExchangeRateUpdateRequest extractValidPatchData(HttpServletRequest req) {
-        ValidationUtils.validateRequiredPatchParameters(req);
+        ExchangeRateValidator.validateRequiredPatchParameters(req);
         String rate = req.getParameter(ExchangeRateParam.RATE.getParamName());
-        ValidationUtils.validateRate(rate);
+        ExchangeRateValidator.validateRate(rate);
         return Mapper.toExchangeRateUpdateRequest(rate);
     }
 
     public static CurrencyCreateRequest extractValidCurrencyData(HttpServletRequest req) {
-        ValidationUtils.validateCurrenciesPostRequest(req);
+        CurrencyValidator.validateCurrenciesPostRequest(req);
         String name = capitalizeRequiredLetters(req.getParameter(CurrencyParam.NAME.getParamName()));
         String code = req.getParameter(CurrencyParam.CODE.getParamName()).toUpperCase();
         String sign = req.getParameter(CurrencyParam.SIGN.getParamName());
@@ -63,7 +63,7 @@ public final class RequestDataExtractor {
     }
 
     public static ExchangeCalculationRequest extractValidCalculationData(HttpServletRequest req) {
-        ValidationUtils.validateCalculationRequest(req);
+        ExchangeRateValidator.validateCalculationRequest(req);
         String from = req.getParameter(ExchangeCalculationParam.FROM.getParamName());
         String to = req.getParameter(ExchangeCalculationParam.TO.getParamName());
         String amount = req.getParameter(ExchangeCalculationParam.AMOUNT.getParamName());
