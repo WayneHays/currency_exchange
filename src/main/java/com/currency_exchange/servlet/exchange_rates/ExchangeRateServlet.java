@@ -1,6 +1,6 @@
 package com.currency_exchange.servlet.exchange_rates;
 
-import com.currency_exchange.dto.currency.CurrencyPairRequest;
+import com.currency_exchange.dto.currency.CurrencyCodesRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
@@ -29,8 +29,8 @@ public class ExchangeRateServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            CurrencyPairRequest currencyPairRequest = RequestDataExtractor.extractValidCurrencyPairData(req);
-            ExchangeRateResponse dtoResponse = exchangeRateService.findByPair(currencyPairRequest);
+            CurrencyCodesRequest currencyCodesRequest = RequestDataExtractor.extractValidCurrencyPairData(req);
+            ExchangeRateResponse dtoResponse = exchangeRateService.findByPair(currencyCodesRequest);
             sendSuccessResponse(resp, dtoResponse);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
@@ -45,9 +45,9 @@ public class ExchangeRateServlet extends BaseServlet {
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            CurrencyPairRequest currencyPairRequest = RequestDataExtractor.extractValidCurrencyPairData(req);
+            CurrencyCodesRequest currencyCodesRequest = RequestDataExtractor.extractValidCurrencyPairData(req);
             ExchangeRateUpdateRequest rateDto = RequestDataExtractor.extractValidPatchData(req);
-            ExchangeRateResponse updated = exchangeRateService.update(currencyPairRequest, rateDto);
+            ExchangeRateResponse updated = exchangeRateService.update(currencyCodesRequest, rateDto);
             sendSuccessResponse(resp, updated);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

@@ -2,8 +2,8 @@ package com.currency_exchange.servlet.exchange_rates;
 
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
+import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
-import com.currency_exchange.exception.service_exception.ExchangeRateConflictException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
@@ -40,12 +40,12 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            ExchangeRateCreateRequest dto = RequestDataExtractor.extractValidExchangeRateData(req);
+            ExchangeRateCreateRequest dto = RequestDataExtractor.extractValidPostData(req);
             ExchangeRateResponse saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);
         } catch (NumberFormatException | InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
-        } catch (ExchangeRateConflictException e) {
+        } catch (ExchangeRateAlreadyExistsException e) {
             sendErrorResponse(resp, SC_CONFLICT, e.getMessage());
         } catch (CurrencyNotFoundException e) {
             sendErrorResponse(resp, SC_NOT_FOUND, e.getMessage());

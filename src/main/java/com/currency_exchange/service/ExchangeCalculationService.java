@@ -3,7 +3,7 @@ package com.currency_exchange.service;
 import com.currency_exchange.dto.currency.CurrencyResponse;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
-import com.currency_exchange.entity.Currency;
+import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.service.calculation_strategy.CalculationStrategy;
 import com.currency_exchange.service.calculation_strategy.CrossRateStrategy;
@@ -16,9 +16,7 @@ import java.util.List;
 
 public class ExchangeCalculationService {
     private static final ExchangeCalculationService INSTANCE = new ExchangeCalculationService();
-
     private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
-    private final CurrencyService currencyService = CurrencyService.getInstance();
     private final List<CalculationStrategy> strategies = List.of(
             new DirectRateStrategy(exchangeRateService),
             new ReverseRateStrategy(exchangeRateService),
@@ -36,16 +34,15 @@ public class ExchangeCalculationService {
         String codeTarget = calculationRequest.to();
         BigDecimal amount = calculationRequest.amount();
 
-        Currency base = currencyService.findCurrencyEntityByCode(codeBase);
-        Currency target = currencyService.findCurrencyEntityByCode(codeTarget);
+        CurrencyPair pair = exchangeRateService.findCurrencyPair(codeBase, codeTarget);
 
-        CurrencyResponse baseResponse = Mapper.mapToCurrencyResponse(base);
-        CurrencyResponse targetResponse = Mapper.mapToCurrencyResponse(target);
+        CurrencyResponse baseResponse = Mapper.toCurrencyResponse(pair.base());
+        CurrencyResponse targetResponse = Mapper.toCurrencyResponse(pair.target());
 
         return strategies.stream()
-                .filter(strategy -> strategy.canHandle(base, target))
+                .filter(strategy -> strategy.canHandle(pair))
                 .findFirst()
-                .map(strategy -> strategy.calculate(base, target, amount, baseResponse, targetResponse))
-                .orElseThrow(() -> new ExchangeRateNotFoundException(base.getCode(), target.getCode()));
+                .map(strategy -> strategy.calculate(pair, amount, baseResponse, targetResponse))
+                .orElseThrow(() -> new ExchangeRateNotFoundException(pair.base().getCode(), pair.target().getCode()));
     }
 }

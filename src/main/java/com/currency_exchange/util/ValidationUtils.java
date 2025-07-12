@@ -1,8 +1,9 @@
 package com.currency_exchange.util;
 
-import com.currency_exchange.CurrencyRequiredParams;
-import com.currency_exchange.ExchangeCalculationRequiredParams;
-import com.currency_exchange.ExchangeRateRequiredParams;
+import com.currency_exchange.CurrencyParam;
+import com.currency_exchange.ExchangeCalculationParam;
+import com.currency_exchange.ExchangeRateParam;
+import com.currency_exchange.RequestParameter;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -16,15 +17,28 @@ public final class ValidationUtils {
     public static final String MISSING_REQUIRED_PARAMS = "Missing required parameters: %s";
     public static final String INVALID_REQUEST = "Invalid request: %s";
     public static final String WRONG_CURRENCY_PAIR_PATH = "Path must be 6 latin letters like /USDRUB";
+    public static final String WRONG_PAIR_MESSAGE = "Base and target currencies must be different";
     public static final String CURRENCY_PAIR_PATTERN = "^/([A-Za-z]{3})([A-Za-z]{3})$";
 
     private ValidationUtils() {
     }
 
     public static void validateGetRequest(HttpServletRequest request) {
-        if (!request.getParameterMap().isEmpty()) {
+        if (hasParameters(request)) {
             throw new InvalidParameterException(PARAMETERS_NOT_ALLOWED);
         }
+    }
+
+    public static void validateCurrenciesPostRequest(HttpServletRequest request) {
+        Map<String, String[]> params = request.getParameterMap();
+        Set<String> requiredParamNames = RequestParameter.getRequiredParamNames(CurrencyParam.class);
+
+        validateRequiredParameters(params, requiredParamNames);
+
+        params.forEach((param, values) -> {
+            validateSingleValue(param, values);
+            validateCurrencyParameter(param, values[0]);
+        });
     }
 
     public static void validateRequiredParameters(Map<String, String[]> parameters,
@@ -47,19 +61,12 @@ public final class ValidationUtils {
         }
     }
 
-    public static void validateCurrenciesPostRequest(HttpServletRequest request) {
-        Map<String, String[]> params = request.getParameterMap();
-        validateRequiredParameters(params, CurrencyRequiredParams.getRequiredParamNames());
-
-        params.forEach((param, values) -> {
-            validateSingleValue(param, values);
-            validateCurrencyParameter(param, values[0]);
-        });
-    }
-
     public static void validateExchangeRatePostRequest(HttpServletRequest request) {
         Map<String, String[]> params = request.getParameterMap();
-        validateRequiredParameters(params, ExchangeRateRequiredParams.getRequiredParamNames());
+        Set<String> requiredParamNames = RequestParameter.getRequiredParamNames(ExchangeRateParam.class);
+
+        validateRequiredParameters(params, requiredParamNames);
+        validateCurrencyIsTheSame(request);
 
         params.forEach((param, values) -> {
             validateSingleValue(param, values);
@@ -67,9 +74,23 @@ public final class ValidationUtils {
         });
     }
 
+    private static void validateCurrencyIsTheSame(HttpServletRequest request) {
+        String baseParam = ExchangeRateParam.BASE_CURRENCY_CODE.getParamName();
+        String targetParam = ExchangeRateParam.TARGET_CURRENCY_CODE.getParamName();
+
+        String baseCurrencyCode = request.getParameter(baseParam);
+        String targetCurrencyCode = request.getParameter(targetParam);
+
+        if (baseCurrencyCode.equals(targetCurrencyCode)) {
+            throw new InvalidParameterException(WRONG_PAIR_MESSAGE);
+        }
+    }
+
     public static void validateCalculationRequest(HttpServletRequest req) {
         Map<String, String[]> params = req.getParameterMap();
-        validateRequiredParameters(params, ExchangeCalculationRequiredParams.getRequiredParamNames());
+        Set<String> requiredParamNames = RequestParameter.getRequiredParamNames(ExchangeRateParam.class);
+
+        validateRequiredParameters(params, requiredParamNames);
 
         params.forEach((param, values) -> {
             validateSingleValue(param, values);
@@ -84,8 +105,8 @@ public final class ValidationUtils {
     }
 
     public static void validateCurrencyCode(String code) {
-        if (!code.matches(CurrencyRequiredParams.CODE.getRegex())) {
-            throw new InvalidParameterException(CurrencyRequiredParams.CODE.getErrorMessage());
+        if (!code.matches(CurrencyParam.CODE.getRegex())) {
+            throw new InvalidParameterException(CurrencyParam.CODE.getErrorMessage());
         }
     }
 
@@ -96,35 +117,45 @@ public final class ValidationUtils {
     }
 
     public static void validateRate(String rate) {
-        if (!rate.matches(ExchangeRateRequiredParams.RATE.getRegex())) {
-            throw new InvalidParameterException(ExchangeRateRequiredParams.RATE.getErrorMessage());
+        if (!rate.matches(ExchangeRateParam.RATE.getRegex())) {
+            throw new InvalidParameterException(ExchangeRateParam.RATE.getErrorMessage());
         }
     }
 
     public static void validateRequiredPatchParameters(HttpServletRequest req) {
-        if (req.getParameter(ExchangeRateRequiredParams.RATE.getParamName()) == null) {
-            throw new InvalidParameterException(MISSING_REQUIRED_PARAMS.formatted(ExchangeRateRequiredParams.RATE.getParamName()));
+        String rateParamName = ExchangeRateParam.RATE.getParamName();
+
+        if (req.getParameter(rateParamName) == null) {
+            throw new InvalidParameterException(MISSING_REQUIRED_PARAMS.formatted(rateParamName));
         }
     }
 
     private static void validateCalculationParameter(String paramName, String value) {
-        ExchangeCalculationRequiredParams param = ExchangeCalculationRequiredParams.fromParamName(paramName);
+        ExchangeCalculationParam param = RequestParameter.fromParamName(ExchangeCalculationParam.class, paramName);
+
         if (!value.trim().matches(param.getRegex())) {
             throw new InvalidParameterException(INVALID_REQUEST.formatted(param.getErrorMessage()));
         }
     }
 
     private static void validateCurrencyParameter(String paramName, String value) {
-        CurrencyRequiredParams param = CurrencyRequiredParams.fromParamName(paramName);
+        CurrencyParam param = RequestParameter.fromParamName(CurrencyParam.class, paramName);
+
         if (!value.trim().matches(param.getRegex())) {
             throw new InvalidParameterException(INVALID_REQUEST.formatted(param.getErrorMessage()));
         }
     }
 
     private static void validateExchangeRateParameter(String paramName, String value) {
-        ExchangeRateRequiredParams param = ExchangeRateRequiredParams.fromParamName(paramName);
-        if (!value.trim().matches(param.getRegex())) {
+        ExchangeRateParam param = RequestParameter.fromParamName(ExchangeRateParam.class, paramName);
+        String regex = param.getRegex();
+
+        if (!value.trim().matches(regex)) {
             throw new InvalidParameterException(INVALID_REQUEST.formatted(param.getErrorMessage()));
         }
+    }
+
+    private static boolean hasParameters(HttpServletRequest request) {
+        return !request.getParameterMap().isEmpty();
     }
 }

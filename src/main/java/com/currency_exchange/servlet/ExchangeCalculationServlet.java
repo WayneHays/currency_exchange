@@ -22,6 +22,8 @@ public class ExchangeCalculationServlet extends BaseServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        prepareJsonResponse(resp);
+
         try {
             ExchangeCalculationRequest calculationRequest = RequestDataExtractor.extractValidCalculationData(req);
             ExchangeCalculationResponse calculatedResponse = exchangeCalculationService.calculate(calculationRequest);
