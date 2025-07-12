@@ -22,7 +22,11 @@ public class ReverseRateStrategy extends CalculationStrategy {
     }
 
     @Override
-    public ExchangeCalculationResponse calculate(CurrencyPair pair, BigDecimal amount, CurrencyResponse baseResponse, CurrencyResponse targetResponse) {
+    public ExchangeCalculationResponse calculate(
+            CurrencyPair pair,
+            BigDecimal amount,
+            CurrencyResponse baseResponse,
+            CurrencyResponse targetResponse) {
         ExchangeRate exchangeRate = exchangeRateService.findEntityByPair(pair);
         BigDecimal directRate = exchangeRate.getRate();
         BigDecimal reversedRate = BigDecimal.ONE.divide(directRate, PRECISION, RoundingMode.HALF_UP);

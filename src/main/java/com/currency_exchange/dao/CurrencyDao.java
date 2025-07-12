@@ -1,9 +1,9 @@
 package com.currency_exchange.dao;
 
-import com.currency_exchange.dao.sql.CurrencyQueries;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.dao_exception.DaoException;
+import com.currency_exchange.repository.CurrencyQueries;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,6 +11,14 @@ import java.util.List;
 import java.util.Optional;
 
 public class CurrencyDao extends BaseDao<Currency> {
+    public static final String FAILED_TO_SAVE_MESSAGE = "Failed to save currency";
+    public static final String FAILED_TO_FIND_ALL_MESSAGE = "Failed to find currencies";
+    public static final String FAILED_TO_FIND_BY_CODE_MESSAGE = "Failed to find currency with code %s";
+    public static final String FAILED_TO_FIND_BY_ID = "Failed to find currency with id %d";
+    public static final String ID = "id";
+    public static final String CODE = "code";
+    public static final String FULL_NAME = "full_name";
+    public static final String SIGN = "sign";
 
     private static final CurrencyDao INSTANCE = new CurrencyDao();
 
@@ -31,7 +39,7 @@ public class CurrencyDao extends BaseDao<Currency> {
                     statement.setString(3, currency.getSign());
                 },
                 currency,
-                "Failed to save currency"
+                FAILED_TO_SAVE_MESSAGE
         );
     }
 
@@ -41,7 +49,7 @@ public class CurrencyDao extends BaseDao<Currency> {
                 CurrencyQueries.FIND_ALL_SQL,
                 stmt -> {
                 },
-                "Failed to find currencies"
+                FAILED_TO_FIND_ALL_MESSAGE
         );
     }
 
@@ -49,7 +57,7 @@ public class CurrencyDao extends BaseDao<Currency> {
         return executeQueryAndBuildSingle(
                 CurrencyQueries.FIND_BY_CODE_SQL,
                 stmt -> stmt.setString(1, code.toUpperCase()),
-                "Failed to find currency with code %s".formatted(code)
+                FAILED_TO_FIND_BY_CODE_MESSAGE.formatted(code)
         );
     }
 
@@ -57,7 +65,7 @@ public class CurrencyDao extends BaseDao<Currency> {
         return executeQueryAndBuildSingle(
                 CurrencyQueries.FIND_BY_ID_SQL,
                 stmt -> stmt.setLong(1, id),
-                "Failed to find currency with id %d".formatted(id)
+                FAILED_TO_FIND_BY_ID.formatted(id)
         );
     }
 
@@ -65,10 +73,10 @@ public class CurrencyDao extends BaseDao<Currency> {
     @Override
     protected Currency buildEntity(ResultSet resultSet) throws SQLException {
         return new Currency(
-                resultSet.getLong("id"),
-                resultSet.getString("code"),
-                resultSet.getString("full_name"),
-                resultSet.getString("sign")
+                resultSet.getLong(ID),
+                resultSet.getString(CODE),
+                resultSet.getString(FULL_NAME),
+                resultSet.getString(SIGN)
         );
     }
 

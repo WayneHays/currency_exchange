@@ -1,4 +1,4 @@
-package com.currency_exchange.util;
+package com.currency_exchange.util.validation;
 
 import com.currency_exchange.CurrencyParam;
 import com.currency_exchange.RequestParameter;

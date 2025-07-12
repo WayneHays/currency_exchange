@@ -1,11 +1,11 @@
 package com.currency_exchange.dao;
 
-import com.currency_exchange.dao.sql.ExchangeRateQueries;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
+import com.currency_exchange.repository.ExchangeRateQueries;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -14,9 +14,18 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
-    public static final long USD_ID = 2;
 
     private static final ExchangeRatesDao INSTANCE = new ExchangeRatesDao();
+    public static final String FAILED_TO_SAVE_MESSAGE = "Failed to save exchangeRate";
+    public static final String FAILED_TO_FIND_ALL_MESSAGE = "Failed to find exchangeRates";
+    public static final String FAILED_TO_UPDATE_MESSAGE = "Failed to update exchangeRate";
+    public static final String FAILED_TO_FIND_BY_IDS = "Failed to find exchange rate with ids %d -> %d";
+    public static final String FAILED_TO_FIND_BY_ID = "Failed to find exchange rate with id %d";
+    public static final String ID = "id";
+    public static final String BASE_CURRENCY_ID = "base_currency_id";
+    public static final String TARGET_CURRENCY_ID = "target_currency_id";
+    public static final String RATE = "rate";
+    public static final long USD_ID = 2;
 
     private ExchangeRatesDao() {
     }
@@ -35,7 +44,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
                     stmt.setBigDecimal(3, exchangeRate.getRate());
                 },
                 exchangeRate,
-                "Failed to save exchangeRate"
+                FAILED_TO_SAVE_MESSAGE
         );
     }
 
@@ -45,7 +54,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
                 ExchangeRateQueries.FIND_ALL_SQL,
                 statement -> {
                 },
-                "Failed to find exchangeRates"
+                FAILED_TO_FIND_ALL_MESSAGE
         );
     }
 
@@ -56,7 +65,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
                     statement.setBigDecimal(1, newRate);
                     statement.setLong(2, exchangeRate.getId());
                 },
-                "Failed to update exchangeRate"
+                FAILED_TO_UPDATE_MESSAGE
         );
 
         return rowsAffected > 0 ? findById(exchangeRate.getId()) : Optional.empty();
@@ -69,7 +78,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
                     statement.setLong(1, first);
                     statement.setLong(2, second);
                 },
-                "Failed to find exchange rate with ids %d -> %d".formatted(first, second)
+                FAILED_TO_FIND_BY_IDS.formatted(first, second)
         );
     }
 
@@ -77,7 +86,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
         return executeQueryAndBuildSingle(
                 ExchangeRateQueries.FIND_BY_ID_SQL,
                 statement -> statement.setLong(1, id),
-                "Failed to find exchange rate with id %d".formatted(id)
+                FAILED_TO_FIND_BY_ID.formatted(id)
         );
     }
 
@@ -105,10 +114,10 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
     @Override
     protected ExchangeRate buildEntity(ResultSet resultSet) throws SQLException {
         return new ExchangeRate(
-                resultSet.getLong("id"),
-                resultSet.getLong("base_currency_id"),
-                resultSet.getLong("target_currency_id"),
-                resultSet.getBigDecimal("rate")
+                resultSet.getLong(ID),
+                resultSet.getLong(BASE_CURRENCY_ID),
+                resultSet.getLong(TARGET_CURRENCY_ID),
+                resultSet.getBigDecimal(RATE)
         );
     }
 

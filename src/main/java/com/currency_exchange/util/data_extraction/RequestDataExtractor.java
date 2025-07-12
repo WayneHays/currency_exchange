@@ -1,4 +1,4 @@
-package com.currency_exchange.util;
+package com.currency_exchange.util.data_extraction;
 
 import com.currency_exchange.CurrencyParam;
 import com.currency_exchange.ExchangeCalculationParam;
@@ -8,6 +8,10 @@ import com.currency_exchange.dto.currency.CurrencyCreateRequest;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
+import com.currency_exchange.util.Mapper;
+import com.currency_exchange.util.validation.CurrencyValidator;
+import com.currency_exchange.util.validation.ExchangeRateValidator;
+import com.currency_exchange.util.validation.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 
 public final class RequestDataExtractor {
@@ -56,7 +60,7 @@ public final class RequestDataExtractor {
 
     public static CurrencyCreateRequest extractValidCurrencyData(HttpServletRequest req) {
         CurrencyValidator.validateCurrenciesPostRequest(req);
-        String name = capitalizeRequiredLetters(req.getParameter(CurrencyParam.NAME.getParamName()));
+        String name = DataFormatter.capitalizeRequiredLetters(req.getParameter(CurrencyParam.NAME.getParamName()));
         String code = req.getParameter(CurrencyParam.CODE.getParamName()).toUpperCase();
         String sign = req.getParameter(CurrencyParam.SIGN.getParamName());
         return new CurrencyCreateRequest(name, code, sign);
@@ -68,24 +72,5 @@ public final class RequestDataExtractor {
         String to = req.getParameter(ExchangeCalculationParam.TO.getParamName());
         String amount = req.getParameter(ExchangeCalculationParam.AMOUNT.getParamName());
         return Mapper.toExchangeCalculationRequest(from, to, amount);
-    }
-
-
-    public static String capitalizeRequiredLetters(String input) {
-        if (input.contains(" ")) {
-            return capitalizeFirstLetterOfEachPart(input);
-        }
-        return capitalizeFirstLetter(input);
-    }
-
-    private static String capitalizeFirstLetterOfEachPart(String input) {
-        String[] parts = input.split(" ");
-        String firstName = capitalizeFirstLetter(parts[0]);
-        String secondName = capitalizeFirstLetter(parts[1]);
-        return "%s %s".formatted(firstName, secondName);
-    }
-
-    private static String capitalizeFirstLetter(String input) {
-        return input.substring(0, 1).toUpperCase() + input.substring(1);
     }
 }

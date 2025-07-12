@@ -20,7 +20,11 @@ public class CrossRateStrategy extends CalculationStrategy {
     }
 
     @Override
-    public ExchangeCalculationResponse calculate(CurrencyPair pair, BigDecimal amount, CurrencyResponse baseResponse, CurrencyResponse targetResponse) {
+    public ExchangeCalculationResponse calculate(
+            CurrencyPair pair,
+            BigDecimal amount,
+            CurrencyResponse baseResponse,
+            CurrencyResponse targetResponse) {
         ExchangeRate usdToBase = exchangeRateService.findByUsd(pair.base());
         ExchangeRate usdToTarget = exchangeRateService.findByUsd(pair.target());
 

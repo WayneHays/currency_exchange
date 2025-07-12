@@ -1,4 +1,4 @@
-package com.currency_exchange.util;
+package com.currency_exchange.util.validation;
 
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import jakarta.servlet.http.HttpServletRequest;

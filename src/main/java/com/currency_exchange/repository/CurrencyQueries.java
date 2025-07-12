@@ -1,4 +1,4 @@
-package com.currency_exchange.dao.sql;
+package com.currency_exchange.repository;
 
 public final class CurrencyQueries {
     public static final String SAVE_SQL = """

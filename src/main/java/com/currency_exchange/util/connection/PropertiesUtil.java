@@ -1,4 +1,4 @@
-package com.currency_exchange.util;
+package com.currency_exchange.util.connection;
 
 import java.io.IOException;
 import java.io.InputStream;

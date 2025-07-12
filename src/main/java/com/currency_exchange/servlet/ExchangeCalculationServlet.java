@@ -6,7 +6,7 @@ import com.currency_exchange.exception.service_exception.CurrencyNotFoundExcepti
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.service.ExchangeCalculationService;
-import com.currency_exchange.util.RequestDataExtractor;
+import com.currency_exchange.util.data_extraction.RequestDataExtractor;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

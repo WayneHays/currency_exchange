@@ -20,7 +20,11 @@ public class DirectRateStrategy extends CalculationStrategy {
     }
 
     @Override
-    public ExchangeCalculationResponse calculate(CurrencyPair pair, BigDecimal amount, CurrencyResponse baseResponse, CurrencyResponse targetResponse) {
+    public ExchangeCalculationResponse calculate(
+            CurrencyPair pair,
+            BigDecimal amount,
+            CurrencyResponse baseResponse,
+            CurrencyResponse targetResponse) {
         ExchangeRate exchangeRate = exchangeRateService.findEntityByPair(pair);
         BigDecimal rate = exchangeRate.getRate();
         BigDecimal convertedAmount = amount.multiply(rate);

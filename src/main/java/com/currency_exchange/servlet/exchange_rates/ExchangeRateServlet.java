@@ -9,7 +9,7 @@ import com.currency_exchange.exception.service_exception.InvalidParameterExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.RequestDataExtractor;
+import com.currency_exchange.util.data_extraction.RequestDataExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
