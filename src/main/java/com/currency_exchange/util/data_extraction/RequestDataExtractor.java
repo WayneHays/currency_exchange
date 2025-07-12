@@ -26,6 +26,7 @@ public final class RequestDataExtractor {
         ValidationUtils.validatePath(path, MISSING_CURRENCY_CODE);
         String code = path.substring(1).toUpperCase();
         CurrencyValidator.validateCurrencyCode(code);
+
         return code;
     }
 
@@ -35,6 +36,7 @@ public final class RequestDataExtractor {
         ExchangeRateValidator.validateCurrencyPair(path);
         String baseCurrencyCode = path.substring(1, 4).toUpperCase();
         String targetCurrencyCode = path.substring(4, 7).toUpperCase();
+
         return new CurrencyCodesRequest(baseCurrencyCode, targetCurrencyCode);
     }
 
@@ -55,6 +57,7 @@ public final class RequestDataExtractor {
         ExchangeRateValidator.validateRequiredPatchParameters(req);
         String rate = req.getParameter(ExchangeRateParam.RATE.getParamName());
         ExchangeRateValidator.validateRate(rate);
+
         return Mapper.toExchangeRateUpdateRequest(rate);
     }
 
@@ -63,6 +66,7 @@ public final class RequestDataExtractor {
         String name = DataFormatter.capitalizeRequiredLetters(req.getParameter(CurrencyParam.NAME.getParamName()));
         String code = req.getParameter(CurrencyParam.CODE.getParamName()).toUpperCase();
         String sign = req.getParameter(CurrencyParam.SIGN.getParamName());
+
         return new CurrencyCreateRequest(name, code, sign);
     }
 
@@ -71,6 +75,7 @@ public final class RequestDataExtractor {
         String from = req.getParameter(ExchangeCalculationParam.FROM.getParamName());
         String to = req.getParameter(ExchangeCalculationParam.TO.getParamName());
         String amount = req.getParameter(ExchangeCalculationParam.AMOUNT.getParamName());
+
         return Mapper.toExchangeCalculationRequest(from, to, amount);
     }
 }
