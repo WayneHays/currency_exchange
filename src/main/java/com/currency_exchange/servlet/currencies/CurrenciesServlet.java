@@ -7,7 +7,7 @@ import com.currency_exchange.exception.service_exception.InvalidParameterExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.data_extraction.RequestDataExtractor;
+import com.currency_exchange.util.data_extraction.DataExtractor;
 import com.currency_exchange.util.validation.ValidationUtils;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,7 +21,7 @@ import static jakarta.servlet.http.HttpServletResponse.*;
 
 @WebServlet("/currencies")
 public class CurrenciesServlet extends BaseServlet {
-    private final CurrencyService currencyService = CurrencyService.getInstance();
+    private final transient CurrencyService currencyService = CurrencyService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -40,7 +40,7 @@ public class CurrenciesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            CurrencyCreateRequest dto = RequestDataExtractor.extractValidCurrencyData(req);
+            CurrencyCreateRequest dto = DataExtractor.extractValidCurrencyData(req);
             CurrencyResponse savedCurrency = currencyService.save(dto);
             sendCreatedResponse(resp, savedCurrency);
         } catch (InvalidParameterException e) {

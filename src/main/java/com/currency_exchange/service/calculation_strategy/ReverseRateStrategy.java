@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class ReverseRateStrategy extends CalculationStrategy {
-    private static final int PRECISION = 6;
 
     public ReverseRateStrategy(ExchangeRateService exchangeRateService) {
         super(exchangeRateService);
@@ -29,9 +28,18 @@ public class ReverseRateStrategy extends CalculationStrategy {
             CurrencyResponse targetResponse) {
         ExchangeRate exchangeRate = exchangeRateService.findEntityByPair(pair);
         BigDecimal directRate = exchangeRate.getRate();
-        BigDecimal reversedRate = BigDecimal.ONE.divide(directRate, PRECISION, RoundingMode.HALF_UP);
+        BigDecimal reversedRate = BigDecimal.ONE.divide(
+                directRate,
+                PRE_ROUNDING,
+                RoundingMode.HALF_UP);
         BigDecimal convertedAmount = amount.multiply(reversedRate);
+        BigDecimal roundedAmount = round(convertedAmount);
 
-        return new ExchangeCalculationResponse(baseResponse, targetResponse, reversedRate, amount, convertedAmount);
+        return new ExchangeCalculationResponse(
+                baseResponse,
+                targetResponse,
+                reversedRate,
+                amount,
+                roundedAmount);
     }
 }

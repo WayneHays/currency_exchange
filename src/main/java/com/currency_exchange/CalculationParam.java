@@ -1,6 +1,6 @@
 package com.currency_exchange;
 
-public enum ExchangeCalculationParam implements RequestParameter {
+public enum CalculationParam implements RequestParameter {
 
     FROM(
             "from",
@@ -21,7 +21,7 @@ public enum ExchangeCalculationParam implements RequestParameter {
     private final String regex;
     private final String errorMessage;
 
-    ExchangeCalculationParam(String paramName, String regex, String errorMessage) {
+    CalculationParam(String paramName, String regex, String errorMessage) {
         this.paramName = paramName;
         this.regex = regex;
         this.errorMessage = errorMessage;

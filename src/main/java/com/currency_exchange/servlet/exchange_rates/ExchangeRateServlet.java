@@ -9,7 +9,7 @@ import com.currency_exchange.exception.service_exception.InvalidParameterExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.data_extraction.RequestDataExtractor;
+import com.currency_exchange.util.data_extraction.DataExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,7 +29,7 @@ public class ExchangeRateServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            CurrencyCodesRequest currencyCodesRequest = RequestDataExtractor.extractValidCurrencyPairData(req);
+            CurrencyCodesRequest currencyCodesRequest = DataExtractor.extractValidCurrencyPairData(req);
             ExchangeRateResponse dtoResponse = exchangeRateService.findByPair(currencyCodesRequest);
             sendSuccessResponse(resp, dtoResponse);
         } catch (InvalidParameterException e) {
@@ -45,8 +45,8 @@ public class ExchangeRateServlet extends BaseServlet {
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            CurrencyCodesRequest currencyCodesRequest = RequestDataExtractor.extractValidCurrencyPairData(req);
-            ExchangeRateUpdateRequest rateDto = RequestDataExtractor.extractValidPatchData(req);
+            CurrencyCodesRequest currencyCodesRequest = DataExtractor.extractValidCurrencyPairData(req);
+            ExchangeRateUpdateRequest rateDto = DataExtractor.extractValidPatchData(req);
             ExchangeRateResponse updated = exchangeRateService.update(currencyCodesRequest, rateDto);
             sendSuccessResponse(resp, updated);
         } catch (InvalidParameterException e) {

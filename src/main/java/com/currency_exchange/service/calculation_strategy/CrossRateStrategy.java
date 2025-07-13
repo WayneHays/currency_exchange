@@ -7,6 +7,7 @@ import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.service.ExchangeRateService;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class CrossRateStrategy extends CalculationStrategy {
 
@@ -30,9 +31,18 @@ public class CrossRateStrategy extends CalculationStrategy {
 
         BigDecimal usdToBaseRate = usdToBase.getRate();
         BigDecimal usdToTargetRate = usdToTarget.getRate();
-        BigDecimal calculatedRate = usdToBaseRate.multiply(usdToTargetRate);
+        BigDecimal calculatedRate = usdToTargetRate.divide(
+                usdToBaseRate,
+                PRE_ROUNDING,
+                RoundingMode.HALF_UP);
         BigDecimal convertedAmount = amount.multiply(calculatedRate);
+        BigDecimal roundedAmount = round(convertedAmount);
 
-        return new ExchangeCalculationResponse(baseResponse, targetResponse, calculatedRate, amount, convertedAmount);
+        return new ExchangeCalculationResponse(
+                baseResponse,
+                targetResponse,
+                calculatedRate,
+                amount,
+                roundedAmount);
     }
 }

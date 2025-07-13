@@ -14,24 +14,25 @@ import com.currency_exchange.util.Mapper;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class ExchangeCalculationService {
-    private static final ExchangeCalculationService INSTANCE = new ExchangeCalculationService();
+public class CalculationService {
+    private static final CalculationService INSTANCE = new CalculationService();
     private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
     private final List<CalculationStrategy> strategies = List.of(
             new DirectRateStrategy(exchangeRateService),
             new ReverseRateStrategy(exchangeRateService),
             new CrossRateStrategy(exchangeRateService));
 
-    private ExchangeCalculationService() {
+    private CalculationService() {
     }
 
-    public static ExchangeCalculationService getInstance() {
+    public static CalculationService getInstance() {
         return INSTANCE;
     }
 
     public ExchangeCalculationResponse calculate(ExchangeCalculationRequest calculationRequest) {
         String codeBase = calculationRequest.from();
         String codeTarget = calculationRequest.to();
+
         BigDecimal amount = calculationRequest.amount();
 
         CurrencyPair pair = exchangeRateService.findCurrencyPair(codeBase, codeTarget);

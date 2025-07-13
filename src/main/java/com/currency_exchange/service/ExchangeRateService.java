@@ -54,7 +54,10 @@ public class ExchangeRateService extends BaseService {
                         .toList());
     }
 
-    public ExchangeRateResponse update(CurrencyCodesRequest pairDto, ExchangeRateUpdateRequest rateDto) throws CurrencyNotFoundException, ExchangeRateNotFoundException {
+    public ExchangeRateResponse update(
+            CurrencyCodesRequest pairDto,
+            ExchangeRateUpdateRequest rateDto) throws CurrencyNotFoundException, ExchangeRateNotFoundException {
+
         return executeDaoOperation(() -> {
             CurrencyPair pair = findCurrencyPair(pairDto.baseCurrencyCode(), pairDto.targetCurrencyCode());
 

@@ -13,6 +13,7 @@ public final class ValidationUtils {
     public static final String SINGLE_PARAMETER_VALUE_REQUIRED = "Parameter '%s' should have exactly one value";
     public static final String MISSING_REQUIRED_PARAMS = "Missing required parameters: %s";
     public static final String INVALID_REQUEST = "Invalid request: %s";
+    public static final String WRONG_PAIR_MESSAGE = "Base and target currencies must be different";
 
     private ValidationUtils() {
     }
@@ -46,6 +47,18 @@ public final class ValidationUtils {
             throw new InvalidParameterException(
                     String.format(SINGLE_PARAMETER_VALUE_REQUIRED, paramName)
             );
+        }
+    }
+
+    public static void validateCurrenciesAreDifferent(HttpServletRequest request,
+                                                      String baseCode,
+                                                      String targetCode) {
+
+        String baseCurrencyCode = request.getParameter(baseCode);
+        String targetCurrencyCode = request.getParameter(targetCode);
+
+        if (baseCurrencyCode.equals(targetCurrencyCode)) {
+            throw new InvalidParameterException(ValidationUtils.WRONG_PAIR_MESSAGE);
         }
     }
 }

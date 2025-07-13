@@ -8,7 +8,7 @@ import com.currency_exchange.exception.service_exception.InvalidParameterExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.data_extraction.RequestDataExtractor;
+import com.currency_exchange.util.data_extraction.DataExtractor;
 import com.currency_exchange.util.validation.ValidationUtils;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
@@ -40,7 +40,7 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            ExchangeRateCreateRequest dto = RequestDataExtractor.extractValidPostData(req);
+            ExchangeRateCreateRequest dto = DataExtractor.extractValidPostData(req);
             ExchangeRateResponse saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);
         } catch (NumberFormatException | InvalidParameterException e) {

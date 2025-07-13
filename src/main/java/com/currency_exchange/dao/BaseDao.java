@@ -14,6 +14,7 @@ import java.util.Optional;
 public abstract class BaseDao<T> implements Dao<T> {
     public static final String DUPLICATE_ERROR_MESSAGE = "UNIQUE constraint failed";
     public static final int DUPLICATE_ERROR_CODE = 19;
+
     private static final List<Integer> CONNECTION_ERROR_CODES = List.of(14, 10, 8, 7);
 
     protected abstract T buildEntity(ResultSet resultSet) throws SQLException;

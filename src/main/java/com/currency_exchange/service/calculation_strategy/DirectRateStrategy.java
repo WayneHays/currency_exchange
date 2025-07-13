@@ -28,7 +28,13 @@ public class DirectRateStrategy extends CalculationStrategy {
         ExchangeRate exchangeRate = exchangeRateService.findEntityByPair(pair);
         BigDecimal rate = exchangeRate.getRate();
         BigDecimal convertedAmount = amount.multiply(rate);
+        BigDecimal roundedAmount = round(convertedAmount);
 
-        return new ExchangeCalculationResponse(baseResponse, targetResponse, rate, amount, convertedAmount);
+        return new ExchangeCalculationResponse(
+                baseResponse,
+                targetResponse,
+                rate,
+                amount,
+                roundedAmount);
     }
 }

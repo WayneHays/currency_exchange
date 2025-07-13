@@ -1,7 +1,7 @@
 package com.currency_exchange.util.data_extraction;
 
+import com.currency_exchange.CalculationParam;
 import com.currency_exchange.CurrencyParam;
-import com.currency_exchange.ExchangeCalculationParam;
 import com.currency_exchange.ExchangeRateParam;
 import com.currency_exchange.dto.currency.CurrencyCodesRequest;
 import com.currency_exchange.dto.currency.CurrencyCreateRequest;
@@ -9,16 +9,17 @@ import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
 import com.currency_exchange.util.Mapper;
+import com.currency_exchange.util.validation.CalculationValidator;
 import com.currency_exchange.util.validation.CurrencyValidator;
 import com.currency_exchange.util.validation.ExchangeRateValidator;
 import com.currency_exchange.util.validation.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 
-public final class RequestDataExtractor {
+public final class DataExtractor {
     public static final String MISSING_CURRENCY_CODE = "Missing currency code";
     public static final String MISSING_CURRENCY_PAIR_CODE = "Missing currency pair code";
 
-    private RequestDataExtractor() {
+    private DataExtractor() {
     }
 
     public static String extractValidCurrencyCode(HttpServletRequest req) {
@@ -42,8 +43,8 @@ public final class RequestDataExtractor {
 
     public static ExchangeRateCreateRequest extractValidPostData(HttpServletRequest req) {
         ExchangeRateValidator.validateExchangeRatePostRequest(req);
-        String baseName = ExchangeRateParam.BASE_CURRENCY_CODE.getParamName();
-        String requiredTargetCurrencyParamName = ExchangeRateParam.TARGET_CURRENCY_CODE.getParamName();
+        String baseName = ExchangeRateParam.BASE.getParamName();
+        String requiredTargetCurrencyParamName = ExchangeRateParam.TARGET.getParamName();
 
         String baseCurrencyCode = req.getParameter(baseName).toUpperCase();
         String targetCurrencyCode = req.getParameter(requiredTargetCurrencyParamName).toUpperCase();
@@ -71,10 +72,10 @@ public final class RequestDataExtractor {
     }
 
     public static ExchangeCalculationRequest extractValidCalculationData(HttpServletRequest req) {
-        ExchangeRateValidator.validateCalculationRequest(req);
-        String from = req.getParameter(ExchangeCalculationParam.FROM.getParamName());
-        String to = req.getParameter(ExchangeCalculationParam.TO.getParamName());
-        String amount = req.getParameter(ExchangeCalculationParam.AMOUNT.getParamName());
+        CalculationValidator.validateCalculationRequest(req);
+        String from = req.getParameter(CalculationParam.FROM.getParamName());
+        String to = req.getParameter(CalculationParam.TO.getParamName());
+        String amount = req.getParameter(CalculationParam.AMOUNT.getParamName());
 
         return Mapper.toExchangeCalculationRequest(from, to, amount);
     }

@@ -2,12 +2,12 @@ package com.currency_exchange;
 
 public enum ExchangeRateParam implements RequestParameter {
 
-    BASE_CURRENCY_CODE(
+    BASE(
             "baseCurrencyCode",
             CurrencyParam.CODE.getRegex(),
             CurrencyParam.CODE.getErrorMessage()),
 
-    TARGET_CURRENCY_CODE(
+    TARGET(
             "targetCurrencyCode",
             CurrencyParam.CODE.getRegex(),
             CurrencyParam.CODE.getErrorMessage()),

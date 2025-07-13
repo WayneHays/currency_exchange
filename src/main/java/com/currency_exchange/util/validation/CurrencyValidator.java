@@ -33,8 +33,9 @@ public final class CurrencyValidator {
 
     private static void validateCurrencyParameter(String paramName, String value) {
         CurrencyParam param = RequestParameter.fromParamName(CurrencyParam.class, paramName);
+        String regex = param.getRegex();
 
-        if (!value.trim().matches(param.getRegex())) {
+        if (!value.trim().matches(regex)) {
             throw new InvalidParameterException(
                     String.format(ValidationUtils.INVALID_REQUEST, param.getErrorMessage())
             );

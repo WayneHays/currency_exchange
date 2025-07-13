@@ -13,11 +13,11 @@ import static jakarta.servlet.http.HttpServletResponse.SC_CREATED;
 
 public class BaseServlet extends HttpServlet {
     protected static final String TEMPLATE = "{\"message\":\"%s\"}";
-    protected final Gson gsonFormatter = new GsonBuilder().setPrettyPrinting().create();
+    protected static final Gson gsonFormatter = new GsonBuilder().setPrettyPrinting().create();
 
     protected void prepareJsonResponse(HttpServletResponse resp) {
         resp.setContentType("application/json");
-        resp.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        resp.setCharacterEncoding(StandardCharsets.UTF_8.toString());
     }
 
     protected void sendErrorResponse(HttpServletResponse resp, int status, String message) throws IOException {
