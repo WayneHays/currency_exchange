@@ -51,7 +51,7 @@ public class ExchangeRateServlet extends BaseServlet {
             sendSuccessResponse(resp, updated);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
-        } catch (ExchangeRateNotFoundException e) {
+        } catch (CurrencyNotFoundException | ExchangeRateNotFoundException e) {
             sendErrorResponse(resp, SC_NOT_FOUND, e.getMessage());
         } catch (ServiceException | JsonIOException | IOException e) {
             sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());

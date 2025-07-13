@@ -14,18 +14,19 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
-
-    private static final ExchangeRatesDao INSTANCE = new ExchangeRatesDao();
     public static final String FAILED_TO_SAVE_MESSAGE = "Failed to save exchangeRate";
     public static final String FAILED_TO_FIND_ALL_MESSAGE = "Failed to find exchangeRates";
     public static final String FAILED_TO_UPDATE_MESSAGE = "Failed to update exchangeRate";
     public static final String FAILED_TO_FIND_BY_IDS = "Failed to find exchange rate with ids %d -> %d";
     public static final String FAILED_TO_FIND_BY_ID = "Failed to find exchange rate with id %d";
+
     public static final String ID = "id";
     public static final String BASE_CURRENCY_ID = "base_currency_id";
     public static final String TARGET_CURRENCY_ID = "target_currency_id";
     public static final String RATE = "rate";
-    public static final long USD_ID = 2;
+    public static final Long USD_ID = 2L;
+
+    private static final ExchangeRatesDao INSTANCE = new ExchangeRatesDao();
 
     private ExchangeRatesDao() {
     }
