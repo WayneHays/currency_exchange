@@ -8,75 +8,81 @@ import com.currency_exchange.dto.currency.CurrencyCreateRequest;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
+import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.util.Mapper;
-import com.currency_exchange.util.validation.CalculationValidator;
-import com.currency_exchange.util.validation.CurrencyValidator;
-import com.currency_exchange.util.validation.ExchangeRateValidator;
-import com.currency_exchange.util.validation.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 
 public final class DataExtractor {
-    public static final String MISSING_CURRENCY_CODE = "Missing currency code";
     public static final String MISSING_CURRENCY_PAIR_CODE = "Missing currency pair code";
+    public static final String MISSING_CURRENCY_CODE = "Missing currency code";
+    private static final String CURRENCY_PAIR_PATTERN = "^/([A-Za-z]{3})([A-Za-z]{3})$";
+    private static final String WRONG_CURRENCY_PAIR_PATH = "Path must be 6 latin letters like /USDRUB";
 
     private DataExtractor() {
     }
 
-    public static String extractValidCurrencyCode(HttpServletRequest req) {
-        String path = req.getPathInfo();
-        ValidationUtils.validatePath(path, MISSING_CURRENCY_CODE);
-        String code = path.substring(1).toUpperCase();
-        CurrencyValidator.validateCurrencyCode(code);
-
-        return code;
+    public static String extractCurrencyCode(HttpServletRequest req) {
+        String pathInfo = req.getPathInfo();
+        validatePath(pathInfo, MISSING_CURRENCY_CODE);
+        return pathInfo.substring(1).toUpperCase();
     }
 
-    public static CurrencyCodesRequest extractValidCurrencyPairData(HttpServletRequest req) {
-        String path = req.getPathInfo();
-        ValidationUtils.validatePath(path, MISSING_CURRENCY_PAIR_CODE);
-        ExchangeRateValidator.validateCurrencyPair(path);
-        String baseCurrencyCode = path.substring(1, 4).toUpperCase();
-        String targetCurrencyCode = path.substring(4, 7).toUpperCase();
+    public static CurrencyCodesRequest extractCurrencyPairData(HttpServletRequest req) {
+        String pathInfo = req.getPathInfo();
+        validatePath(pathInfo, MISSING_CURRENCY_PAIR_CODE);
+
+        if (!CURRENCY_PAIR_PATTERN.matches(pathInfo)) {
+            throw new InvalidParameterException(WRONG_CURRENCY_PAIR_PATH);
+        }
+
+        String baseCurrencyCode = pathInfo.substring(1, 4).toUpperCase();
+        String targetCurrencyCode = pathInfo.substring(4, 7).toUpperCase();
 
         return new CurrencyCodesRequest(baseCurrencyCode, targetCurrencyCode);
     }
 
-    public static ExchangeRateCreateRequest extractValidPostData(HttpServletRequest req) {
-        ExchangeRateValidator.validateExchangeRatePostRequest(req);
-        String baseName = ExchangeRateParam.BASE.getParamName();
-        String requiredTargetCurrencyParamName = ExchangeRateParam.TARGET.getParamName();
-
-        String baseCurrencyCode = req.getParameter(baseName).toUpperCase();
-        String targetCurrencyCode = req.getParameter(requiredTargetCurrencyParamName).toUpperCase();
-        String rate = req.getParameter(ExchangeRateParam.RATE.getParamName());
+    public static ExchangeRateCreateRequest extractExchangeRatePostData(HttpServletRequest req) {
+        String baseCurrencyCode = getRequiredParameter(req, ExchangeRateParam.BASE.getParamName());
+        String targetCurrencyCode = getRequiredParameter(req, ExchangeRateParam.TARGET.getParamName());
+        String rate = getRequiredParameter(req, ExchangeRateParam.RATE.getParamName());
 
         return Mapper.toExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, rate);
-
     }
 
-    public static ExchangeRateUpdateRequest extractValidPatchData(HttpServletRequest req) {
-        ExchangeRateValidator.validateRequiredPatchParameters(req);
-        String rate = req.getParameter(ExchangeRateParam.RATE.getParamName());
-        ExchangeRateValidator.validateRate(rate);
-
+    public static ExchangeRateUpdateRequest extractPatchData(HttpServletRequest req) {
+        String rate = getRequiredParameter(req, ExchangeRateParam.RATE.getParamName());
         return Mapper.toExchangeRateUpdateRequest(rate);
     }
 
-    public static CurrencyCreateRequest extractValidCurrencyData(HttpServletRequest req) {
-        CurrencyValidator.validateCurrenciesPostRequest(req);
-        String name = DataFormatter.capitalizeRequiredLetters(req.getParameter(CurrencyParam.NAME.getParamName()));
-        String code = req.getParameter(CurrencyParam.CODE.getParamName()).toUpperCase();
-        String sign = req.getParameter(CurrencyParam.SIGN.getParamName());
+    public static CurrencyCreateRequest extractCurrenciesPostData(HttpServletRequest req) {
+        String name = getRequiredParameter(req, CurrencyParam.NAME.getParamName());
+        String code = getRequiredParameter(req, CurrencyParam.CODE.getParamName()).toUpperCase();
+        String sign = getRequiredParameter(req, CurrencyParam.SIGN.getParamName());
+        name = DataFormatter.capitalizeRequiredLetters(name);
 
         return new CurrencyCreateRequest(name, code, sign);
     }
 
-    public static ExchangeCalculationRequest extractValidCalculationData(HttpServletRequest req) {
-        CalculationValidator.validateCalculationRequest(req);
-        String from = req.getParameter(CalculationParam.FROM.getParamName());
-        String to = req.getParameter(CalculationParam.TO.getParamName());
-        String amount = req.getParameter(CalculationParam.AMOUNT.getParamName());
+    public static ExchangeCalculationRequest extractCalculationData(HttpServletRequest req) {
+        String from = getRequiredParameter(req, CalculationParam.FROM.getParamName());
+        String to = getRequiredParameter(req, CalculationParam.TO.getParamName());
+        String amount = getRequiredParameter(req, CalculationParam.AMOUNT.getParamName());
 
         return Mapper.toExchangeCalculationRequest(from, to, amount);
+    }
+
+    private static String getRequiredParameter(HttpServletRequest req, String paramName) {
+        String value = req.getParameter(paramName);
+
+        if (value == null || value.trim().isEmpty()) {
+            throw new InvalidParameterException("Missing required parameter: %s".formatted(paramName));
+        }
+        return value.trim();
+    }
+
+    private static void validatePath(String pathInfo, String errorMessage) {
+        if (pathInfo == null || "/".equals(pathInfo)) {
+            throw new InvalidParameterException(errorMessage);
+        }
     }
 }

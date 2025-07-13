@@ -41,14 +41,14 @@ public class CurrencyService extends BaseService {
         return executeDaoOperation(() ->
                 currencyDao.findByCode(code)
                         .map(Mapper::toCurrencyResponse)
-                        .orElseThrow(() -> new CurrencyNotFoundException(code))
+                        .orElseThrow(() -> new CurrencyNotFoundException(code.toUpperCase()))
         );
     }
 
     public Currency getEntityByCode(String code) {
         return executeDaoOperation(() ->
                 currencyDao.findByCode(code)
-                        .orElseThrow(() -> new CurrencyNotFoundException(code))
+                        .orElseThrow(() -> new CurrencyNotFoundException(code.toUpperCase()))
         );
     }
 

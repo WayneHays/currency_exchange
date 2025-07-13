@@ -45,7 +45,11 @@ public final class Mapper {
     public static ExchangeRateResponse toExchangeRateResponse(ExchangeRate exchangeRate, CurrencyPair pair) {
         CurrencyResponse baseResponse = Mapper.toCurrencyResponse(pair.base());
         CurrencyResponse targetResponse = Mapper.toCurrencyResponse(pair.target());
-        return new ExchangeRateResponse(exchangeRate.getId(), baseResponse, targetResponse, exchangeRate.getRate());
+        return new ExchangeRateResponse(
+                exchangeRate.getId(),
+                baseResponse,
+                targetResponse,
+                exchangeRate.getRate());
     }
 
     public static ExchangeRateCreateRequest toExchangeRateCreateRequest(
@@ -53,7 +57,10 @@ public final class Mapper {
             String targetCurrencyCode,
             String rate) {
         BigDecimal rateDecimal = createFromString(rate);
-        return new ExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, rateDecimal);
+        return new ExchangeRateCreateRequest(
+                baseCurrencyCode,
+                targetCurrencyCode,
+                rateDecimal);
     }
 
     public static ExchangeRateUpdateRequest toExchangeRateUpdateRequest(String rate) {

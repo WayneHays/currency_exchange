@@ -7,8 +7,8 @@ import com.currency_exchange.exception.service_exception.InvalidParameterExcepti
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
+import com.currency_exchange.util.ValidationUtils;
 import com.currency_exchange.util.data_extraction.DataExtractor;
-import com.currency_exchange.util.validation.ValidationUtils;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +28,6 @@ public class CurrenciesServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            ValidationUtils.validateGetRequest(req);
             List<CurrencyResponse> currencies = currencyService.findAll();
             sendSuccessResponse(resp, currencies);
         } catch (ServiceException | JsonIOException | IOException e) {
@@ -40,7 +39,8 @@ public class CurrenciesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            CurrencyCreateRequest dto = DataExtractor.extractValidCurrencyData(req);
+            CurrencyCreateRequest dto = DataExtractor.extractCurrenciesPostData(req);
+            ValidationUtils.validateCurrencyCreateRequest(dto.code(), dto.name(), dto.sign());
             CurrencyResponse savedCurrency = currencyService.save(dto);
             sendCreatedResponse(resp, savedCurrency);
         } catch (InvalidParameterException e) {
