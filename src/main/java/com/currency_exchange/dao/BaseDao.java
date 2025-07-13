@@ -25,7 +25,7 @@ public abstract class BaseDao<T> implements Dao<T> {
     protected List<T> executeQueryAndBuildList(String sql,
                                                PreparedStatementSetter setter,
                                                String errorMessage) {
-        try (var connection = ConnectionManager.open();
+        try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(sql)) {
 
             setter.setParameters(prepareStatement);
@@ -39,7 +39,7 @@ public abstract class BaseDao<T> implements Dao<T> {
     protected Optional<T> executeQueryAndBuildSingle(String sql,
                                                      PreparedStatementSetter setter,
                                                      String errorMessage) {
-        try (var connection = ConnectionManager.open();
+        try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(sql)) {
 
             setter.setParameters(prepareStatement);
@@ -54,7 +54,7 @@ public abstract class BaseDao<T> implements Dao<T> {
                                       PreparedStatementSetter setter,
                                       T entity,
                                       String errorMessage) {
-        try (var connection = ConnectionManager.open();
+        try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             setter.setParameters(preparedStatement);
@@ -77,7 +77,7 @@ public abstract class BaseDao<T> implements Dao<T> {
     protected int executeUpdate(String sql,
                                 PreparedStatementSetter setter,
                                 String errorMessage) {
-        try (var connection = ConnectionManager.open();
+        try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(sql)) {
 
             setter.setParameters(prepareStatement);
