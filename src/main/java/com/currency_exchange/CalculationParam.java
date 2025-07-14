@@ -1,21 +1,23 @@
 package com.currency_exchange;
 
-public enum CalculationParam implements RequestParameter {
+import com.currency_exchange.util.ValidationConstants;
+
+public enum CalculationParam {
 
     FROM(
             "from",
-            CurrencyParam.CODE.getRegex(),
-            CurrencyParam.CODE.getErrorMessage()),
+            ValidationConstants.CURRENCY_CODE_REGEX,
+            ValidationConstants.CURRENCY_CODE_ERROR_MESSAGE),
 
     TO(
             "to",
-            CurrencyParam.CODE.getRegex(),
-            CurrencyParam.CODE.getErrorMessage()),
+            ValidationConstants.CURRENCY_CODE_REGEX,
+            ValidationConstants.CURRENCY_CODE_ERROR_MESSAGE),
 
     AMOUNT(
             "amount",
-            ExchangeRateParam.RATE.getRegex(),
-            ExchangeRateParam.RATE.getErrorMessage());
+            ValidationConstants.EXCHANGE_RATE_RATE_REGEX,
+            ValidationConstants.CALCULATION_AMOUNT_ERROR_MESSAGE);
 
     private final String paramName;
     private final String regex;

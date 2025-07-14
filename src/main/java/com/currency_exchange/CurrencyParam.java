@@ -1,21 +1,23 @@
 package com.currency_exchange;
 
-public enum CurrencyParam implements RequestParameter {
+import com.currency_exchange.util.ValidationConstants;
+
+public enum CurrencyParam {
 
     NAME(
             "name",
-            "^[\\p{L}\\s\\-]{2,30}$",
-            "Currency name must be 2-30 latin letters"),
+            ValidationConstants.CURRENCY_NAME_REGEX,
+            ValidationConstants.CURRENCY_NAME_ERROR_MESSAGE),
 
     CODE(
             "code",
-            "^[A-Za-z]{3}$",
-            "Currency code must be 3 latin letters"),
+            ValidationConstants.CURRENCY_CODE_REGEX,
+            ValidationConstants.CURRENCY_CODE_ERROR_MESSAGE),
 
     SIGN(
             "sign",
-            "^\\p{Sc}",
-            "Currency sign must be a valid symbol (e.g. $, €...");
+            ValidationConstants.CURRENCY_SIGN_REGEX,
+            ValidationConstants.CURRENCY_SIGN_ERROR_MESSAGE);
 
     private final String paramName;
     private final String regex;

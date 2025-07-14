@@ -1,21 +1,23 @@
 package com.currency_exchange;
 
-public enum ExchangeRateParam implements RequestParameter {
+import com.currency_exchange.util.ValidationConstants;
+
+public enum ExchangeRateParam {
 
     BASE(
             "baseCurrencyCode",
-            CurrencyParam.CODE.getRegex(),
-            CurrencyParam.CODE.getErrorMessage()),
+            ValidationConstants.CURRENCY_CODE_REGEX,
+            ValidationConstants.CURRENCY_CODE_ERROR_MESSAGE),
 
     TARGET(
             "targetCurrencyCode",
-            CurrencyParam.CODE.getRegex(),
-            CurrencyParam.CODE.getErrorMessage()),
+            ValidationConstants.CURRENCY_CODE_REGEX,
+            ValidationConstants.CURRENCY_CODE_ERROR_MESSAGE),
 
     RATE(
             "rate",
-            "^(?!0+([.,]0+)?$)([1-9]\\d{0,5}([.,]\\d{1,6})?|0[.,]\\d{1,6}|[.,]\\d{1,6})$"
-            , "Rate must be a positive number with up to 6 digits before and after the point");
+            ValidationConstants.EXCHANGE_RATE_RATE_REGEX
+            , ValidationConstants.EXCHANGE_RATE_RATE_ERROR_MESSAGE);
 
     private final String paramName;
     private final String regex;
