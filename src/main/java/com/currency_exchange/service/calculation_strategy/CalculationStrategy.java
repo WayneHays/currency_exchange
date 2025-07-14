@@ -1,7 +1,7 @@
 package com.currency_exchange.service.calculation_strategy;
 
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
-import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
+import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.service.ExchangeRateService;
 
@@ -20,10 +20,10 @@ public abstract class CalculationStrategy {
 
     public abstract boolean canHandle(CurrencyPair pair);
 
-    public abstract ExchangeCalculationResponse calculate(CurrencyPair pair,
-                                                          BigDecimal amount,
-                                                          CurrencyResponseDto baseResponse,
-                                                          CurrencyResponseDto targetResponse);
+    public abstract CalculationResponseDto calculate(CurrencyPair pair,
+                                                     BigDecimal amount,
+                                                     CurrencyResponseDto baseResponse,
+                                                     CurrencyResponseDto targetResponse);
 
     protected BigDecimal round(BigDecimal convertedAmount) {
         return convertedAmount.setScale(RESULT_ROUNDING, RoundingMode.HALF_UP);

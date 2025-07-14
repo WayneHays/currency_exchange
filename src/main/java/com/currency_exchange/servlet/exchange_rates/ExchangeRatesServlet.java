@@ -1,7 +1,7 @@
 package com.currency_exchange.servlet.exchange_rates;
 
-import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateDto;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
@@ -27,7 +27,7 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            List<ExchangeRateResponse> exchangeRates = exchangeRateService.findAll();
+            List<ExchangeRateResponseDto> exchangeRates = exchangeRateService.findAll();
             sendSuccessResponse(resp, exchangeRates);
         } catch (ServiceException | JsonIOException | IOException e) {
             sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -38,8 +38,8 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            ExchangeRateCreateRequest dto = DataExtractor.extractExchangeRateCreateRequest(req);
-            ExchangeRateResponse saved = exchangeRateService.save(dto);
+            ExchangeRateCreateDto dto = DataExtractor.extractExchangeRateCreateRequest(req);
+            ExchangeRateResponseDto saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);
         } catch (NumberFormatException | InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

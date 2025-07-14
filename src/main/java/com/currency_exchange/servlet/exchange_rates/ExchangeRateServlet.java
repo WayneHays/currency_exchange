@@ -1,7 +1,7 @@
 package com.currency_exchange.servlet.exchange_rates;
 
 import com.currency_exchange.dto.currency.CurrencyCodesDto;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
@@ -31,7 +31,7 @@ public class ExchangeRateServlet extends BaseServlet {
         try {
             String path = req.getPathInfo();
             CurrencyCodesDto dto = DataExtractor.extractCurrencyPair(path);
-            ExchangeRateResponse dtoResponse = exchangeRateService.findByPair(dto);
+            ExchangeRateResponseDto dtoResponse = exchangeRateService.findByPair(dto);
             sendSuccessResponse(resp, dtoResponse);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
@@ -49,7 +49,7 @@ public class ExchangeRateServlet extends BaseServlet {
             String path = req.getPathInfo();
             CurrencyCodesDto dto = DataExtractor.extractCurrencyPair(path);
             ExchangeRateUpdateDto updateDto = DataExtractor.extractExchangeRateUpdateRequest(req);
-            ExchangeRateResponse updated = exchangeRateService.update(dto, updateDto);
+            ExchangeRateResponseDto updated = exchangeRateService.update(dto, updateDto);
             sendSuccessResponse(resp, updated);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

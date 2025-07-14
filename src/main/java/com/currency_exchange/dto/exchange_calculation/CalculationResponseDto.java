@@ -4,7 +4,7 @@ import com.currency_exchange.dto.currency.CurrencyResponseDto;
 
 import java.math.BigDecimal;
 
-public record ExchangeCalculationResponse(
+public record CalculationResponseDto(
         CurrencyResponseDto baseCurrency,
         CurrencyResponseDto targetCurrency,
         BigDecimal rate,

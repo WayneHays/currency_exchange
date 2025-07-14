@@ -25,14 +25,14 @@ public class CurrencyService extends BaseService {
             Currency currency = Mapper.toCurrency(dto);
             Currency saved = currencyDao.saveAndSetId(currency);
 
-            return Mapper.toCurrencyResponse(saved);
+            return Mapper.toCurrencyResponseDto(saved);
         });
     }
 
     public List<CurrencyResponseDto> findAll() {
         return executeDaoOperation(() ->
                 currencyDao.findAll().stream()
-                        .map(Mapper::toCurrencyResponse)
+                        .map(Mapper::toCurrencyResponseDto)
                         .toList()
         );
     }
@@ -40,7 +40,7 @@ public class CurrencyService extends BaseService {
     public CurrencyResponseDto getByCode(String code) {
         return executeDaoOperation(() ->
                 currencyDao.findByCode(code)
-                        .map(Mapper::toCurrencyResponse)
+                        .map(Mapper::toCurrencyResponseDto)
                         .orElseThrow(() -> new CurrencyNotFoundException(code.toUpperCase()))
         );
     }

@@ -1,10 +1,11 @@
 package com.currency_exchange.service.calculation_strategy;
 
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
-import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
+import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.service.ExchangeRateService;
+import com.currency_exchange.util.Mapper;
 
 import java.math.BigDecimal;
 
@@ -20,7 +21,7 @@ public class DirectRateStrategy extends CalculationStrategy {
     }
 
     @Override
-    public ExchangeCalculationResponse calculate(
+    public CalculationResponseDto calculate(
             CurrencyPair pair,
             BigDecimal amount,
             CurrencyResponseDto baseResponse,
@@ -30,11 +31,12 @@ public class DirectRateStrategy extends CalculationStrategy {
         BigDecimal convertedAmount = amount.multiply(rate);
         BigDecimal roundedAmount = round(convertedAmount);
 
-        return new ExchangeCalculationResponse(
+        return Mapper.toCalculationResponseDto(
                 baseResponse,
                 targetResponse,
                 rate,
                 amount,
-                roundedAmount);
+                roundedAmount
+        );
     }
 }

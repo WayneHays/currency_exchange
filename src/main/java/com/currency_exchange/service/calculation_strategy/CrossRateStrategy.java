@@ -1,10 +1,11 @@
 package com.currency_exchange.service.calculation_strategy;
 
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
-import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
+import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.service.ExchangeRateService;
+import com.currency_exchange.util.Mapper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -21,7 +22,7 @@ public class CrossRateStrategy extends CalculationStrategy {
     }
 
     @Override
-    public ExchangeCalculationResponse calculate(
+    public CalculationResponseDto calculate(
             CurrencyPair pair,
             BigDecimal amount,
             CurrencyResponseDto baseResponse,
@@ -31,18 +32,19 @@ public class CrossRateStrategy extends CalculationStrategy {
 
         BigDecimal usdToBaseRate = usdToBase.getRate();
         BigDecimal usdToTargetRate = usdToTarget.getRate();
-        BigDecimal calculatedRate = usdToTargetRate.divide(
+        BigDecimal rate = usdToTargetRate.divide(
                 usdToBaseRate,
                 PRE_ROUNDING,
                 RoundingMode.HALF_UP);
-        BigDecimal convertedAmount = amount.multiply(calculatedRate);
+        BigDecimal convertedAmount = amount.multiply(rate);
         BigDecimal roundedAmount = round(convertedAmount);
 
-        return new ExchangeCalculationResponse(
+        return Mapper.toCalculationResponseDto(
                 baseResponse,
                 targetResponse,
-                calculatedRate,
+                rate,
                 amount,
-                roundedAmount);
+                roundedAmount
+        );
     }
 }

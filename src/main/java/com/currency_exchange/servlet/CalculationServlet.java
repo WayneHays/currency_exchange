@@ -1,7 +1,7 @@
 package com.currency_exchange.servlet;
 
 import com.currency_exchange.dto.exchange_calculation.CalculationRequestDto;
-import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
+import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
@@ -26,7 +26,7 @@ public class CalculationServlet extends BaseServlet {
 
         try {
             CalculationRequestDto dto = DataExtractor.extractCalculationRequestDto(req);
-            ExchangeCalculationResponse calculatedResponse = calculationService.calculate(dto);
+            CalculationResponseDto calculatedResponse = calculationService.calculate(dto);
             sendSuccessResponse(resp, calculatedResponse);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

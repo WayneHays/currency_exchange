@@ -17,7 +17,7 @@ public final class Validator {
         validateCurrenciesAreDifferent(baseCurrencyCode, targetCurrencyCode);
         validateParamRegex(baseCurrencyCode, CurrencyParam.CODE);
         validateParamRegex(targetCurrencyCode, CurrencyParam.CODE);
-        validateParamRegex(String.valueOf(rate), ExchangeRateParam.RATE);
+        validateParamRegex(rate, ExchangeRateParam.RATE);
     }
 
     public static void validateCurrencyCreateDto(String code, String name, String sign) {

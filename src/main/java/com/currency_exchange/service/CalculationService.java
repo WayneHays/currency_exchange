@@ -2,7 +2,7 @@ package com.currency_exchange.service;
 
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.dto.exchange_calculation.CalculationRequestDto;
-import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
+import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.service.calculation_strategy.CalculationStrategy;
@@ -29,7 +29,7 @@ public class CalculationService {
         return INSTANCE;
     }
 
-    public ExchangeCalculationResponse calculate(CalculationRequestDto calculationRequest) {
+    public CalculationResponseDto calculate(CalculationRequestDto calculationRequest) {
         String codeBase = calculationRequest.from();
         String codeTarget = calculationRequest.to();
 
@@ -37,8 +37,8 @@ public class CalculationService {
 
         CurrencyPair pair = exchangeRateService.findCurrencyPair(codeBase, codeTarget);
 
-        CurrencyResponseDto baseResponse = Mapper.toCurrencyResponse(pair.base());
-        CurrencyResponseDto targetResponse = Mapper.toCurrencyResponse(pair.target());
+        CurrencyResponseDto baseResponse = Mapper.toCurrencyResponseDto(pair.base());
+        CurrencyResponseDto targetResponse = Mapper.toCurrencyResponseDto(pair.target());
 
         return strategies.stream()
                 .filter(strategy -> strategy.canHandle(pair))

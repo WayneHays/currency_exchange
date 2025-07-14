@@ -2,8 +2,8 @@ package com.currency_exchange.service;
 
 import com.currency_exchange.dao.ExchangeRatesDao;
 import com.currency_exchange.dto.currency.CurrencyCodesDto;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateDto;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.CurrencyPair;
@@ -29,7 +29,7 @@ public class ExchangeRateService extends BaseService {
         return INSTANCE;
     }
 
-    public ExchangeRateResponse save(ExchangeRateCreateRequest dto) throws CurrencyNotFoundException {
+    public ExchangeRateResponseDto save(ExchangeRateCreateDto dto) throws CurrencyNotFoundException {
         return executeDaoOperation(() -> {
             CurrencyPair pair = findCurrencyPair(dto.baseCurrencyCode(), dto.targetCurrencyCode());
 
@@ -38,23 +38,23 @@ public class ExchangeRateService extends BaseService {
             ExchangeRate exchangeRate = Mapper.toExchangeRate(dto, pair);
             ExchangeRate saved = exchangeRatesDao.saveAndSetId(exchangeRate);
 
-            return Mapper.toExchangeRateResponse(saved, pair);
+            return Mapper.toExchangeRateResponseDto(saved, pair);
         });
     }
 
-    public List<ExchangeRateResponse> findAll() {
+    public List<ExchangeRateResponseDto> findAll() {
         return executeDaoOperation(() ->
                 exchangeRatesDao.findAll().stream()
                         .map(exchangeRate -> {
                             Currency base = currencyService.getEntityById(exchangeRate.getBaseCurrencyId());
                             Currency target = currencyService.getEntityById(exchangeRate.getTargetCurrencyId());
                             CurrencyPair pair = new CurrencyPair(base, target);
-                            return Mapper.toExchangeRateResponse(exchangeRate, pair);
+                            return Mapper.toExchangeRateResponseDto(exchangeRate, pair);
                         })
                         .toList());
     }
 
-    public ExchangeRateResponse update(
+    public ExchangeRateResponseDto update(
             CurrencyCodesDto pairDto,
             ExchangeRateUpdateDto rateDto) throws CurrencyNotFoundException, ExchangeRateNotFoundException {
 
@@ -66,7 +66,7 @@ public class ExchangeRateService extends BaseService {
             ExchangeRate updated = exchangeRatesDao.update(toUpdate, rateDto.rate())
                     .orElseThrow(() -> new DaoException("Failed to update exchange rate"));
 
-            return Mapper.toExchangeRateResponse(updated, pair);
+            return Mapper.toExchangeRateResponseDto(updated, pair);
         });
     }
 
@@ -82,13 +82,13 @@ public class ExchangeRateService extends BaseService {
         return exchangeRatesDao.isCrossCourseExists(pair);
     }
 
-    public ExchangeRateResponse findByPair(CurrencyCodesDto dto) {
+    public ExchangeRateResponseDto findByPair(CurrencyCodesDto dto) {
         return executeDaoOperation(() -> {
             CurrencyPair pair = findCurrencyPair(dto.baseCurrencyCode(), dto.targetCurrencyCode());
             ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(pair.base().getId(), pair.target().getId())
                     .orElseThrow(() -> new ExchangeRateNotFoundException(pair.base().getCode(), pair.target().getCode()));
 
-            return Mapper.toExchangeRateResponse(exchangeRate, pair);
+            return Mapper.toExchangeRateResponseDto(exchangeRate, pair);
         });
     }
 

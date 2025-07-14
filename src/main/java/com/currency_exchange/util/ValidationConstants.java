@@ -15,6 +15,7 @@ public final class ValidationConstants {
     public static final String WRONG_PAIR_MESSAGE = "Base and target currencies must be different";
     public static final String CURRENCY_PAIR_ERROR_MESSAGE = "Path must be 6 latin letters like USDRUB";
     public static final String MISSING_CURRENCY_CODE = "Missing currency code";
+    public static final String WRONG_COUNT_OF_PARAM_MESSAGE = "Parameter '%s' must have exactly one value";
     public static final String MISSING_CURRENCY_PAIR_CODE = "Missing currency pair code";
     public static final String MISSING_RATE_MESSAGE = "Missing rate parameter";
     public static final String UNKNOWN_CURRENCY_PARAM = "Unknown currency param";
