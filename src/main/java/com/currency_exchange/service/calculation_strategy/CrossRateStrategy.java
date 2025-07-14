@@ -1,6 +1,6 @@
 package com.currency_exchange.service.calculation_strategy;
 
-import com.currency_exchange.dto.currency.CurrencyResponse;
+import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
@@ -24,8 +24,8 @@ public class CrossRateStrategy extends CalculationStrategy {
     public ExchangeCalculationResponse calculate(
             CurrencyPair pair,
             BigDecimal amount,
-            CurrencyResponse baseResponse,
-            CurrencyResponse targetResponse) {
+            CurrencyResponseDto baseResponse,
+            CurrencyResponseDto targetResponse) {
         ExchangeRate usdToBase = exchangeRateService.findByUsd(pair.base());
         ExchangeRate usdToTarget = exchangeRateService.findByUsd(pair.target());
 

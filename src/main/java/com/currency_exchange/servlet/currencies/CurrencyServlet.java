@@ -1,12 +1,11 @@
 package com.currency_exchange.servlet.currencies;
 
-import com.currency_exchange.dto.currency.CurrencyResponse;
+import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.ValidationUtils;
 import com.currency_exchange.util.data_extraction.DataExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,9 +25,9 @@ public class CurrencyServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            String code = DataExtractor.extractCurrencyCode(req);
-            ValidationUtils.validateCurrencyCode(code);
-            CurrencyResponse dto = currencyService.getByCode(code);
+            String path = req.getPathInfo();
+            String code = DataExtractor.extractCurrencyCode(path);
+            CurrencyResponseDto dto = currencyService.getByCode(code);
             sendSuccessResponse(resp, dto);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

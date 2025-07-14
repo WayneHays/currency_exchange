@@ -1,13 +1,12 @@
 package com.currency_exchange.servlet.currencies;
 
-import com.currency_exchange.dto.currency.CurrencyCreateRequest;
-import com.currency_exchange.dto.currency.CurrencyResponse;
+import com.currency_exchange.dto.currency.CurrencyCreateDto;
+import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.ValidationUtils;
 import com.currency_exchange.util.data_extraction.DataExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
@@ -26,9 +25,8 @@ public class CurrenciesServlet extends BaseServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
-
         try {
-            List<CurrencyResponse> currencies = currencyService.findAll();
+            List<CurrencyResponseDto> currencies = currencyService.findAll();
             sendSuccessResponse(resp, currencies);
         } catch (ServiceException | JsonIOException | IOException e) {
             sendErrorResponse(resp, SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -39,9 +37,8 @@ public class CurrenciesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            CurrencyCreateRequest dto = DataExtractor.extractCurrenciesPostData(req);
-            ValidationUtils.validateCurrencyCreateRequest(dto.code(), dto.name(), dto.sign());
-            CurrencyResponse savedCurrency = currencyService.save(dto);
+            CurrencyCreateDto dto = DataExtractor.extractCurrenciesCreateDto(req);
+            CurrencyResponseDto savedCurrency = currencyService.save(dto);
             sendCreatedResponse(resp, savedCurrency);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

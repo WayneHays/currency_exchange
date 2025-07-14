@@ -1,8 +1,8 @@
 package com.currency_exchange.service;
 
 import com.currency_exchange.dao.CurrencyDao;
-import com.currency_exchange.dto.currency.CurrencyCreateRequest;
-import com.currency_exchange.dto.currency.CurrencyResponse;
+import com.currency_exchange.dto.currency.CurrencyCreateDto;
+import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.util.Mapper;
@@ -20,7 +20,7 @@ public class CurrencyService extends BaseService {
         return INSTANCE;
     }
 
-    public CurrencyResponse save(CurrencyCreateRequest dto) {
+    public CurrencyResponseDto save(CurrencyCreateDto dto) {
         return executeDaoOperation(() -> {
             Currency currency = Mapper.toCurrency(dto);
             Currency saved = currencyDao.saveAndSetId(currency);
@@ -29,7 +29,7 @@ public class CurrencyService extends BaseService {
         });
     }
 
-    public List<CurrencyResponse> findAll() {
+    public List<CurrencyResponseDto> findAll() {
         return executeDaoOperation(() ->
                 currencyDao.findAll().stream()
                         .map(Mapper::toCurrencyResponse)
@@ -37,7 +37,7 @@ public class CurrencyService extends BaseService {
         );
     }
 
-    public CurrencyResponse getByCode(String code) {
+    public CurrencyResponseDto getByCode(String code) {
         return executeDaoOperation(() ->
                 currencyDao.findByCode(code)
                         .map(Mapper::toCurrencyResponse)

@@ -1,11 +1,12 @@
 package com.currency_exchange.util;
 
-import com.currency_exchange.dto.currency.CurrencyCreateRequest;
-import com.currency_exchange.dto.currency.CurrencyResponse;
-import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
+import com.currency_exchange.dto.currency.CurrencyCodesDto;
+import com.currency_exchange.dto.currency.CurrencyCreateDto;
+import com.currency_exchange.dto.currency.CurrencyResponseDto;
+import com.currency_exchange.dto.exchange_calculation.CalculationRequestDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
@@ -17,7 +18,7 @@ public final class Mapper {
     private Mapper() {
     }
 
-    public static Currency toCurrency(CurrencyCreateRequest dto) {
+    public static Currency toCurrency(CurrencyCreateDto dto) {
         Currency currency = new Currency();
         currency.setCode(dto.code());
         currency.setSign(dto.sign());
@@ -34,8 +35,8 @@ public final class Mapper {
         return exchangeRate;
     }
 
-    public static CurrencyResponse toCurrencyResponse(Currency currency) {
-        return new CurrencyResponse(
+    public static CurrencyResponseDto toCurrencyResponse(Currency currency) {
+        return new CurrencyResponseDto(
                 currency.getId(),
                 currency.getCode(),
                 currency.getFullName(),
@@ -43,8 +44,8 @@ public final class Mapper {
     }
 
     public static ExchangeRateResponse toExchangeRateResponse(ExchangeRate exchangeRate, CurrencyPair pair) {
-        CurrencyResponse baseResponse = Mapper.toCurrencyResponse(pair.base());
-        CurrencyResponse targetResponse = Mapper.toCurrencyResponse(pair.target());
+        CurrencyResponseDto baseResponse = Mapper.toCurrencyResponse(pair.base());
+        CurrencyResponseDto targetResponse = Mapper.toCurrencyResponse(pair.target());
         return new ExchangeRateResponse(
                 exchangeRate.getId(),
                 baseResponse,
@@ -63,13 +64,13 @@ public final class Mapper {
                 rateDecimal);
     }
 
-    public static ExchangeRateUpdateRequest toExchangeRateUpdateRequest(String rate) {
-        return new ExchangeRateUpdateRequest(new BigDecimal(rate));
+    public static ExchangeRateUpdateDto toExchangeRateUpdateDto(String rate) {
+        return new ExchangeRateUpdateDto(new BigDecimal(rate));
     }
 
-    public static ExchangeCalculationRequest toExchangeCalculationRequest(String from, String to, String amount) {
+    public static CalculationRequestDto toCalculationRequestDto(String from, String to, String amount) {
         BigDecimal rateDecimal = new BigDecimal(amount);
-        return new ExchangeCalculationRequest(from, to, rateDecimal);
+        return new CalculationRequestDto(from, to, rateDecimal);
     }
 
     private static BigDecimal createFromString(String input) {
@@ -78,5 +79,9 @@ public final class Mapper {
             return new BigDecimal(valid);
         }
         return new BigDecimal(input.trim());
+    }
+
+    public static CurrencyCodesDto toCurrencyCodesRequest(String baseCurrencyCode, String targetCurrencyCode) {
+        return new CurrencyCodesDto(baseCurrencyCode, targetCurrencyCode);
     }
 }

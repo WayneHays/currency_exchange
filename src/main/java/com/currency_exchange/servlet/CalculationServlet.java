@@ -1,12 +1,11 @@
 package com.currency_exchange.servlet;
 
-import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationRequest;
+import com.currency_exchange.dto.exchange_calculation.CalculationRequestDto;
 import com.currency_exchange.dto.exchange_calculation.ExchangeCalculationResponse;
 import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.service.CalculationService;
-import com.currency_exchange.util.ValidationUtils;
 import com.currency_exchange.util.data_extraction.DataExtractor;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,8 +25,7 @@ public class CalculationServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            ExchangeCalculationRequest dto = DataExtractor.extractCalculationData(req);
-            ValidationUtils.validateExchangeCalculationRequest(dto.from(), dto.to(), String.valueOf(dto.amount()));
+            CalculationRequestDto dto = DataExtractor.extractCalculationRequestDto(req);
             ExchangeCalculationResponse calculatedResponse = calculationService.calculate(dto);
             sendSuccessResponse(resp, calculatedResponse);
         } catch (InvalidParameterException e) {

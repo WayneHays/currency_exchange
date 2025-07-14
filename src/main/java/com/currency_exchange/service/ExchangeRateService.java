@@ -1,10 +1,10 @@
 package com.currency_exchange.service;
 
 import com.currency_exchange.dao.ExchangeRatesDao;
-import com.currency_exchange.dto.currency.CurrencyCodesRequest;
+import com.currency_exchange.dto.currency.CurrencyCodesDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponse;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
@@ -55,8 +55,8 @@ public class ExchangeRateService extends BaseService {
     }
 
     public ExchangeRateResponse update(
-            CurrencyCodesRequest pairDto,
-            ExchangeRateUpdateRequest rateDto) throws CurrencyNotFoundException, ExchangeRateNotFoundException {
+            CurrencyCodesDto pairDto,
+            ExchangeRateUpdateDto rateDto) throws CurrencyNotFoundException, ExchangeRateNotFoundException {
 
         return executeDaoOperation(() -> {
             CurrencyPair pair = findCurrencyPair(pairDto.baseCurrencyCode(), pairDto.targetCurrencyCode());
@@ -82,7 +82,7 @@ public class ExchangeRateService extends BaseService {
         return exchangeRatesDao.isCrossCourseExists(pair);
     }
 
-    public ExchangeRateResponse findByPair(CurrencyCodesRequest dto) {
+    public ExchangeRateResponse findByPair(CurrencyCodesDto dto) {
         return executeDaoOperation(() -> {
             CurrencyPair pair = findCurrencyPair(dto.baseCurrencyCode(), dto.targetCurrencyCode());
             ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(pair.base().getId(), pair.target().getId())

@@ -1,22 +1,25 @@
 package com.currency_exchange;
 
+import com.currency_exchange.util.RequiredParam;
 import com.currency_exchange.util.ValidationConstants;
 
-public enum ExchangeRateParam {
+import java.util.Set;
+
+public enum ExchangeRateParam implements RequiredParam {
 
     BASE(
             "baseCurrencyCode",
-            ValidationConstants.CURRENCY_CODE_REGEX,
+            ValidationConstants.CURRENCY_CODE_PATTERN,
             ValidationConstants.CURRENCY_CODE_ERROR_MESSAGE),
 
     TARGET(
             "targetCurrencyCode",
-            ValidationConstants.CURRENCY_CODE_REGEX,
+            ValidationConstants.CURRENCY_CODE_PATTERN,
             ValidationConstants.CURRENCY_CODE_ERROR_MESSAGE),
 
     RATE(
             "rate",
-            ValidationConstants.EXCHANGE_RATE_RATE_REGEX
+            ValidationConstants.EXCHANGE_RATE_RATE_PATTERN
             , ValidationConstants.EXCHANGE_RATE_RATE_ERROR_MESSAGE);
 
     private final String paramName;
@@ -27,6 +30,10 @@ public enum ExchangeRateParam {
         this.paramName = paramName;
         this.regex = regex;
         this.errorMessage = errorMessage;
+    }
+
+    public static Set<String> getAllNames() {
+        return Set.of(BASE.paramName, TARGET.paramName, RATE.paramName);
     }
 
     public String getParamName() {
