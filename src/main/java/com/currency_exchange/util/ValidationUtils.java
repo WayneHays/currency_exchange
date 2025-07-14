@@ -6,7 +6,6 @@ import com.currency_exchange.ExchangeRateParam;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 
 public final class ValidationUtils {
-    public static final String WRONG_PAIR_MESSAGE = "Base and target currencies must be different";
 
     private ValidationUtils() {
     }
@@ -54,7 +53,7 @@ public final class ValidationUtils {
 
     public static void validateCurrenciesAreDifferent(String baseCode, String targetCode) {
         if (baseCode.equals(targetCode)) {
-            throw new InvalidParameterException(ValidationUtils.WRONG_PAIR_MESSAGE);
+            throw new InvalidParameterException(ValidationConstants.WRONG_PAIR_MESSAGE);
         }
     }
 

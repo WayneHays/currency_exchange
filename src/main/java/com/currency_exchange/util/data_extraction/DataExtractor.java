@@ -10,12 +10,12 @@ import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateRequest;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateRequest;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.util.Mapper;
+import com.currency_exchange.util.ValidationConstants;
 import jakarta.servlet.http.HttpServletRequest;
 
 public final class DataExtractor {
-    public static final String MISSING_CURRENCY_PAIR_CODE = "Missing currency pair code";
-    public static final String MISSING_CURRENCY_CODE = "Missing currency code";
-    private static final String CURRENCY_PAIR_PATTERN = "^/([A-Za-z]{3})([A-Za-z]{3})$";
+    private static final String MISSING_CURRENCY_PAIR_CODE = "Missing currency pair code";
+    private static final String MISSING_CURRENCY_CODE = "Missing currency code";
     private static final String WRONG_CURRENCY_PAIR_PATH = "Path must be 6 latin letters like /USDRUB";
 
     private DataExtractor() {
@@ -31,7 +31,7 @@ public final class DataExtractor {
         String pathInfo = req.getPathInfo();
         validatePath(pathInfo, MISSING_CURRENCY_PAIR_CODE);
 
-        if (!CURRENCY_PAIR_PATTERN.matches(pathInfo)) {
+        if (!ValidationConstants.CURRENCY_PAIR_PATTERN.matches(pathInfo)) {
             throw new InvalidParameterException(WRONG_CURRENCY_PAIR_PATH);
         }
 
