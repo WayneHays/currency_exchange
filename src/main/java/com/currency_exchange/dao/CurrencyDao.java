@@ -3,18 +3,17 @@ package com.currency_exchange.dao;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.dao_exception.DaoException;
+import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.repository.CurrencyQueries;
+import com.currency_exchange.util.connection.ConnectionManager;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CurrencyDao extends BaseDao<Currency> {
-    public static final String FAILED_TO_SAVE_MESSAGE = "Failed to save currency";
-    public static final String FAILED_TO_FIND_ALL_MESSAGE = "Failed to find currencies";
-    public static final String FAILED_TO_FIND_BY_CODE_MESSAGE = "Failed to find currency with code %s";
-    public static final String FAILED_TO_FIND_BY_ID = "Failed to find currency with id %d";
     public static final String ID = "id";
     public static final String CODE = "code";
     public static final String FULL_NAME = "full_name";
@@ -30,45 +29,94 @@ public class CurrencyDao extends BaseDao<Currency> {
     }
 
     @Override
-    public Currency saveAndSetId(Currency currency) {
-        return executeInsertAndSetId(
-                CurrencyQueries.SAVE_SQL,
-                statement -> {
-                    statement.setString(1, currency.getCode());
-                    statement.setString(2, currency.getFullName());
-                    statement.setString(3, currency.getSign());
-                },
-                currency,
-                FAILED_TO_SAVE_MESSAGE
-        );
+    public Currency save(Currency currency) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(CurrencyQueries.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setString(1, currency.getCode());
+            preparedStatement.setString(2, currency.getFullName());
+            preparedStatement.setString(3, currency.getSign());
+            preparedStatement.executeUpdate();
+
+            var generatedKeys = preparedStatement.getGeneratedKeys();
+
+            if (generatedKeys.next()) {
+                currency.setId(generatedKeys.getLong(1));
+                return currency;
+            }
+            throw new CurrencyAlreadyExistsException(currency.getCode());
+        } catch (SQLException e) {
+            if (isDuplicateError(e)) {
+                throw new CurrencyAlreadyExistsException(currency.getCode());
+            }
+            throw new DaoException(e.getMessage());
+        }
     }
 
+    /* возвращает пустой список при отсутствии сущностей */
     @Override
-    public List<Currency> findAll() throws DaoException {
-        return executeQueryAndBuildList(
-                CurrencyQueries.FIND_ALL_SQL,
-                stmt -> {
-                },
-                FAILED_TO_FIND_ALL_MESSAGE
-        );
+    public List<Currency> findAll() {
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_ALL_SQL)) {
+            ;
+            var resultSet = prepareStatement.executeQuery();
+            return buildEntityList(resultSet);
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
     }
 
-    public Optional<Currency> findByCode(String code) {
-        return executeQueryAndBuildSingle(
-                CurrencyQueries.FIND_BY_CODE_SQL,
-                stmt -> stmt.setString(1, code.toUpperCase()),
-                FAILED_TO_FIND_BY_CODE_MESSAGE.formatted(code)
-        );
+    public Currency findByCode(String code) {
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_BY_CODE_SQL)) {
+            prepareStatement.setString(1, code.toUpperCase());
+            var resultSet = prepareStatement.executeQuery();
+            if (resultSet.next()) {
+                return buildEntity(resultSet);
+            }
+            throw new CurrencyNotFoundException(code);
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
     }
 
-    public Optional<Currency> findById(Long id) {
-        return executeQueryAndBuildSingle(
-                CurrencyQueries.FIND_BY_ID_SQL,
-                stmt -> stmt.setLong(1, id),
-                FAILED_TO_FIND_BY_ID.formatted(id)
-        );
+    public Currency findById(Long id) {
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_BY_CODE_SQL)) {
+            prepareStatement.setLong(1, id);
+            var resultSet = prepareStatement.executeQuery();
+            if (resultSet.next()) {
+                return buildEntity(resultSet);
+            }
+            throw new CurrencyNotFoundException(String.valueOf(id));
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
     }
 
+    public Map<Long, Currency> findByIds(List<Long> ids) {
+        String placeholders = ids.stream().map(i -> "?").collect(Collectors.joining(","));
+        try (Connection connection = ConnectionManager.get();
+             PreparedStatement statement = connection.prepareStatement(CurrencyQueries.FIND_BY_IDS_SQL.formatted(placeholders))) {
+
+            int index = 1;
+            for (Long id : ids) {
+                statement.setLong(index++, id);
+            }
+
+            Map<Long, Currency> result = new HashMap<>();
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Currency currency = new Currency();
+                    buildEntity(resultSet);
+                    result.put(currency.getId(), currency);
+                }
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new DaoException("Failed to fetch currencies by IDs");
+        }
+
+    }
 
     @Override
     protected Currency buildEntity(ResultSet resultSet) throws SQLException {
@@ -78,15 +126,5 @@ public class CurrencyDao extends BaseDao<Currency> {
                 resultSet.getString(FULL_NAME),
                 resultSet.getString(SIGN)
         );
-    }
-
-    @Override
-    protected void setEntityId(Currency entity, Long id) {
-        entity.setId(id);
-    }
-
-    @Override
-    protected DaoException createDuplicateKeyException(Currency entity, SQLException e) {
-        return new CurrencyAlreadyExistsException(entity.getCode(), e);
     }
 }

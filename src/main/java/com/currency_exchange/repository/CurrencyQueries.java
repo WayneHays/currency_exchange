@@ -21,6 +21,10 @@ public final class CurrencyQueries {
             WHERE id = ?
             """;
 
+    public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + """
+            WHERE id IN (%s)
+            """;
+
     private CurrencyQueries() {
     }
 }

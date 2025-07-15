@@ -13,14 +13,15 @@ public final class ExchangeRateQueries {
             FROM exchange_rates
             """;
 
-    public static final String FIND_BY_PAIR_SQL = FIND_ALL_SQL + """
+    public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + """
             WHERE base_currency_id = ? AND target_currency_id = ?
             """;
 
     public static final String UPDATE_SQL = """
             UPDATE exchange_rates
             SET rate = ?
-            WHERE id = ?
+            WHERE base_currency_id = ? AND target_currency_id = ?
+            RETURNING id, base_currency_id, target_currency_id, rate
             """;
     public static final String FIND_BY_ID_SQL = FIND_ALL_SQL + """
             WHERE id = ?

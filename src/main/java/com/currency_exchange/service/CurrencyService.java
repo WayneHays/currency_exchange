@@ -4,7 +4,8 @@ import com.currency_exchange.dao.CurrencyDao;
 import com.currency_exchange.dto.currency.CurrencyCreateDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
-import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
+import com.currency_exchange.exception.dao_exception.DaoException;
+import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.util.Mapper;
 
 import java.util.List;
@@ -21,40 +22,32 @@ public class CurrencyService extends BaseService {
     }
 
     public CurrencyResponseDto save(CurrencyCreateDto dto) {
-        return executeDaoOperation(() -> {
+        try {
             Currency currency = Mapper.toCurrency(dto);
-            Currency saved = currencyDao.saveAndSetId(currency);
-
+            Currency saved = currencyDao.save(currency);
             return Mapper.toCurrencyResponseDto(saved);
-        });
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
+        }
     }
 
     public List<CurrencyResponseDto> findAll() {
-        return executeDaoOperation(() ->
-                currencyDao.findAll().stream()
-                        .map(Mapper::toCurrencyResponseDto)
-                        .toList()
-        );
+        try {
+            return currencyDao.findAll().stream()
+                    .map(Mapper::toCurrencyResponseDto)
+                    .toList();
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
+        }
     }
 
-    public CurrencyResponseDto getByCode(String code) {
-        return executeDaoOperation(() ->
-                currencyDao.findByCode(code)
-                        .map(Mapper::toCurrencyResponseDto)
-                        .orElseThrow(() -> new CurrencyNotFoundException(code.toUpperCase()))
-        );
-    }
+    public CurrencyResponseDto findByCode(String code) {
+        try {
+            Currency currency = currencyDao.findByCode(code);
+            return Mapper.toCurrencyResponseDto(currency);
 
-    public Currency getEntityByCode(String code) {
-        return executeDaoOperation(() ->
-                currencyDao.findByCode(code)
-                        .orElseThrow(() -> new CurrencyNotFoundException(code.toUpperCase()))
-        );
-    }
-
-    public Currency getEntityById(Long id) {
-        return executeDaoOperation(() ->
-                currencyDao.findById(id))
-                .orElseThrow(() -> new CurrencyNotFoundException(String.valueOf(id)));
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
+        }
     }
 }

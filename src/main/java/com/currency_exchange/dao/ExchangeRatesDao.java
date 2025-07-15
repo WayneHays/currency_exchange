@@ -5,21 +5,17 @@ import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
+import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.repository.ExchangeRateQueries;
+import com.currency_exchange.util.connection.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
-import java.util.Optional;
 
 public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
-    public static final String FAILED_TO_SAVE_MESSAGE = "Failed to save exchangeRate";
-    public static final String FAILED_TO_FIND_ALL_MESSAGE = "Failed to find exchangeRates";
-    public static final String FAILED_TO_UPDATE_MESSAGE = "Failed to update exchangeRate";
-    public static final String FAILED_TO_FIND_BY_IDS = "Failed to find exchange rate with ids %d -> %d";
-    public static final String FAILED_TO_FIND_BY_ID = "Failed to find exchange rate with id %d";
-
     public static final String ID = "id";
     public static final String BASE_CURRENCY_ID = "base_currency_id";
     public static final String TARGET_CURRENCY_ID = "target_currency_id";
@@ -36,80 +32,81 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
     }
 
     @Override
-    public ExchangeRate saveAndSetId(ExchangeRate exchangeRate) {
-        return executeInsertAndSetId(
-                ExchangeRateQueries.SAVE_SQL,
-                stmt -> {
-                    stmt.setLong(1, exchangeRate.getBaseCurrencyId());
-                    stmt.setLong(2, exchangeRate.getTargetCurrencyId());
-                    stmt.setBigDecimal(3, exchangeRate.getRate());
-                },
-                exchangeRate,
-                FAILED_TO_SAVE_MESSAGE
-        );
+    public ExchangeRate save(ExchangeRate exchangeRate) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(ExchangeRateQueries.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setLong(1, exchangeRate.getBaseCurrencyId());
+            preparedStatement.setLong(2, exchangeRate.getTargetCurrencyId());
+            preparedStatement.setBigDecimal(3, exchangeRate.getRate());
+            preparedStatement.executeUpdate();
+
+            var generatedKeys = preparedStatement.getGeneratedKeys();
+
+            if (generatedKeys.next()) {
+                exchangeRate.setId(generatedKeys.getLong(1));
+                return exchangeRate;
+            }
+            throw new ExchangeRateAlreadyExistsException(exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId());
+        } catch (SQLException e) {
+            if (isDuplicateError(e)) {
+                throw new ExchangeRateAlreadyExistsException(exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId());
+            }
+            throw new DaoException(e.getMessage());
+        }
     }
 
+    /* возвращает пустой список при отсутствии сущностей */
     @Override
     public List<ExchangeRate> findAll() {
-        return executeQueryAndBuildList(
-                ExchangeRateQueries.FIND_ALL_SQL,
-                statement -> {
-                },
-                FAILED_TO_FIND_ALL_MESSAGE
-        );
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(ExchangeRateQueries.FIND_ALL_SQL)) {
+            var resultSet = prepareStatement.executeQuery();
+            return buildEntityList(resultSet);
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
     }
 
-    public Optional<ExchangeRate> update(ExchangeRate exchangeRate, BigDecimal newRate) {
-        int rowsAffected = executeUpdate(
-                ExchangeRateQueries.UPDATE_SQL,
-                statement -> {
-                    statement.setBigDecimal(1, newRate);
-                    statement.setLong(2, exchangeRate.getId());
-                },
-                FAILED_TO_UPDATE_MESSAGE
-        );
+    public ExchangeRate update(CurrencyPair pair, BigDecimal rate) {
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(ExchangeRateQueries.UPDATE_SQL)) {
+            prepareStatement.setLong(1, pair.base().getId());
+            prepareStatement.setLong(2, pair.target().getId());
+            prepareStatement.setBigDecimal(3, rate);
 
-        return rowsAffected > 0 ? findById(exchangeRate.getId()) : Optional.empty();
+            try (var resultSet = prepareStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return new ExchangeRate(
+                            resultSet.getLong(ID),
+                            resultSet.getLong(BASE_CURRENCY_ID),
+                            resultSet.getLong(TARGET_CURRENCY_ID),
+                            resultSet.getBigDecimal(RATE)
+                    );
+                }
+                throw new ExchangeRateNotFoundException(pair.base().getCode(), pair.target().getCode());
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
     }
 
-    public Optional<ExchangeRate> findByCurrencyIds(Long first, Long second) {
-        return executeQueryAndBuildSingle(
-                ExchangeRateQueries.FIND_BY_PAIR_SQL,
-                statement -> {
-                    statement.setLong(1, first);
-                    statement.setLong(2, second);
-                },
-                FAILED_TO_FIND_BY_IDS.formatted(first, second)
-        );
+    public ExchangeRate findByCurrencyIds(Long first, Long second) {
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(ExchangeRateQueries.FIND_BY_IDS_SQL)) {
+            prepareStatement.setLong(1, first);
+            prepareStatement.setLong(2, second);
+            var resultSet = prepareStatement.executeQuery();
+            if (resultSet.next()) {
+                return buildEntity(resultSet);
+            }
+            throw new ExchangeRateNotFoundException(first, second);
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
     }
 
-    public Optional<ExchangeRate> findById(Long id) {
-        return executeQueryAndBuildSingle(
-                ExchangeRateQueries.FIND_BY_ID_SQL,
-                statement -> statement.setLong(1, id),
-                FAILED_TO_FIND_BY_ID.formatted(id)
-        );
-    }
-
-    public Optional<ExchangeRate> findByUsd(Currency currency) {
+    public ExchangeRate findByUsd(Currency currency) {
         return findByCurrencyIds(USD_ID, currency.getId());
-    }
-
-    public boolean isExchangeRateExists(CurrencyPair pair) {
-        Optional<ExchangeRate> exchangeRate = findByCurrencyIds(pair.base().getId(), pair.target().getId());
-        return exchangeRate.isPresent();
-    }
-
-    public boolean isReversedExchangeRateExists(CurrencyPair pair) {
-        Optional<ExchangeRate> reversed = findByCurrencyIds(pair.target().getId(), pair.base().getId());
-        return reversed.isPresent();
-    }
-
-    public boolean isCrossCourseExists(CurrencyPair pair) {
-        Optional<ExchangeRate> baseToCross = findByCurrencyIds(USD_ID, pair.base().getId());
-        Optional<ExchangeRate> targetToCross = findByCurrencyIds(USD_ID, pair.target().getId());
-
-        return baseToCross.isPresent() && targetToCross.isPresent();
     }
 
     @Override
@@ -120,15 +117,5 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
                 resultSet.getLong(TARGET_CURRENCY_ID),
                 resultSet.getBigDecimal(RATE)
         );
-    }
-
-    @Override
-    protected void setEntityId(ExchangeRate entity, Long id) {
-        entity.setId(id);
-    }
-
-    @Override
-    protected DaoException createDuplicateKeyException(ExchangeRate entity, SQLException e) {
-        return new ExchangeRateAlreadyExistsException("%s -> %s");
     }
 }

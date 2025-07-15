@@ -27,7 +27,7 @@ public class CurrencyServlet extends BaseServlet {
         try {
             String path = req.getPathInfo();
             String code = DataExtractor.extractCurrencyCode(path);
-            CurrencyResponseDto dto = currencyService.getByCode(code);
+            CurrencyResponseDto dto = currencyService.findByCode(code);
             sendSuccessResponse(resp, dto);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
