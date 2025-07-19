@@ -2,8 +2,8 @@ package com.currency_exchange.dao;
 
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
+import com.currency_exchange.exception.dao_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.dao_exception.DaoException;
-import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.repository.CurrencyQueries;
 import com.currency_exchange.util.connection.ConnectionManager;
 
@@ -28,7 +28,6 @@ public class CurrencyDao extends BaseDao<Currency> {
         return INSTANCE;
     }
 
-    @Override
     public Currency save(Currency currency) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(CurrencyQueries.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -45,26 +44,11 @@ public class CurrencyDao extends BaseDao<Currency> {
             }
             throw new CurrencyAlreadyExistsException(currency.getCode());
         } catch (SQLException e) {
-            if (isDuplicateError(e)) {
-                throw new CurrencyAlreadyExistsException(currency.getCode());
-            }
             throw new DaoException(e.getMessage());
         }
     }
 
     /* возвращает пустой список при отсутствии сущностей */
-    @Override
-    public List<Currency> findAll() {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_ALL_SQL)) {
-            ;
-            var resultSet = prepareStatement.executeQuery();
-            return buildEntityList(resultSet);
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
-        }
-    }
-
     public Currency findByCode(String code) {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_BY_CODE_SQL)) {
@@ -74,6 +58,17 @@ public class CurrencyDao extends BaseDao<Currency> {
                 return buildEntity(resultSet);
             }
             throw new CurrencyNotFoundException(code);
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
+    }
+
+    public List<Currency> findAll() {
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_ALL_SQL)) {
+            ;
+            var resultSet = prepareStatement.executeQuery();
+            return buildEntityList(resultSet);
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         }
@@ -113,7 +108,7 @@ public class CurrencyDao extends BaseDao<Currency> {
             }
             return result;
         } catch (SQLException e) {
-            throw new DaoException("Failed to fetch currencies by IDs");
+            throw new DaoException(e.getMessage());
         }
 
     }

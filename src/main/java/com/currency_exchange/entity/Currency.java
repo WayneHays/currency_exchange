@@ -62,14 +62,4 @@ public class Currency {
     public int hashCode() {
         return Objects.hash(id, code);
     }
-
-    @Override
-    public String toString() {
-        return "Currency{" +
-               "id=" + id +
-               ", code='" + code + '\'' +
-               ", fullName='" + fullName + '\'' +
-               ", sign='" + sign + '\'' +
-               '}';
-    }
 }

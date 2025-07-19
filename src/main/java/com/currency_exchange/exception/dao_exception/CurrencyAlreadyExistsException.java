@@ -1,7 +1,8 @@
 package com.currency_exchange.exception.dao_exception;
 
-public class CurrencyAlreadyExistsException extends DuplicateException {
-    public CurrencyAlreadyExistsException(String code) {
-        super("Currency with code [%s] already exists".formatted(code));
+public class CurrencyAlreadyExistsException extends RuntimeException {
+
+    public CurrencyAlreadyExistsException(String param) {
+        super("Currency with code [%s] already exists".formatted(param));
     }
 }

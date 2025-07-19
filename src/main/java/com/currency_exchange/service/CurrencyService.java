@@ -10,7 +10,7 @@ import com.currency_exchange.util.Mapper;
 
 import java.util.List;
 
-public class CurrencyService extends BaseService {
+public class CurrencyService {
     private static final CurrencyService INSTANCE = new CurrencyService();
     private final CurrencyDao currencyDao = CurrencyDao.getInstance();
 
@@ -31,21 +31,21 @@ public class CurrencyService extends BaseService {
         }
     }
 
-    public List<CurrencyResponseDto> findAll() {
-        try {
-            return currencyDao.findAll().stream()
-                    .map(Mapper::toCurrencyResponseDto)
-                    .toList();
-        } catch (DaoException e) {
-            throw new ServiceException(e.getMessage());
-        }
-    }
-
     public CurrencyResponseDto findByCode(String code) {
         try {
             Currency currency = currencyDao.findByCode(code);
             return Mapper.toCurrencyResponseDto(currency);
 
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
+        }
+    }
+
+    public List<CurrencyResponseDto> findAll() {
+        try {
+            return currencyDao.findAll().stream()
+                    .map(Mapper::toCurrencyResponseDto)
+                    .toList();
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }

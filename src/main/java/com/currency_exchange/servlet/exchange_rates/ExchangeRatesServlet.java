@@ -2,8 +2,8 @@ package com.currency_exchange.servlet.exchange_rates;
 
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
+import com.currency_exchange.exception.dao_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
-import com.currency_exchange.exception.service_exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.service_exception.InvalidParameterException;
 import com.currency_exchange.exception.service_exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;

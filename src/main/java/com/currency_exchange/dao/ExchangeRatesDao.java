@@ -5,7 +5,7 @@ import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.dao_exception.DaoException;
 import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
-import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
+import com.currency_exchange.exception.dao_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.repository.ExchangeRateQueries;
 import com.currency_exchange.util.connection.ConnectionManager;
 
@@ -31,7 +31,6 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
         return INSTANCE;
     }
 
-    @Override
     public ExchangeRate save(ExchangeRate exchangeRate) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(ExchangeRateQueries.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -48,15 +47,29 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
             }
             throw new ExchangeRateAlreadyExistsException(exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId());
         } catch (SQLException e) {
-            if (isDuplicateError(e)) {
-                throw new ExchangeRateAlreadyExistsException(exchangeRate.getBaseCurrencyId(), exchangeRate.getTargetCurrencyId());
-            }
             throw new DaoException(e.getMessage());
         }
     }
 
     /* возвращает пустой список при отсутствии сущностей */
-    @Override
+    public ExchangeRate update(CurrencyPair pair, BigDecimal rate) {
+        try (var connection = ConnectionManager.get();
+             var prepareStatement = connection.prepareStatement(ExchangeRateQueries.UPDATE_SQL)) {
+            prepareStatement.setLong(1, pair.base().getId());
+            prepareStatement.setLong(2, pair.target().getId());
+            prepareStatement.setBigDecimal(3, rate);
+
+            try (var resultSet = prepareStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return buildEntity(resultSet);
+                }
+                throw new ExchangeRateNotFoundException(pair.base().getCode(), pair.target().getCode());
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
+    }
+
     public List<ExchangeRate> findAll() {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(ExchangeRateQueries.FIND_ALL_SQL)) {
@@ -67,39 +80,16 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
         }
     }
 
-    public ExchangeRate update(CurrencyPair pair, BigDecimal rate) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(ExchangeRateQueries.UPDATE_SQL)) {
-            prepareStatement.setLong(1, pair.base().getId());
-            prepareStatement.setLong(2, pair.target().getId());
-            prepareStatement.setBigDecimal(3, rate);
-
-            try (var resultSet = prepareStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    return new ExchangeRate(
-                            resultSet.getLong(ID),
-                            resultSet.getLong(BASE_CURRENCY_ID),
-                            resultSet.getLong(TARGET_CURRENCY_ID),
-                            resultSet.getBigDecimal(RATE)
-                    );
-                }
-                throw new ExchangeRateNotFoundException(pair.base().getCode(), pair.target().getCode());
-            }
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
-        }
-    }
-
-    public ExchangeRate findByCurrencyIds(Long first, Long second) {
+    public ExchangeRate findByCurrencyIds(Long baseId, Long targetId) {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(ExchangeRateQueries.FIND_BY_IDS_SQL)) {
-            prepareStatement.setLong(1, first);
-            prepareStatement.setLong(2, second);
+            prepareStatement.setLong(1, baseId);
+            prepareStatement.setLong(2, targetId);
             var resultSet = prepareStatement.executeQuery();
             if (resultSet.next()) {
                 return buildEntity(resultSet);
             }
-            throw new ExchangeRateNotFoundException(first, second);
+            throw new ExchangeRateNotFoundException(baseId, targetId);
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         }

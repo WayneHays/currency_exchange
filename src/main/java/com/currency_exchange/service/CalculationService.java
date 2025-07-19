@@ -4,7 +4,7 @@ import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.dto.exchange_calculation.CalculationRequestDto;
 import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
 import com.currency_exchange.entity.CurrencyPair;
-import com.currency_exchange.exception.service_exception.ExchangeRateNotFoundException;
+import com.currency_exchange.exception.dao_exception.ExchangeRateNotFoundException;
 import com.currency_exchange.service.calculation_strategy.CalculationStrategy;
 import com.currency_exchange.service.calculation_strategy.CrossRateStrategy;
 import com.currency_exchange.service.calculation_strategy.DirectRateStrategy;
@@ -32,7 +32,6 @@ public class CalculationService {
     public CalculationResponseDto calculate(CalculationRequestDto calculationRequest) {
         String codeBase = calculationRequest.from();
         String codeTarget = calculationRequest.to();
-
         BigDecimal amount = calculationRequest.amount();
 
         CurrencyPair pair = exchangeRateService.findCurrencyPair(codeBase, codeTarget);

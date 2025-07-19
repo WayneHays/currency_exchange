@@ -18,8 +18,4 @@ public abstract class BaseDao<T> implements Dao<T> {
         }
         return entities;
     }
-
-    protected boolean isDuplicateError(SQLException e) {
-        return e.getErrorCode() == DUPLICATE_ERROR_CODE && e.getMessage().contains(DUPLICATE_ERROR_MESSAGE);
-    }
 }
