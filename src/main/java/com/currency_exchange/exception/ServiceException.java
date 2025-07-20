@@ -1,4 +1,4 @@
-package com.currency_exchange.exception.service_exception;
+package com.currency_exchange.exception;
 
 public class ServiceException extends RuntimeException {
 

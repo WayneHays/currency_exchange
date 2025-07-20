@@ -5,9 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseDao<T> implements Dao<T> {
-    public static final String DUPLICATE_ERROR_MESSAGE = "UNIQUE constraint failed";
-    public static final int DUPLICATE_ERROR_CODE = 19;
+public abstract class BaseDao<T> {
 
     protected abstract T buildEntity(ResultSet resultSet) throws SQLException;
 

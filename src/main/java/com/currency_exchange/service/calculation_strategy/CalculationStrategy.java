@@ -1,9 +1,9 @@
 package com.currency_exchange.service.calculation_strategy;
 
+import com.currency_exchange.dao.ExchangeRatesDao;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
-import com.currency_exchange.entity.CurrencyPair;
-import com.currency_exchange.service.ExchangeRateService;
+import com.currency_exchange.entity.Currency;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,15 +12,16 @@ public abstract class CalculationStrategy {
     protected static final int PRE_ROUNDING = 6;
     protected static final int RESULT_ROUNDING = 2;
 
-    protected final ExchangeRateService exchangeRateService;
+    protected final ExchangeRatesDao exchangeRatesDao;
 
-    protected CalculationStrategy(ExchangeRateService exchangeRateService) {
-        this.exchangeRateService = exchangeRateService;
+    protected CalculationStrategy(ExchangeRatesDao exchangeRatesDao) {
+        this.exchangeRatesDao = exchangeRatesDao;
     }
 
-    public abstract boolean canHandle(CurrencyPair pair);
+    public abstract boolean canHandle(Currency base, Currency target);
 
-    public abstract CalculationResponseDto calculate(CurrencyPair pair,
+    public abstract CalculationResponseDto calculate(Currency base,
+                                                     Currency target,
                                                      BigDecimal amount,
                                                      CurrencyResponseDto baseResponse,
                                                      CurrencyResponseDto targetResponse);

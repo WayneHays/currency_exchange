@@ -1,9 +1,9 @@
 package com.currency_exchange.dao;
 
 import com.currency_exchange.entity.Currency;
-import com.currency_exchange.exception.dao_exception.CurrencyAlreadyExistsException;
-import com.currency_exchange.exception.dao_exception.CurrencyNotFoundException;
-import com.currency_exchange.exception.dao_exception.DaoException;
+import com.currency_exchange.exception.CurrencyAlreadyExistsException;
+import com.currency_exchange.exception.CurrencyNotFoundException;
+import com.currency_exchange.exception.DaoException;
 import com.currency_exchange.repository.CurrencyQueries;
 import com.currency_exchange.util.connection.ConnectionManager;
 
@@ -42,13 +42,15 @@ public class CurrencyDao extends BaseDao<Currency> {
                 currency.setId(generatedKeys.getLong(1));
                 return currency;
             }
-            throw new CurrencyAlreadyExistsException(currency.getCode());
+            throw new DaoException("Creating currency failed");
         } catch (SQLException e) {
+            if (e.getErrorCode() == 19) {
+                throw new CurrencyAlreadyExistsException(currency.getCode());
+            }
             throw new DaoException(e.getMessage());
         }
     }
 
-    /* возвращает пустой список при отсутствии сущностей */
     public Currency findByCode(String code) {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_BY_CODE_SQL)) {
@@ -66,23 +68,8 @@ public class CurrencyDao extends BaseDao<Currency> {
     public List<Currency> findAll() {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_ALL_SQL)) {
-            ;
             var resultSet = prepareStatement.executeQuery();
             return buildEntityList(resultSet);
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
-        }
-    }
-
-    public Currency findById(Long id) {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_BY_CODE_SQL)) {
-            prepareStatement.setLong(1, id);
-            var resultSet = prepareStatement.executeQuery();
-            if (resultSet.next()) {
-                return buildEntity(resultSet);
-            }
-            throw new CurrencyNotFoundException(String.valueOf(id));
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         }
@@ -101,8 +88,7 @@ public class CurrencyDao extends BaseDao<Currency> {
             Map<Long, Currency> result = new HashMap<>();
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    Currency currency = new Currency();
-                    buildEntity(resultSet);
+                    Currency currency = buildEntity(resultSet);
                     result.put(currency.getId(), currency);
                 }
             }

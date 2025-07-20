@@ -1,7 +1,7 @@
 package com.currency_exchange.util;
 
 public final class ValidationConstants {
-    public static final String CURRENCY_NAME_PATTERN = "^[\\p{L}\\s\\-]{2,30}$";
+    public static final String CURRENCY_NAME_PATTERN = "^[\\p{L}\\s\\-]{2,15}$";
     public static final String CURRENCY_CODE_PATTERN = "^[A-Za-z]{3}$";
     public static final String CURRENCY_SIGN_PATTERN = "^\\p{Sc}";
     public static final String EXCHANGE_RATE_RATE_PATTERN = "^(?!0+([.,]0+)?$)([1-9]\\d{0,5}([.,]\\d{1,6})?|0[.,]\\d{1,6}|[.,]\\d{1,6})$";

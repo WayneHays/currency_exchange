@@ -14,6 +14,14 @@ public final class ConnectionManager {
 
     private static BlockingQueue<Connection> pool;
 
+    public static Connection get() {
+        try {
+            return pool.take();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     static {
         loadDriver();
         initConnectionPool();
@@ -58,13 +66,5 @@ public final class ConnectionManager {
                         ? pool.add((Connection) proxy)
                         : method.invoke(connection, args)
         );
-    }
-
-    public static Connection get() {
-        try {
-            return pool.take();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

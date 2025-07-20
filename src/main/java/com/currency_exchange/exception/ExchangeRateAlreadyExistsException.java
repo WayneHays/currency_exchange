@@ -1,11 +1,11 @@
-package com.currency_exchange.exception.dao_exception;
+package com.currency_exchange.exception;
 
 public class ExchangeRateAlreadyExistsException extends RuntimeException {
     private final String baseCode;
     private final String targetCode;
 
     public ExchangeRateAlreadyExistsException(String baseCode, String targetCode) {
-        super("Exchange rate already exists for currencies [%s -> %s]".formatted(baseCode, targetCode));
+        super("Exchange rate already exists [%s -> %s]".formatted(baseCode.toUpperCase(), targetCode.toUpperCase()));
         this.baseCode = baseCode;
         this.targetCode = targetCode;
     }

@@ -4,8 +4,8 @@ import com.currency_exchange.dao.CurrencyDao;
 import com.currency_exchange.dto.currency.CurrencyCreateDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
-import com.currency_exchange.exception.dao_exception.DaoException;
-import com.currency_exchange.exception.service_exception.ServiceException;
+import com.currency_exchange.exception.DaoException;
+import com.currency_exchange.exception.ServiceException;
 import com.currency_exchange.util.Mapper;
 
 import java.util.List;
@@ -35,7 +35,6 @@ public class CurrencyService {
         try {
             Currency currency = currencyDao.findByCode(code);
             return Mapper.toCurrencyResponseDto(currency);
-
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }

@@ -3,7 +3,7 @@ package com.currency_exchange.util;
 import com.currency_exchange.CalculationParam;
 import com.currency_exchange.CurrencyParam;
 import com.currency_exchange.ExchangeRateParam;
-import com.currency_exchange.exception.service_exception.InvalidParameterException;
+import com.currency_exchange.exception.InvalidParameterException;
 
 public final class Validator {
 
@@ -20,7 +20,7 @@ public final class Validator {
         validateParamRegex(rate, ExchangeRateParam.RATE);
     }
 
-    public static void validateCurrencyCreateDto(String code, String name, String sign) {
+    public static void validateCurrencyCreateRequest(String code, String name, String sign) {
         validateParamRegex(code, CurrencyParam.CODE);
         validateParamRegex(name, CurrencyParam.NAME);
         validateParamRegex(sign, CurrencyParam.SIGN);
@@ -45,7 +45,7 @@ public final class Validator {
         }
     }
 
-    private static void validateCurrenciesAreDifferent(String baseCode, String targetCode) {
+    public static void validateCurrenciesAreDifferent(String baseCode, String targetCode) {
         if (baseCode.equals(targetCode)) {
             throw new InvalidParameterException(ValidationConstants.WRONG_PAIR_MESSAGE);
         }

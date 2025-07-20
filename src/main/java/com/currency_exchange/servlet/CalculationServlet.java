@@ -2,9 +2,9 @@ package com.currency_exchange.servlet;
 
 import com.currency_exchange.dto.exchange_calculation.CalculationRequestDto;
 import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
-import com.currency_exchange.exception.dao_exception.CurrencyNotFoundException;
-import com.currency_exchange.exception.dao_exception.ExchangeRateNotFoundException;
-import com.currency_exchange.exception.service_exception.InvalidParameterException;
+import com.currency_exchange.exception.CurrencyNotFoundException;
+import com.currency_exchange.exception.ExchangeRateNotFoundException;
+import com.currency_exchange.exception.InvalidParameterException;
 import com.currency_exchange.service.CalculationService;
 import com.currency_exchange.util.data_extraction.DataExtractor;
 import jakarta.servlet.annotation.WebServlet;

@@ -1,10 +1,11 @@
 package com.currency_exchange.service.calculation_strategy;
 
+import com.currency_exchange.dao.ExchangeRatesDao;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
-import com.currency_exchange.entity.CurrencyPair;
+import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
-import com.currency_exchange.service.ExchangeRateService;
+import com.currency_exchange.service.RateType;
 import com.currency_exchange.util.Mapper;
 
 import java.math.BigDecimal;
@@ -12,22 +13,23 @@ import java.math.RoundingMode;
 
 public class ReverseRateStrategy extends CalculationStrategy {
 
-    public ReverseRateStrategy(ExchangeRateService exchangeRateService) {
-        super(exchangeRateService);
+    public ReverseRateStrategy(ExchangeRatesDao exchangeRatesDao) {
+        super(exchangeRatesDao);
     }
 
     @Override
-    public boolean canHandle(CurrencyPair pair) {
-        return exchangeRateService.isReversedExchangeRateExists(pair);
+    public boolean canHandle(Currency base, Currency target) {
+        return exchangeRatesDao.isRateExists(base, target, RateType.REVERSE);
     }
 
     @Override
     public CalculationResponseDto calculate(
-            CurrencyPair pair,
+            Currency base,
+            Currency target,
             BigDecimal amount,
             CurrencyResponseDto baseResponse,
             CurrencyResponseDto targetResponse) {
-        ExchangeRate exchangeRate = exchangeRateService.findEntityByPair(pair);
+        ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
         BigDecimal rate = exchangeRate.getRate();
         BigDecimal calculatedRate = BigDecimal.ONE.divide(
                 rate,

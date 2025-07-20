@@ -2,10 +2,10 @@ package com.currency_exchange.servlet.exchange_rates;
 
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
-import com.currency_exchange.exception.dao_exception.CurrencyNotFoundException;
-import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
-import com.currency_exchange.exception.service_exception.InvalidParameterException;
-import com.currency_exchange.exception.service_exception.ServiceException;
+import com.currency_exchange.exception.CurrencyNotFoundException;
+import com.currency_exchange.exception.ExchangeRateAlreadyExistsException;
+import com.currency_exchange.exception.InvalidParameterException;
+import com.currency_exchange.exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
 import com.currency_exchange.util.data_extraction.DataExtractor;
@@ -38,7 +38,7 @@ public class ExchangeRatesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            ExchangeRateCreateDto dto = DataExtractor.extractExchangeRateCreateRequest(req);
+            ExchangeRateCreateDto dto = DataExtractor.extractExchangeRateCreateDto(req);
             ExchangeRateResponseDto saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);
         } catch (NumberFormatException | InvalidParameterException e) {

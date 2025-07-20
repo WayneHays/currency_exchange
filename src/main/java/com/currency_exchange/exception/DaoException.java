@@ -1,4 +1,4 @@
-package com.currency_exchange.exception.dao_exception;
+package com.currency_exchange.exception;
 
 public class DaoException extends RuntimeException {
     public DaoException(String message) {

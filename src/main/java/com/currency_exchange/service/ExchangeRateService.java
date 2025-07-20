@@ -7,12 +7,11 @@ import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
 import com.currency_exchange.entity.Currency;
-import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
-import com.currency_exchange.exception.dao_exception.DaoException;
-import com.currency_exchange.exception.dao_exception.ExchangeRateAlreadyExistsException;
-import com.currency_exchange.exception.dao_exception.ExchangeRateNotFoundException;
-import com.currency_exchange.exception.service_exception.ServiceException;
+import com.currency_exchange.exception.DaoException;
+import com.currency_exchange.exception.ExchangeRateAlreadyExistsException;
+import com.currency_exchange.exception.ExchangeRateNotFoundException;
+import com.currency_exchange.exception.ServiceException;
 import com.currency_exchange.util.Mapper;
 
 import java.util.ArrayList;
@@ -34,10 +33,11 @@ public class ExchangeRateService {
 
     public ExchangeRateResponseDto save(ExchangeRateCreateDto dto) {
         try {
-            CurrencyPair pair = findCurrencyPair(dto.baseCurrencyCode(), dto.targetCurrencyCode());
-            ExchangeRate exchangeRate = Mapper.toExchangeRate(dto, pair);
+            Currency base = currencyDao.findByCode(dto.baseCurrencyCode());
+            Currency target = currencyDao.findByCode(dto.targetCurrencyCode());
+            ExchangeRate exchangeRate = Mapper.toExchangeRate(dto.rate(), base, target);
             ExchangeRate saved = exchangeRatesDao.save(exchangeRate);
-            return Mapper.toExchangeRateResponseDto(saved, pair);
+            return Mapper.toExchangeRateResponseDto(saved, base, target);
         } catch (ExchangeRateAlreadyExistsException e) {
             throw new ExchangeRateAlreadyExistsException(dto.baseCurrencyCode(), dto.targetCurrencyCode());
         } catch (DaoException e) {
@@ -45,11 +45,13 @@ public class ExchangeRateService {
         }
     }
 
-    public ExchangeRateResponseDto update(CurrencyCodesDto pairDto, ExchangeRateUpdateDto rateDto) {
+    public ExchangeRateResponseDto update(ExchangeRateUpdateDto dto) {
         try {
-            CurrencyPair pair = findCurrencyPair(pairDto.baseCurrencyCode(), pairDto.targetCurrencyCode());
-            ExchangeRate updated = exchangeRatesDao.update(pair, rateDto.rate());
-            return Mapper.toExchangeRateResponseDto(updated, pair);
+            Currency base = currencyDao.findByCode(dto.codesDto().baseCurrencyCode());
+            Currency target = currencyDao.findByCode(dto.codesDto().targetCurrencyCode());
+            ExchangeRate toUpdate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
+            ExchangeRate updated = exchangeRatesDao.update();
+            return Mapper.toExchangeRateResponseDto(updated, base, target);
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -69,29 +71,19 @@ public class ExchangeRateService {
                 .map(rate -> {
                     Currency base = currencies.get(rate.getBaseCurrencyId());
                     Currency target = currencies.get(rate.getTargetCurrencyId());
-                    CurrencyPair pair = new CurrencyPair(base, target);
-                    return Mapper.toExchangeRateResponseDto(rate, pair);
+                    return Mapper.toExchangeRateResponseDto(rate, base, target);
                 })
                 .toList();
     }
 
     public ExchangeRateResponseDto findByPair(CurrencyCodesDto dto) {
         try {
-            CurrencyPair pair = findCurrencyPair(dto.baseCurrencyCode(), dto.targetCurrencyCode());
-            ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(pair.base().getId(), pair.target().getId());
-            return Mapper.toExchangeRateResponseDto(exchangeRate, pair);
+            Currency base = currencyDao.findByCode(dto.baseCurrencyCode());
+            Currency target = currencyDao.findByCode(dto.targetCurrencyCode());
+            ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
+            return Mapper.toExchangeRateResponseDto(exchangeRate, base, target);
         } catch (ExchangeRateNotFoundException e) {
             throw new ExchangeRateNotFoundException(dto.baseCurrencyCode(), dto.targetCurrencyCode());
         }
-    }
-
-    public ExchangeRate findEntityByPair(CurrencyPair pair) {
-        return exchangeRatesDao.findByCurrencyIds(pair.base().getId(), pair.target().getId());
-    }
-
-    public CurrencyPair findCurrencyPair(String baseCode, String targetCode) {
-        Currency base = currencyDao.findByCode(baseCode);
-        Currency target = currencyDao.findByCode(targetCode);
-        return new CurrencyPair(base, target);
     }
 }

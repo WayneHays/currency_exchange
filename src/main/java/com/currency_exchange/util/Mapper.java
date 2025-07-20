@@ -9,7 +9,6 @@ import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
 import com.currency_exchange.entity.Currency;
-import com.currency_exchange.entity.CurrencyPair;
 import com.currency_exchange.entity.ExchangeRate;
 
 import java.math.BigDecimal;
@@ -27,11 +26,11 @@ public final class Mapper {
         return currency;
     }
 
-    public static ExchangeRate toExchangeRate(ExchangeRateCreateDto dto, CurrencyPair pair) {
+    public static ExchangeRate toExchangeRate(BigDecimal rate, Currency base, Currency target) {
         ExchangeRate exchangeRate = new ExchangeRate();
-        exchangeRate.setBaseCurrencyId(pair.base().getId());
-        exchangeRate.setTargetCurrencyId(pair.target().getId());
-        exchangeRate.setRate(dto.rate());
+        exchangeRate.setBaseCurrencyId(base.getId());
+        exchangeRate.setTargetCurrencyId(target.getId());
+        exchangeRate.setRate(rate);
 
         return exchangeRate;
     }
@@ -44,9 +43,9 @@ public final class Mapper {
                 currency.getSign());
     }
 
-    public static ExchangeRateResponseDto toExchangeRateResponseDto(ExchangeRate exchangeRate, CurrencyPair pair) {
-        CurrencyResponseDto baseResponse = Mapper.toCurrencyResponseDto(pair.base());
-        CurrencyResponseDto targetResponse = Mapper.toCurrencyResponseDto(pair.target());
+    public static ExchangeRateResponseDto toExchangeRateResponseDto(ExchangeRate exchangeRate, Currency base, Currency target) {
+        CurrencyResponseDto baseResponse = Mapper.toCurrencyResponseDto(base);
+        CurrencyResponseDto targetResponse = Mapper.toCurrencyResponseDto(target);
         return new ExchangeRateResponseDto(
                 exchangeRate.getId(),
                 baseResponse,
@@ -65,8 +64,8 @@ public final class Mapper {
                 rateDecimal);
     }
 
-    public static ExchangeRateUpdateDto toExchangeRateUpdateDto(String rate) {
-        return new ExchangeRateUpdateDto(new BigDecimal(rate));
+    public static ExchangeRateUpdateDto toExchangeRateUpdateDto(CurrencyCodesDto codesDto, String rate) {
+        return new ExchangeRateUpdateDto(codesDto, new BigDecimal(rate));
     }
 
     public static CalculationRequestDto toCalculationRequestDto(String from, String to, String amount) {

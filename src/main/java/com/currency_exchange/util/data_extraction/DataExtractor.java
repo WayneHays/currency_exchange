@@ -9,7 +9,7 @@ import com.currency_exchange.dto.currency.CurrencyCreateDto;
 import com.currency_exchange.dto.exchange_calculation.CalculationRequestDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
-import com.currency_exchange.exception.service_exception.InvalidParameterException;
+import com.currency_exchange.exception.InvalidParameterException;
 import com.currency_exchange.util.Mapper;
 import com.currency_exchange.util.ValidationConstants;
 import com.currency_exchange.util.Validator;
@@ -31,16 +31,16 @@ public final class DataExtractor {
         return code;
     }
 
-    public static CurrencyCodesDto extractCurrencyPair(String path) {
+    public static CurrencyCodesDto extractCurrencyCodes(String path) {
         Validator.validateParamRegex(path, CurrencyPairParam.PAIR);
-
         String baseCurrencyCode = path.substring(1, 4).toUpperCase();
         String targetCurrencyCode = path.substring(4, 7).toUpperCase();
+        Validator.validateCurrenciesAreDifferent(baseCurrencyCode, targetCurrencyCode);
 
         return Mapper.toCurrencyCodesDto(baseCurrencyCode, targetCurrencyCode);
     }
 
-    public static ExchangeRateCreateDto extractExchangeRateCreateRequest(HttpServletRequest req) {
+    public static ExchangeRateCreateDto extractExchangeRateCreateDto(HttpServletRequest req) {
         Set<String> requiredNames = ExchangeRateParam.getAllNames();
 
         checkMissingParameters(req, requiredNames);
@@ -50,12 +50,12 @@ public final class DataExtractor {
         String targetCurrencyCode = req.getParameter(ExchangeRateParam.TARGET.getParamName()).trim();
         String rate = req.getParameter(ExchangeRateParam.RATE.getParamName()).trim();
 
-        Validator.validateExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, targetCurrencyCode);
+        Validator.validateExchangeRateCreateRequest(baseCurrencyCode, targetCurrencyCode, rate);
 
         return Mapper.toExchangeRateCreateDto(baseCurrencyCode, targetCurrencyCode, rate);
     }
 
-    public static CurrencyCreateDto extractCurrenciesCreateDto(HttpServletRequest req) {
+    public static CurrencyCreateDto extractCurrencyCreateDto(HttpServletRequest req) {
         Set<String> requiredNames = CurrencyParam.getAllNames();
 
         checkMissingParameters(req, requiredNames);
@@ -65,7 +65,7 @@ public final class DataExtractor {
         String code = req.getParameter(CurrencyParam.CODE.getParamName()).trim().toUpperCase();
         String sign = req.getParameter(CurrencyParam.SIGN.getParamName()).trim();
 
-        Validator.validateCurrencyCreateDto(code, name, sign);
+        Validator.validateCurrencyCreateRequest(code, name, sign);
         name = DataFormatter.capitalizeRequiredLetters(name);
 
         return new CurrencyCreateDto(name, code, sign);
@@ -86,7 +86,9 @@ public final class DataExtractor {
         return Mapper.toCalculationRequestDto(from, to, amount);
     }
 
-    public static ExchangeRateUpdateDto extractExchangeRateUpdateRequest(HttpServletRequest req) {
+    public static ExchangeRateUpdateDto extractExchangeRateUpdateDto(HttpServletRequest req) {
+        String path = req.getPathInfo();
+        CurrencyCodesDto codesDto = extractCurrencyCodes(path);
         String rate = req.getParameter(ExchangeRateParam.RATE.getParamName());
 
         if (rate == null) {
@@ -94,7 +96,7 @@ public final class DataExtractor {
         }
         Validator.validateParamRegex(rate, ExchangeRateParam.RATE);
 
-        return Mapper.toExchangeRateUpdateDto(rate);
+        return Mapper.toExchangeRateUpdateDto(codesDto, rate);
     }
 
     private static void checkMissingParameters(HttpServletRequest req, Set<String> requiredNames) {
