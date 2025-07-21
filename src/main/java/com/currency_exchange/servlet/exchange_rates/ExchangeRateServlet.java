@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 import static jakarta.servlet.http.HttpServletResponse.*;
 
@@ -54,9 +55,9 @@ public class ExchangeRateServlet extends BaseServlet {
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            CurrencyPairDto codesDto = PathExtractor.extractCurrencyPair(req);
-            String rate = ParameterExtractor.extractPatchData(req);
-            ExchangeRateResponseDto updated = exchangeRateService.update(codesDto, rate);
+            CurrencyPairDto dto = PathExtractor.extractCurrencyPair(req);
+            BigDecimal rate = ParameterExtractor.extractPatchDto(req);
+            ExchangeRateResponseDto updated = exchangeRateService.update(dto, rate);
             sendSuccessResponse(resp, updated);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

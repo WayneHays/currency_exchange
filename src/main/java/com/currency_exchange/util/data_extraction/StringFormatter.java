@@ -1,8 +1,8 @@
 package com.currency_exchange.util.data_extraction;
 
-public class DataFormatter {
+public class StringFormatter {
 
-    private DataFormatter() {
+    private StringFormatter() {
     }
 
     public static String capitalizeRequiredLetters(String input) {

@@ -4,58 +4,61 @@ import com.currency_exchange.dto.calculation.CalculationRequestDto;
 import com.currency_exchange.dto.currency.CurrencyRequestDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateRequestDto;
 import com.currency_exchange.util.Mapper;
-import com.currency_exchange.util.ValidationConstants;
-import com.currency_exchange.util.Validator;
+import com.currency_exchange.util.validator.CalculationValidator;
+import com.currency_exchange.util.validator.CurrencyValidator;
+import com.currency_exchange.util.validator.ExchangeRateValidator;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
-public final class ParameterExtractor {
+import static com.currency_exchange.util.ValidationConstants.*;
 
+public final class ParameterExtractor {
     private ParameterExtractor() {
     }
 
     public static CurrencyRequestDto extractCurrencyRequest(HttpServletRequest req) {
         Map<String, String[]> params = req.getParameterMap();
-        Validator.validateCurrencyCreateRequest(params);
+        CurrencyValidator.validateCreateRequest(params);
 
-        String code = req.getParameter(ValidationConstants.CODE_PARAM).trim().toUpperCase();
-        String name = req.getParameter(ValidationConstants.NAME_PARAM).trim();
-        String sign = req.getParameter(ValidationConstants.SIGN_PARAM).trim();
+        String code = req.getParameter(CODE.trim()).toUpperCase();
+        String name = req.getParameter(NAME.trim());
+        String sign = req.getParameter(SIGN.trim());
 
-        name = DataFormatter.capitalizeRequiredLetters(name);
+        name = StringFormatter.capitalizeRequiredLetters(name);
 
         return Mapper.toCurrencyRequestDto(name, code, sign);
     }
 
     public static ExchangeRateRequestDto extractExchangeRateRequest(HttpServletRequest req) {
         Map<String, String[]> params = req.getParameterMap();
-        Validator.validateExchangeRateCreateRequest(params);
+        ExchangeRateValidator.validateCreateRequest(params);
 
-        String baseCurrencyCode = req.getParameter(ValidationConstants.BASE_CURRENCY_CODE).trim().toUpperCase();
-        String targetCurrencyCode = req.getParameter(ValidationConstants.TARGET_CURRENCY_CODE).trim().toUpperCase();
-        String rate = req.getParameter(ValidationConstants.RATE);
+        String baseCurrencyCode = req.getParameter(BASE_CURRENCY_CODE).trim().toUpperCase();
+        String targetCurrencyCode = req.getParameter(TARGET_CURRENCY_CODE).trim().toUpperCase();
+        String rate = req.getParameter(RATE);
 
-        return Mapper.toExchangeRateCreateDto(baseCurrencyCode, targetCurrencyCode, rate);
+        return Mapper.toExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, rate);
     }
 
     public static CalculationRequestDto extractCalculationRequest(HttpServletRequest req) {
         Map<String, String[]> params = req.getParameterMap();
-        Validator.validateCalculationRequest(params);
+        CalculationValidator.validateCalculationRequest(params);
 
-        String from = params.get(ValidationConstants.FROM)[0].trim().toUpperCase();
-        String to = params.get(ValidationConstants.TO)[0].trim().toUpperCase();
-        String amount = params.get(ValidationConstants.AMOUNT)[0].trim();
+        String from = req.getParameter(FROM).trim().toUpperCase();
+        String to = req.getParameter(TO).trim().toUpperCase();
+        String amount = req.getParameter(AMOUNT).trim();
 
         return Mapper.toCalculationRequestDto(from, to, amount);
     }
 
-    public static String extractPatchData(HttpServletRequest req) {
+    public static BigDecimal extractPatchDto(HttpServletRequest req) {
         Map<String, String[]> params = req.getParameterMap();
-        Validator.validatePatchRequest(params);
+        ExchangeRateValidator.validateUpdateRequest(params);
 
-        String amount = params.get(ValidationConstants.AMOUNT)[0].trim();
-        return Mapper.toPatchDto();
+        String amount = params.get(AMOUNT)[0].trim();
+        return new BigDecimal(amount);
     }
 }
 

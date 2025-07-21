@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 import static jakarta.servlet.http.HttpServletResponse.*;
 
@@ -38,7 +37,6 @@ public class CurrenciesServlet extends BaseServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            Set.of()
             CurrencyRequestDto dto = ParameterExtractor.extractCurrencyRequest(req);
             CurrencyResponseDto savedCurrency = currencyService.save(dto);
             sendCreatedResponse(resp, savedCurrency);

@@ -55,7 +55,7 @@ public final class Mapper {
                 exchangeRate.getRate());
     }
 
-    public static ExchangeRateRequestDto toExchangeRateCreateDto(
+    public static ExchangeRateRequestDto toExchangeRateRequestDto(
             String baseCurrencyCode,
             String targetCurrencyCode,
             String rate) {
@@ -65,10 +65,6 @@ public final class Mapper {
                 targetCurrencyCode,
                 rateDecimal);
     }
-
-//    public static ExchangeRateUpdateDto toExchangeRateUpdateDto(CurrencyCodesDto codesDto, String rate) {
-//        return new ExchangeRateUpdateDto(codesDto, new BigDecimal(rate));
-//    }
 
     public static CalculationRequestDto toCalculationRequestDto(String from, String to, String amount) {
         return new CalculationRequestDto(from, to, amount);
@@ -94,15 +90,15 @@ public final class Mapper {
         );
     }
 
+    public static CurrencyRequestDto toCurrencyRequestDto(String name, String code, String sign) {
+        return new CurrencyRequestDto(name, code, sign);
+    }
+
     private static BigDecimal createFromString(String input) {
         if (input.trim().contains(",")) {
             String valid = input.replaceFirst(",", ".");
             return new BigDecimal(valid);
         }
         return new BigDecimal(input.trim());
-    }
-
-    public static CurrencyRequestDto toCurrencyRequestDto(String name, String code, String sign) {
-        return new CurrencyRequestDto(name, code, sign);
     }
 }
