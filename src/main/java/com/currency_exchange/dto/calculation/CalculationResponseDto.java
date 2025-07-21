@@ -1,4 +1,4 @@
-package com.currency_exchange.dto.exchange_calculation;
+package com.currency_exchange.dto.calculation;
 
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 

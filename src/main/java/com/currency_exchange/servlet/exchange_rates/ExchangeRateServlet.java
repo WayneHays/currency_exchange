@@ -1,15 +1,15 @@
 package com.currency_exchange.servlet.exchange_rates;
 
-import com.currency_exchange.dto.currency.CurrencyCodesDto;
+import com.currency_exchange.dto.currency.CurrencyPairDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
 import com.currency_exchange.exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.InvalidParameterException;
 import com.currency_exchange.exception.ServiceException;
 import com.currency_exchange.service.ExchangeRateService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.data_extraction.DataExtractor;
+import com.currency_exchange.util.data_extraction.ParameterExtractor;
+import com.currency_exchange.util.data_extraction.PathExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -38,8 +38,7 @@ public class ExchangeRateServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            String path = req.getPathInfo();
-            CurrencyCodesDto dto = DataExtractor.extractCurrencyCodes(path);
+            CurrencyPairDto dto = PathExtractor.extractCurrencyPair(req);
             ExchangeRateResponseDto dtoResponse = exchangeRateService.findByPair(dto);
             sendSuccessResponse(resp, dtoResponse);
         } catch (InvalidParameterException e) {
@@ -55,10 +54,9 @@ public class ExchangeRateServlet extends BaseServlet {
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         prepareJsonResponse(resp);
         try {
-            String path = req.getPathInfo();
-            CurrencyCodesDto codesDto = DataExtractor.extractCurrencyCodes(path);
-            ExchangeRateUpdateDto updateDto = DataExtractor.extractExchangeRateUpdateDto(req);
-            ExchangeRateResponseDto updated = exchangeRateService.update(codesDto, updateDto);
+            CurrencyPairDto codesDto = PathExtractor.extractCurrencyPair(req);
+            String rate = ParameterExtractor.extractPatchData(req);
+            ExchangeRateResponseDto updated = exchangeRateService.update(codesDto, rate);
             sendSuccessResponse(resp, updated);
         } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());

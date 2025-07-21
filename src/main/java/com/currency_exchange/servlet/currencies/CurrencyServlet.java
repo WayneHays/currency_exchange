@@ -6,7 +6,7 @@ import com.currency_exchange.exception.InvalidParameterException;
 import com.currency_exchange.exception.ServiceException;
 import com.currency_exchange.service.CurrencyService;
 import com.currency_exchange.servlet.BaseServlet;
-import com.currency_exchange.util.data_extraction.DataExtractor;
+import com.currency_exchange.util.data_extraction.PathExtractor;
 import com.google.gson.JsonIOException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,8 +25,7 @@ public class CurrencyServlet extends BaseServlet {
         prepareJsonResponse(resp);
 
         try {
-            String path = req.getPathInfo();
-            String code = DataExtractor.extractCurrencyCode(path);
+            String code = PathExtractor.extractCurrencyCode(req);
             CurrencyResponseDto dto = currencyService.findByCode(code);
             sendSuccessResponse(resp, dto);
         } catch (InvalidParameterException e) {

@@ -1,7 +1,7 @@
 package com.currency_exchange.service;
 
 import com.currency_exchange.dao.CurrencyDao;
-import com.currency_exchange.dto.currency.CurrencyCreateDto;
+import com.currency_exchange.dto.currency.CurrencyRequestDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.DaoException;
@@ -21,7 +21,7 @@ public class CurrencyService {
         return INSTANCE;
     }
 
-    public CurrencyResponseDto save(CurrencyCreateDto dto) {
+    public CurrencyResponseDto save(CurrencyRequestDto dto) {
         try {
             Currency currency = Mapper.toCurrency(dto);
             Currency saved = currencyDao.save(currency);

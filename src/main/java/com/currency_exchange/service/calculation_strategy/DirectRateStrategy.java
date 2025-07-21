@@ -1,8 +1,8 @@
 package com.currency_exchange.service.calculation_strategy;
 
 import com.currency_exchange.dao.ExchangeRatesDao;
+import com.currency_exchange.dto.calculation.CalculationResponseDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
-import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.service.RateType;

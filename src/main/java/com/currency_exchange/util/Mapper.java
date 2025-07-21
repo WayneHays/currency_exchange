@@ -1,13 +1,12 @@
 package com.currency_exchange.util;
 
-import com.currency_exchange.dto.currency.CurrencyCodesDto;
-import com.currency_exchange.dto.currency.CurrencyCreateDto;
+import com.currency_exchange.dto.calculation.CalculationRequestDto;
+import com.currency_exchange.dto.calculation.CalculationResponseDto;
+import com.currency_exchange.dto.currency.CurrencyPairDto;
+import com.currency_exchange.dto.currency.CurrencyRequestDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
-import com.currency_exchange.dto.exchange_calculation.CalculationRequestDto;
-import com.currency_exchange.dto.exchange_calculation.CalculationResponseDto;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateCreateDto;
+import com.currency_exchange.dto.exchange_rate.ExchangeRateRequestDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
-import com.currency_exchange.dto.exchange_rate.ExchangeRateUpdateDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
 
@@ -18,7 +17,7 @@ public final class Mapper {
     private Mapper() {
     }
 
-    public static Currency toCurrency(CurrencyCreateDto dto) {
+    public static Currency toCurrency(CurrencyRequestDto dto) {
         Currency currency = new Currency();
         currency.setCode(dto.code());
         currency.setSign(dto.sign());
@@ -43,7 +42,10 @@ public final class Mapper {
                 currency.getSign());
     }
 
-    public static ExchangeRateResponseDto toExchangeRateResponseDto(ExchangeRate exchangeRate, Currency base, Currency target) {
+    public static ExchangeRateResponseDto toExchangeRateResponseDto(
+            ExchangeRate exchangeRate,
+            Currency base,
+            Currency target) {
         CurrencyResponseDto baseResponse = Mapper.toCurrencyResponseDto(base);
         CurrencyResponseDto targetResponse = Mapper.toCurrencyResponseDto(target);
         return new ExchangeRateResponseDto(
@@ -53,28 +55,27 @@ public final class Mapper {
                 exchangeRate.getRate());
     }
 
-    public static ExchangeRateCreateDto toExchangeRateCreateDto(
+    public static ExchangeRateRequestDto toExchangeRateCreateDto(
             String baseCurrencyCode,
             String targetCurrencyCode,
             String rate) {
         BigDecimal rateDecimal = createFromString(rate);
-        return new ExchangeRateCreateDto(
+        return new ExchangeRateRequestDto(
                 baseCurrencyCode,
                 targetCurrencyCode,
                 rateDecimal);
     }
 
-    public static ExchangeRateUpdateDto toExchangeRateUpdateDto(CurrencyCodesDto codesDto, String rate) {
-        return new ExchangeRateUpdateDto(codesDto, new BigDecimal(rate));
-    }
+//    public static ExchangeRateUpdateDto toExchangeRateUpdateDto(CurrencyCodesDto codesDto, String rate) {
+//        return new ExchangeRateUpdateDto(codesDto, new BigDecimal(rate));
+//    }
 
     public static CalculationRequestDto toCalculationRequestDto(String from, String to, String amount) {
-        BigDecimal rateDecimal = new BigDecimal(amount);
-        return new CalculationRequestDto(from, to, rateDecimal);
+        return new CalculationRequestDto(from, to, amount);
     }
 
-    public static CurrencyCodesDto toCurrencyCodesDto(String baseCurrencyCode, String targetCurrencyCode) {
-        return new CurrencyCodesDto(baseCurrencyCode, targetCurrencyCode);
+    public static CurrencyPairDto toCurrencyCodesDto(String baseCurrencyCode, String targetCurrencyCode) {
+        return new CurrencyPairDto(baseCurrencyCode, targetCurrencyCode);
     }
 
     public static CalculationResponseDto toCalculationResponseDto(
@@ -99,5 +100,9 @@ public final class Mapper {
             return new BigDecimal(valid);
         }
         return new BigDecimal(input.trim());
+    }
+
+    public static CurrencyRequestDto toCurrencyRequestDto(String name, String code, String sign) {
+        return new CurrencyRequestDto(name, code, sign);
     }
 }
