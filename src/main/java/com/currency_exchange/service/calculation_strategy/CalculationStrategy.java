@@ -18,8 +18,6 @@ public abstract class CalculationStrategy {
         this.exchangeRatesDao = exchangeRatesDao;
     }
 
-    public abstract boolean canHandle(Currency base, Currency target);
-
     public abstract CalculationResponseDto calculate(Currency base,
                                                      Currency target,
                                                      BigDecimal amount,

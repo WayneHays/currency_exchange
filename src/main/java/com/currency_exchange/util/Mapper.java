@@ -67,7 +67,8 @@ public final class Mapper {
     }
 
     public static CalculationRequestDto toCalculationRequestDto(String from, String to, String amount) {
-        return new CalculationRequestDto(from, to, amount);
+        BigDecimal amountDecimal = createFromString(amount);
+        return new CalculationRequestDto(from, to, amountDecimal);
     }
 
     public static CurrencyPairDto toCurrencyCodesDto(String baseCurrencyCode, String targetCurrencyCode) {

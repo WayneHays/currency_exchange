@@ -5,21 +5,17 @@ import com.currency_exchange.dto.calculation.CalculationResponseDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
-import com.currency_exchange.service.RateType;
 import com.currency_exchange.util.Mapper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 public class CrossRateStrategy extends CalculationStrategy {
+    private final Long crossCurrencyId;
 
-    public CrossRateStrategy(ExchangeRatesDao exchangeRatesDao) {
+    public CrossRateStrategy(ExchangeRatesDao exchangeRatesDao, Long crossCurrencyId) {
         super(exchangeRatesDao);
-    }
-
-    @Override
-    public boolean canHandle(Currency base, Currency target) {
-        return exchangeRatesDao.isRateExists(base, target, RateType.CROSS);
+        this.crossCurrencyId = crossCurrencyId;
     }
 
     @Override
@@ -29,11 +25,11 @@ public class CrossRateStrategy extends CalculationStrategy {
             BigDecimal amount,
             CurrencyResponseDto baseResponse,
             CurrencyResponseDto targetResponse) {
-        ExchangeRate usdToBase = exchangeRatesDao.findByUsd(base);
-        ExchangeRate usdToTarget = exchangeRatesDao.findByUsd(target);
+        ExchangeRate crossToBase = exchangeRatesDao.findByBaseCurrency(crossCurrencyId, base);
+        ExchangeRate crossToTarget = exchangeRatesDao.findByBaseCurrency(crossCurrencyId, target);
 
-        BigDecimal rate = usdToTarget.getRate().divide(
-                usdToBase.getRate(),
+        BigDecimal rate = crossToTarget.getRate().divide(
+                crossToBase.getRate(),
                 PRE_ROUNDING,
                 RoundingMode.HALF_UP);
         BigDecimal convertedAmount = amount.multiply(rate);

@@ -13,6 +13,7 @@ import com.currency_exchange.exception.ExchangeRateNotFoundException;
 import com.currency_exchange.exception.ServiceException;
 import com.currency_exchange.util.Mapper;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,18 +45,20 @@ public class ExchangeRateService {
         }
     }
 
-//    public ExchangeRateResponseDto update(CurrencyPairDto dto, String rate) {
-//        try {
-//            Currency base = currencyDao.findByCode(dto.baseCurrencyCode());
-//            Currency target = currencyDao.findByCode(dto.targetCurrencyCode());
-////            BigDecimal
-//            ExchangeRate toUpdate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
-////            ExchangeRate updated = exchangeRatesDao.update();
-////            return Mapper.toExchangeRateResponseDto(updated, base, target);
-//        } catch (DaoException e) {
-//            throw new ServiceException(e.getMessage());
-//        }
-//    }
+    public ExchangeRateResponseDto update(CurrencyPairDto dto, BigDecimal rate) {
+        try {
+            Currency base = currencyDao.findByCode(dto.baseCurrencyCode());
+            Currency target = currencyDao.findByCode(dto.targetCurrencyCode());
+            ExchangeRate toUpdate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
+            toUpdate.setRate(rate);
+            ExchangeRate updated = exchangeRatesDao.update(toUpdate);
+            return Mapper.toExchangeRateResponseDto(updated, base, target);
+        } catch (ExchangeRateNotFoundException e) {
+            throw new ExchangeRateNotFoundException(dto.baseCurrencyCode(), dto.targetCurrencyCode());
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
+        }
+    }
 
     public List<ExchangeRateResponseDto> findAll() {
         List<ExchangeRate> rates = exchangeRatesDao.findAll();

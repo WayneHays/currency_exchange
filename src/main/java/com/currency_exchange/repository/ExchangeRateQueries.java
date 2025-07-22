@@ -25,7 +25,6 @@ public final class ExchangeRateQueries {
             UPDATE exchange_rates
             SET rate = ?
             WHERE base_currency_id = ? AND target_currency_id = ?
-            RETURNING id, base_currency_id, target_currency_id, rate
             """;
 
     public static final String EXISTS_SQL = """

@@ -8,10 +8,10 @@ import com.currency_exchange.repository.CurrencyQueries;
 import com.currency_exchange.util.connection.ConnectionManager;
 
 import java.sql.*;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class CurrencyDao extends BaseDao<Currency> {
     public static final String ID = "id";
@@ -30,7 +30,8 @@ public class CurrencyDao extends BaseDao<Currency> {
 
     public Currency save(Currency currency) {
         try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(CurrencyQueries.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+             var preparedStatement = connection.prepareStatement(
+                     CurrencyQueries.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, currency.getCode());
             preparedStatement.setString(2, currency.getFullName());
             preparedStatement.setString(3, currency.getSign());
@@ -44,7 +45,7 @@ public class CurrencyDao extends BaseDao<Currency> {
             }
             throw new DaoException("Creating currency failed");
         } catch (SQLException e) {
-            if (e.getErrorCode() == 19) {
+            if (e.getErrorCode() == DUPLICATE_ERROR_CODE) {
                 throw new CurrencyAlreadyExistsException(currency.getCode());
             }
             throw new DaoException(e.getMessage());
@@ -54,7 +55,7 @@ public class CurrencyDao extends BaseDao<Currency> {
     public Currency findByCode(String code) {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_BY_CODE_SQL)) {
-            prepareStatement.setString(1, code.toUpperCase());
+            prepareStatement.setString(1, code);
             var resultSet = prepareStatement.executeQuery();
             if (resultSet.next()) {
                 return buildEntity(resultSet);
@@ -76,9 +77,14 @@ public class CurrencyDao extends BaseDao<Currency> {
     }
 
     public Map<Long, Currency> findByIds(List<Long> ids) {
-        String placeholders = ids.stream().map(i -> "?").collect(Collectors.joining(","));
+        if (ids == null || ids.isEmpty()) {
+            return new HashMap<>();
+        }
+        String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
+        String sql = "%s%s)".formatted(CurrencyQueries.FIND_BY_IDS_SQL, placeholders);
+
         try (Connection connection = ConnectionManager.get();
-             PreparedStatement statement = connection.prepareStatement(CurrencyQueries.FIND_BY_IDS_SQL.formatted(placeholders))) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
             int index = 1;
             for (Long id : ids) {
@@ -96,7 +102,6 @@ public class CurrencyDao extends BaseDao<Currency> {
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         }
-
     }
 
     @Override

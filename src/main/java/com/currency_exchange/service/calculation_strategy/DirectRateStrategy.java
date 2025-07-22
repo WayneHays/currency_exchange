@@ -5,7 +5,6 @@ import com.currency_exchange.dto.calculation.CalculationResponseDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
-import com.currency_exchange.service.RateType;
 import com.currency_exchange.util.Mapper;
 
 import java.math.BigDecimal;
@@ -14,11 +13,6 @@ public class DirectRateStrategy extends CalculationStrategy {
 
     public DirectRateStrategy(ExchangeRatesDao exchangeRatesDao) {
         super(exchangeRatesDao);
-    }
-
-    @Override
-    public boolean canHandle(Currency base, Currency target) {
-        return exchangeRatesDao.isRateExists(base, target, RateType.DIRECT);
     }
 
     @Override

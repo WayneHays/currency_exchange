@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class BaseDao<T> {
+    protected static final int DUPLICATE_ERROR_CODE = 19;
 
     protected abstract T buildEntity(ResultSet resultSet) throws SQLException;
 

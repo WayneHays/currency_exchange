@@ -1,6 +1,6 @@
 package com.currency_exchange.util.data_extraction;
 
-public class StringFormatter {
+public final class StringFormatter {
 
     private StringFormatter() {
     }

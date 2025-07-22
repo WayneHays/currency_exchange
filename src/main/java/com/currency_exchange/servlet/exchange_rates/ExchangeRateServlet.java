@@ -56,7 +56,7 @@ public class ExchangeRateServlet extends BaseServlet {
         prepareJsonResponse(resp);
         try {
             CurrencyPairDto dto = PathExtractor.extractCurrencyPair(req);
-            BigDecimal rate = ParameterExtractor.extractPatchDto(req);
+            BigDecimal rate = ParameterExtractor.extractRate(req);
             ExchangeRateResponseDto updated = exchangeRateService.update(dto, rate);
             sendSuccessResponse(resp, updated);
         } catch (InvalidParameterException e) {
