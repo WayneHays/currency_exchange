@@ -15,10 +15,4 @@ public class ExchangeRateNotFoundException extends RuntimeException {
         this.baseCode = null;
         this.targetCode = null;
     }
-
-    public ExchangeRateNotFoundException(Long id) {
-        super("Exchange rate with id [%s] not found".formatted(id));
-        this.baseCode = null;
-        this.targetCode = null;
-    }
 }

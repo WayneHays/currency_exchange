@@ -4,7 +4,6 @@ import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.DaoException;
-import com.currency_exchange.repository.CurrencyQueries;
 import com.currency_exchange.util.connection.ConnectionManager;
 
 import java.sql.*;
@@ -19,6 +18,11 @@ public class CurrencyDao extends BaseDao<Currency> {
     public static final String FULL_NAME = "full_name";
     public static final String SIGN = "sign";
 
+    public static final String SAVE_SQL = "INSERT INTO currencies (code, full_name, sign) VALUES (?,?,?)";
+    public static final String FIND_ALL_SQL = "SELECT id, code, full_name, sign FROM currencies";
+    public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE id IN (";
+    public static final String FIND_BY_CODE_SQL = FIND_ALL_SQL + " WHERE CODE = ?";
+
     private static final CurrencyDao INSTANCE = new CurrencyDao();
 
     private CurrencyDao() {
@@ -31,7 +35,7 @@ public class CurrencyDao extends BaseDao<Currency> {
     public Currency save(Currency currency) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(
-                     CurrencyQueries.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+                     SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, currency.getCode());
             preparedStatement.setString(2, currency.getFullName());
             preparedStatement.setString(3, currency.getSign());
@@ -54,7 +58,7 @@ public class CurrencyDao extends BaseDao<Currency> {
 
     public Currency findByCode(String code) {
         try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_BY_CODE_SQL)) {
+             var prepareStatement = connection.prepareStatement(FIND_BY_CODE_SQL)) {
             prepareStatement.setString(1, code);
             var resultSet = prepareStatement.executeQuery();
             if (resultSet.next()) {
@@ -68,7 +72,7 @@ public class CurrencyDao extends BaseDao<Currency> {
 
     public List<Currency> findAll() {
         try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(CurrencyQueries.FIND_ALL_SQL)) {
+             var prepareStatement = connection.prepareStatement(FIND_ALL_SQL)) {
             var resultSet = prepareStatement.executeQuery();
             return buildEntityList(resultSet);
         } catch (SQLException e) {
@@ -81,7 +85,7 @@ public class CurrencyDao extends BaseDao<Currency> {
             return new HashMap<>();
         }
         String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
-        String sql = "%s%s)".formatted(CurrencyQueries.FIND_BY_IDS_SQL, placeholders);
+        String sql = FIND_BY_IDS_SQL + placeholders + ")";
 
         try (Connection connection = ConnectionManager.get();
              PreparedStatement statement = connection.prepareStatement(sql)) {

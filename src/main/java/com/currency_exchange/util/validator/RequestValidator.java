@@ -8,6 +8,9 @@ import java.util.Map;
 
 public final class RequestValidator {
 
+    public static final String SINGLE_VALUE_MESSAGE = "Parameter must have single value: %s";
+    public static final String MISSING_PARAMS_MESSAGE = "Missing parameters: %s";
+
     private RequestValidator() {
     }
 
@@ -23,7 +26,7 @@ public final class RequestValidator {
         }
         if (!missing.isEmpty()) {
             throw new InvalidParameterException(
-                    "Missing parameters: %s".formatted(String.join(", ", missing)));
+                    MISSING_PARAMS_MESSAGE.formatted(String.join(", ", missing)));
         }
     }
 
@@ -32,7 +35,7 @@ public final class RequestValidator {
             if (params.containsKey(param) &&
                 params.get(param) != null &&
                 params.get(param).length > 1) {
-                throw new InvalidParameterException("Parameter must have single value: %s".formatted(param));
+                throw new InvalidParameterException(SINGLE_VALUE_MESSAGE.formatted(param));
             }
         }
     }

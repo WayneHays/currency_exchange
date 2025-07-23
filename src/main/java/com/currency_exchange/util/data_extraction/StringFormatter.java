@@ -1,5 +1,8 @@
 package com.currency_exchange.util.data_extraction;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public final class StringFormatter {
 
     private StringFormatter() {
@@ -13,10 +16,10 @@ public final class StringFormatter {
     }
 
     private static String capitalizeFirstLetterOfEachWord(String input) {
-        String[] parts = input.split(" ");
-        String firstName = capitalizeFirstLetter(parts[0]);
-        String secondName = capitalizeFirstLetter(parts[1]);
-        return "%s %s".formatted(firstName, secondName);
+        return Arrays.stream(input.split("\\s+"))
+                .filter(word -> !word.isEmpty())
+                .map(StringFormatter::capitalizeFirstLetter)
+                .collect(Collectors.joining(" "));
     }
 
     private static String capitalizeFirstLetter(String input) {

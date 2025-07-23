@@ -15,6 +15,7 @@ import java.util.Map;
 import static com.currency_exchange.util.ValidationConstants.*;
 
 public final class ParameterExtractor {
+
     private ParameterExtractor() {
     }
 

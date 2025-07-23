@@ -5,7 +5,6 @@ import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.DaoException;
 import com.currency_exchange.exception.ExchangeRateAlreadyExistsException;
 import com.currency_exchange.exception.ExchangeRateNotFoundException;
-import com.currency_exchange.repository.ExchangeRateQueries;
 import com.currency_exchange.util.connection.ConnectionManager;
 
 import java.sql.ResultSet;
@@ -18,7 +17,11 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
     public static final String BASE_CURRENCY_ID = "base_currency_id";
     public static final String TARGET_CURRENCY_ID = "target_currency_id";
     public static final String RATE = "rate";
-    public static final Long USD_ID = 2L;
+
+    public static final String SAVE_SQL = "INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (?,?,?)";
+    public static final String FIND_ALL_SQL = "SELECT id, base_currency_id, target_currency_id, rate FROM exchange_rates";
+    public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE base_currency_id = ? AND target_currency_id = ?";
+    public static final String UPDATE_SQL = "UPDATE exchange_rates SET rate = ? WHERE base_currency_id = ? AND target_currency_id = ?";
 
     private static final ExchangeRatesDao INSTANCE = new ExchangeRatesDao();
 
@@ -32,12 +35,11 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
     public ExchangeRate save(ExchangeRate exchangeRate) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(
-                     ExchangeRateQueries.SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
+                     SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setLong(1, exchangeRate.getBaseCurrencyId());
             preparedStatement.setLong(2, exchangeRate.getTargetCurrencyId());
             preparedStatement.setBigDecimal(3, exchangeRate.getRate());
             preparedStatement.executeUpdate();
-
             var generatedKeys = preparedStatement.getGeneratedKeys();
 
             if (generatedKeys.next()) {
@@ -57,7 +59,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
 
     public ExchangeRate update(ExchangeRate exchangeRate) {
         try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(ExchangeRateQueries.UPDATE_SQL)) {
+             var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
 
             preparedStatement.setBigDecimal(1, exchangeRate.getRate());
             preparedStatement.setLong(2, exchangeRate.getBaseCurrencyId());
@@ -77,7 +79,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
 
     public List<ExchangeRate> findAll() {
         try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(ExchangeRateQueries.FIND_ALL_SQL)) {
+             var preparedStatement = connection.prepareStatement(FIND_ALL_SQL)) {
             var resultSet = preparedStatement.executeQuery();
             return buildEntityList(resultSet);
         } catch (SQLException e) {
@@ -87,7 +89,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
 
     public ExchangeRate findByCurrencyIds(Long baseId, Long targetId) {
         try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(ExchangeRateQueries.FIND_BY_IDS_SQL)) {
+             var preparedStatement = connection.prepareStatement(FIND_BY_IDS_SQL)) {
             preparedStatement.setLong(1, baseId);
             preparedStatement.setLong(2, targetId);
             var resultSet = preparedStatement.executeQuery();
@@ -102,10 +104,6 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
 
     public ExchangeRate findByBaseCurrency(Long baseCurrencyId, Currency targetCurrency) {
         return findByCurrencyIds(baseCurrencyId, targetCurrency.getId());
-    }
-
-    public ExchangeRate findByUsd(Currency currency) {
-        return findByCurrencyIds(USD_ID, currency.getId());
     }
 
     @Override

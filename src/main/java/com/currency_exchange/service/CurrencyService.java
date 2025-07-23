@@ -4,6 +4,8 @@ import com.currency_exchange.dao.CurrencyDao;
 import com.currency_exchange.dto.currency.CurrencyRequestDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
+import com.currency_exchange.exception.CurrencyAlreadyExistsException;
+import com.currency_exchange.exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.DaoException;
 import com.currency_exchange.exception.ServiceException;
 import com.currency_exchange.util.Mapper;
@@ -11,6 +13,10 @@ import com.currency_exchange.util.Mapper;
 import java.util.List;
 
 public class CurrencyService {
+    public static final String FAILED_TO_SAVE_MESSAGE = "Failed to save currency with code [%s]";
+    public static final String FAILED_TO_FIND_BY_CODE_MESSAGE = "Failed to find currency with code [%s]";
+    public static final String FAILED_TO_FIND_ALL_MESSAGE = "Failed to find all currencies";
+
     private static final CurrencyService INSTANCE = new CurrencyService();
     private final CurrencyDao currencyDao = CurrencyDao.getInstance();
 
@@ -21,32 +27,36 @@ public class CurrencyService {
         return INSTANCE;
     }
 
-    public CurrencyResponseDto save(CurrencyRequestDto dto) {
+    public CurrencyResponseDto save(CurrencyRequestDto dto) throws CurrencyAlreadyExistsException, ServiceException {
         try {
             Currency currency = Mapper.toCurrency(dto);
             Currency saved = currencyDao.save(currency);
             return Mapper.toCurrencyResponseDto(saved);
+        } catch (CurrencyAlreadyExistsException e) {
+            throw e;
         } catch (DaoException e) {
-            throw new ServiceException(e.getMessage());
+            throw new ServiceException(FAILED_TO_SAVE_MESSAGE.formatted(dto.code()), e);
         }
     }
 
-    public CurrencyResponseDto findByCode(String code) {
+    public CurrencyResponseDto findByCode(String code) throws CurrencyNotFoundException, ServiceException {
         try {
             Currency currency = currencyDao.findByCode(code);
             return Mapper.toCurrencyResponseDto(currency);
+        } catch (CurrencyNotFoundException e) {
+            throw e;
         } catch (DaoException e) {
-            throw new ServiceException(e.getMessage());
+            throw new ServiceException(FAILED_TO_FIND_BY_CODE_MESSAGE.formatted(code), e);
         }
     }
 
-    public List<CurrencyResponseDto> findAll() {
+    public List<CurrencyResponseDto> findAll() throws ServiceException {
         try {
             return currencyDao.findAll().stream()
                     .map(Mapper::toCurrencyResponseDto)
                     .toList();
         } catch (DaoException e) {
-            throw new ServiceException(e.getMessage());
+            throw new ServiceException(FAILED_TO_FIND_ALL_MESSAGE, e);
         }
     }
 }

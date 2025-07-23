@@ -41,7 +41,7 @@ public class ExchangeRatesServlet extends BaseServlet {
             ExchangeRateRequestDto dto = ParameterExtractor.extractExchangeRateRequest(req);
             ExchangeRateResponseDto saved = exchangeRateService.save(dto);
             sendCreatedResponse(resp, saved);
-        } catch (NumberFormatException | InvalidParameterException e) {
+        } catch (InvalidParameterException e) {
             sendErrorResponse(resp, SC_BAD_REQUEST, e.getMessage());
         } catch (ExchangeRateAlreadyExistsException e) {
             sendErrorResponse(resp, SC_CONFLICT, e.getMessage());
