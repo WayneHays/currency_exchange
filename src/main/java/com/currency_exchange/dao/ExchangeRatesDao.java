@@ -1,6 +1,5 @@
 package com.currency_exchange.dao;
 
-import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
 import com.currency_exchange.exception.DaoException;
 import com.currency_exchange.exception.ExchangeRateAlreadyExistsException;
@@ -100,10 +99,6 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         }
-    }
-
-    public ExchangeRate findByBaseCurrency(Long baseCurrencyId, Currency targetCurrency) {
-        return findByCurrencyIds(baseCurrencyId, targetCurrency.getId());
     }
 
     @Override

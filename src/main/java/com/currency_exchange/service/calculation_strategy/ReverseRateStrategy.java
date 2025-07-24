@@ -23,7 +23,7 @@ public class ReverseRateStrategy extends CalculationStrategy {
             BigDecimal amount,
             CurrencyResponseDto baseResponse,
             CurrencyResponseDto targetResponse) {
-        ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
+        ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(target.getId(), base.getId());
         BigDecimal rate = exchangeRate.getRate();
         BigDecimal calculatedRate = BigDecimal.ONE.divide(
                 rate,

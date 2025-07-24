@@ -25,8 +25,9 @@ public class CrossRateStrategy extends CalculationStrategy {
             BigDecimal amount,
             CurrencyResponseDto baseResponse,
             CurrencyResponseDto targetResponse) {
-        ExchangeRate crossToBase = exchangeRatesDao.findByBaseCurrency(crossCurrencyId, base);
-        ExchangeRate crossToTarget = exchangeRatesDao.findByBaseCurrency(crossCurrencyId, target);
+
+        ExchangeRate crossToBase = exchangeRatesDao.findByCurrencyIds(crossCurrencyId, base.getId());
+        ExchangeRate crossToTarget = exchangeRatesDao.findByCurrencyIds(crossCurrencyId, target.getId());
 
         BigDecimal rate = crossToTarget.getRate().divide(
                 crossToBase.getRate(),

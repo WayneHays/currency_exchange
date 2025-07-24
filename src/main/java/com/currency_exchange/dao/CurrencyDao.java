@@ -85,7 +85,7 @@ public class CurrencyDao extends BaseDao<Currency> {
             return new HashMap<>();
         }
         String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
-        String sql = FIND_BY_IDS_SQL + placeholders + ")";
+        String sql = "%s%s)".formatted(FIND_BY_IDS_SQL, placeholders);
 
         try (Connection connection = ConnectionManager.get();
              PreparedStatement statement = connection.prepareStatement(sql)) {
