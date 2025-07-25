@@ -1,4 +1,4 @@
-package com.currency_exchange.servlet.filter;
+package com.currency_exchange.filter;
 
 import com.currency_exchange.util.ResponseHelper;
 import jakarta.servlet.*;
