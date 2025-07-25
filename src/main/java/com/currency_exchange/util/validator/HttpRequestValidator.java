@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public final class RequestValidator {
+public final class HttpRequestValidator {
 
     public static final String SINGLE_VALUE_MESSAGE = "Parameter must have single value: %s";
     public static final String MISSING_PARAMS_MESSAGE = "Missing parameters: %s";
 
-    private RequestValidator() {
+    private HttpRequestValidator() {
     }
 
     public static void validateRequiredParams(Map<String, String[]> params, String... requiredParams) {

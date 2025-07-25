@@ -15,7 +15,7 @@ import java.util.List;
 
 @WebServlet("/currencies")
 public class CurrenciesServlet extends HttpServlet {
-    private final transient CurrencyService currencyService = CurrencyService.getInstance();
+    private final CurrencyService currencyService = CurrencyService.getInstance();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

@@ -12,28 +12,28 @@ public final class ValidationUtils {
     }
 
     public static void validateRequest(Map<String, String[]> params, String... requiredParams) {
-        RequestValidator.validateRequiredParams(params, requiredParams);
-        RequestValidator.validateSingleParamValue(params, requiredParams);
+        HttpRequestValidator.validateRequiredParams(params, requiredParams);
+        HttpRequestValidator.validateSingleParamValue(params, requiredParams);
     }
 
     public static void validateCurrencyCode(String code) {
-        RequestValidator.validateStringPattern(code, CODE_PATTERN, CODE_ERROR_MESSAGE);
+        HttpRequestValidator.validateStringPattern(code, CODE_PATTERN, CODE_ERROR_MESSAGE);
     }
 
     public static void validateRate(String rate) {
-        RequestValidator.validateStringPattern(rate, RATE_PATTERN, RATE_ERROR_MESSAGE);
+        HttpRequestValidator.validateStringPattern(rate, RATE_PATTERN, RATE_ERROR_MESSAGE);
     }
 
     public static void validateAmount(String amount) {
-        RequestValidator.validateStringPattern(amount, RATE_PATTERN, AMOUNT_ERROR_MESSAGE);
+        HttpRequestValidator.validateStringPattern(amount, RATE_PATTERN, AMOUNT_ERROR_MESSAGE);
     }
 
     public static void validateCurrencyName(String name) {
-        RequestValidator.validateStringPattern(name, NAME_PATTERN, NAME_ERROR_MESSAGE);
+        HttpRequestValidator.validateStringPattern(name, NAME_PATTERN, NAME_ERROR_MESSAGE);
     }
 
     public static void validateCurrencySign(String sign) {
-        RequestValidator.validateStringPattern(sign, SIGN_PATTERN, SIGN_ERROR_MESSAGE);
+        HttpRequestValidator.validateStringPattern(sign, SIGN_PATTERN, SIGN_ERROR_MESSAGE);
     }
 
     public static void checkCurrenciesAreDifferent(String baseCode, String targetCode) {

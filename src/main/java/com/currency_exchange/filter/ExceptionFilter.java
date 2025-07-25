@@ -32,6 +32,9 @@ public class ExceptionFilter implements Filter {
                 statusCode = SC_BAD_REQUEST;
             }
             case "CurrencyNotFoundException", "ExchangeRateNotFoundException" -> {
+                statusCode = SC_NOT_FOUND;
+            }
+            case "CurrencyAlreadyExistsException", "ExchangeRateAlreadyExistsException" -> {
                 statusCode = SC_CONFLICT;
             }
             case "ServiceException" -> {
