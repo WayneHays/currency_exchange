@@ -86,7 +86,7 @@ public final class ParameterExtractor {
             while ((line = req.getReader().readLine()) != null) {
                 buffer.append(line);
             }
-            String body = buffer.toString();
+            String body = buffer.toString().trim().replaceAll(" ", "");
 
             String[] pairs = body.split("&");
             for (String pair : pairs) {

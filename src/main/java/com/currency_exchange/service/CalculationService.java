@@ -14,20 +14,24 @@ import com.currency_exchange.service.calculation_strategy.ReverseRateStrategy;
 import com.currency_exchange.util.Mapper;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class CalculationService {
-    private static final CalculationService INSTANCE = new CalculationService();
     private static final Long CROSS_CURRENCY_ID = 2L;
+    private static final CalculationService INSTANCE = new CalculationService();
 
-    private final ExchangeRatesDao exchangeRatesDao = ExchangeRatesDao.getInstance();
     private final CurrencyDao currencyDao = CurrencyDao.getInstance();
-    private final DirectRateStrategy directRateStrategy = new DirectRateStrategy(exchangeRatesDao);
-    private final ReverseRateStrategy reverseRateStrategy = new ReverseRateStrategy(exchangeRatesDao);
-    private final CrossRateStrategy crossRateStrategy = new CrossRateStrategy(exchangeRatesDao, CROSS_CURRENCY_ID);
+    private final List<CalculationStrategy> strategies;
 
     private CalculationService() {
+        ExchangeRatesDao exchangeRatesDao = ExchangeRatesDao.getInstance();
+        this.strategies = Arrays.asList(
+                new DirectRateStrategy(exchangeRatesDao),
+                new ReverseRateStrategy(exchangeRatesDao),
+                new CrossRateStrategy(exchangeRatesDao, CROSS_CURRENCY_ID)
+        );
     }
 
     public static CalculationService getInstance() {
@@ -42,7 +46,7 @@ public class CalculationService {
         CurrencyResponseDto baseResponse = Mapper.toCurrencyResponseDto(base);
         CurrencyResponseDto targetResponse = Mapper.toCurrencyResponseDto(target);
 
-        return Stream.of(directRateStrategy, reverseRateStrategy, crossRateStrategy)
+        return strategies.stream()
                 .map(strategy -> tryCalculate(
                         strategy,
                         base,
