@@ -304,7 +304,5 @@ CREATE TABLE exchange_rates (
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ## 📞 Контакты
+Telegram: @wayne_hays
 
-GitHub: [@Nikitavj](https://github.com/Nikitavj)
-
-Project Link: [https://github.com/Nikitavj/CurrencyExchanger](https://github.com/Nikitavj/CurrencyExchanger)
