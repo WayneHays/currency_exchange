@@ -14,7 +14,6 @@ import com.currency_exchange.service.calculation_strategy.ReverseRateStrategy;
 import com.currency_exchange.util.Mapper;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +26,7 @@ public class CalculationService {
 
     private CalculationService() {
         ExchangeRatesDao exchangeRatesDao = ExchangeRatesDao.getInstance();
-        this.strategies = Arrays.asList(
+        this.strategies = List.of(
                 new DirectRateStrategy(exchangeRatesDao),
                 new ReverseRateStrategy(exchangeRatesDao),
                 new CrossRateStrategy(exchangeRatesDao, CROSS_CURRENCY_ID)
