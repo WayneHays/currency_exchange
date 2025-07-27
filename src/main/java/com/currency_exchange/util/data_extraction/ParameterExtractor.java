@@ -10,9 +10,13 @@ import com.currency_exchange.util.validator.CurrencyValidator;
 import com.currency_exchange.util.validator.ExchangeRateValidator;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.currency_exchange.util.ValidationConstants.*;
 
@@ -23,17 +27,13 @@ public final class ParameterExtractor {
 
     public static CurrencyRequestDto extractCurrencyRequest(HttpServletRequest req) {
         Map<String, String[]> params = req.getParameterMap();
-
         CurrencyValidator.validateCreateRequest(params);
 
-        String code = extractAndNormalize(req, CODE);
-        String name = extractAndTrim(req, NAME);
-        String sign = extractAndRemoveSpaces(req, SIGN);
+        String code = extractParam(req, CODE, true);
+        String name = capitalizeWords(req.getParameter(NAME).trim());
+        String sign = extractParam(req, SIGN, false);
 
         CurrencyValidator.validateFields(code, name, sign);
-
-        name = StringFormatter.capitalizeRequiredLetters(name);
-
         return Mapper.toCurrencyRequestDto(name, code, sign);
     }
 
@@ -41,12 +41,11 @@ public final class ParameterExtractor {
         Map<String, String[]> params = req.getParameterMap();
         ExchangeRateValidator.validateCreateRequest(params);
 
-        String baseCurrencyCode = extractAndNormalize(req, BASE_CURRENCY_CODE);
-        String targetCurrencyCode = extractAndNormalize(req, TARGET_CURRENCY_CODE);
-        String rate = extractAndRemoveSpaces(req, RATE);
+        String baseCurrencyCode = extractParam(req, BASE_CURRENCY_CODE, true);
+        String targetCurrencyCode = extractParam(req, TARGET_CURRENCY_CODE, true);
+        String rate = extractParam(req, RATE, false);
 
         ExchangeRateValidator.validateFields(baseCurrencyCode, targetCurrencyCode, rate);
-
         return Mapper.toExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, rate);
     }
 
@@ -54,45 +53,38 @@ public final class ParameterExtractor {
         Map<String, String[]> params = req.getParameterMap();
         CalculationValidator.validateRequest(params);
 
-        String from = extractAndNormalize(req, FROM);
-        String to = extractAndNormalize(req, TO);
-        String amount = extractAndRemoveSpaces(req, AMOUNT);
+        String from = extractParam(req, FROM, true);
+        String to = extractParam(req, TO, true);
+        String amount = extractParam(req, AMOUNT, false);
 
         CalculationValidator.validateFields(from, to, amount);
-
         return Mapper.toCalculationRequestDto(from, to, amount);
     }
 
     public static BigDecimal extractRate(HttpServletRequest req) {
-        String rate;
-
-        if ("PATCH".equals(req.getMethod())) {
-            rate = extractRateFromRequestBody(req);
-        } else {
-            Map<String, String[]> params = req.getParameterMap();
-            ExchangeRateValidator.validateUpdateRequest(params);
-            rate = extractFromParamsAndRemoveSpaces(params, RATE);
-        }
+        String rate = "PATCH".equals(req.getMethod())
+                ? extractRateFromBody(req)
+                : extractParam(req, RATE, false);
 
         ExchangeRateValidator.validateRateField(rate);
         return new BigDecimal(rate);
     }
 
-    private static String extractRateFromRequestBody(HttpServletRequest req) {
-        try {
-            StringBuilder buffer = new StringBuilder();
-            String line;
+    private static String extractParam(HttpServletRequest req, String name, boolean normalize) {
+        String value = req.getParameter(name).trim().replaceAll("\\s+", "");
+        return normalize ? value.toUpperCase() : value;
+    }
 
-            while ((line = req.getReader().readLine()) != null) {
-                buffer.append(line);
-            }
-            String body = buffer.toString().trim().replaceAll(" ", "");
+    private static String extractRateFromBody(HttpServletRequest req) {
+        try (BufferedReader reader = req.getReader()) {
+            String body = reader.lines().collect(Collectors.joining()).trim();
 
             String[] pairs = body.split("&");
             for (String pair : pairs) {
                 String[] keyValue = pair.split("=", 2);
                 if (keyValue.length == 2 && RATE.equals(keyValue[0])) {
-                    return keyValue[1].trim();
+                    String decodedValue = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                    return decodedValue.replace(",", ".");
                 }
             }
             throw new InvalidParameterException("Missing parameter: rate");
@@ -102,22 +94,22 @@ public final class ParameterExtractor {
         }
     }
 
-    private static String extractAndTrim(HttpServletRequest req, String paramName) {
-        String value = req.getParameter(paramName);
-        return value.trim();
-    }
+    private static String capitalizeWords(String input) {
+        if (!input.contains(" ")) {
+            return input.substring(0, 1).toUpperCase() + input.substring(1);
+        }
 
-    private static String extractAndNormalize(HttpServletRequest req, String paramName) {
-        return extractAndRemoveSpaces(req, paramName).toUpperCase();
-    }
+        String[] words = input.split("\\s+");
+        StringBuilder result = new StringBuilder();
 
-    private static String extractAndRemoveSpaces(HttpServletRequest req, String paramName) {
-        String value = req.getParameter(paramName);
-        return value.trim().replaceAll("\\s+", "");
-    }
-
-    private static String extractFromParamsAndRemoveSpaces(Map<String, String[]> params, String paramName) {
-        return params.get(paramName)[0].trim().replaceAll("\\s+", "");
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) result.append(" ");
+            if (!words[i].isEmpty()) {
+                result.append(words[i].substring(0, 1).toUpperCase())
+                        .append(words[i].substring(1));
+            }
+        }
+        return result.toString();
     }
 }
 
