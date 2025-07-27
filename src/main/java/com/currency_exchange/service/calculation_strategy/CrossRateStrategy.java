@@ -48,8 +48,12 @@ public class CrossRateStrategy extends CalculationStrategy {
             ExchangeRate rate = exchangeRatesDao.findByCurrencyIds(crossCurrencyId, currencyId);
             return rate.getRate();
         } catch (ExchangeRateNotFoundException e) {
-            ExchangeRate reverseRate = exchangeRatesDao.findByCurrencyIds(currencyId, crossCurrencyId);
-            return BigDecimal.ONE.divide(reverseRate.getRate(), PRE_ROUNDING, RoundingMode.HALF_UP);
+            try {
+                ExchangeRate reverseRate = exchangeRatesDao.findByCurrencyIds(currencyId, crossCurrencyId);
+                return BigDecimal.ONE.divide(reverseRate.getRate(), PRE_ROUNDING, RoundingMode.HALF_UP);
+            } catch (ExchangeRateNotFoundException reverseException) {
+                throw new ExchangeRateNotFoundException(crossCurrencyId, currencyId);
+            }
         }
     }
 }
