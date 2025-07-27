@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import static com.currency_exchange.util.ValidationConstants.*;
 
 public final class ParameterExtractor {
+    public static final String MISSING_PARAMETER_RATE = "Missing parameter: rate";
+    public static final String FAILED_TO_READ_REQUEST_BODY = "Failed to read request body";
 
     private ParameterExtractor() {
     }
@@ -77,7 +79,7 @@ public final class ParameterExtractor {
 
     private static String extractRateFromBody(HttpServletRequest req) {
         try (BufferedReader reader = req.getReader()) {
-            String body = reader.lines().collect(Collectors.joining()).trim();
+            String body = reader.lines().collect(Collectors.joining()).trim().replaceAll(" ", "");
 
             String[] pairs = body.split("&");
             for (String pair : pairs) {
@@ -87,10 +89,10 @@ public final class ParameterExtractor {
                     return decodedValue.replace(",", ".");
                 }
             }
-            throw new InvalidParameterException("Missing parameter: rate");
+            throw new InvalidParameterException(MISSING_PARAMETER_RATE);
 
         } catch (IOException e) {
-            throw new InvalidParameterException("Failed to read request body");
+            throw new InvalidParameterException(FAILED_TO_READ_REQUEST_BODY);
         }
     }
 
