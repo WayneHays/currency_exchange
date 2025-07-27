@@ -2,7 +2,7 @@ package com.currency_exchange.util.validator;
 
 import java.util.Map;
 
-import static com.currency_exchange.util.ValidationConstants.*;
+import static com.currency_exchange.util.constant.ParameterNames.*;
 
 public final class CurrencyValidator {
 

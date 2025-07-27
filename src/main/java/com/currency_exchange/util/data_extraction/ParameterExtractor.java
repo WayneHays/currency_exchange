@@ -18,7 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.currency_exchange.util.ValidationConstants.*;
+import static com.currency_exchange.util.constant.ParameterNames.*;
 
 public final class ParameterExtractor {
     public static final String MISSING_PARAMETER_RATE = "Missing parameter: rate";
