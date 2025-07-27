@@ -120,6 +120,7 @@ POST /currencies
 Content-Type: application/x-www-form-urlencoded
 
 name=Euro&code=EUR&sign=€
+
 ```
 
 **Ответ:**
