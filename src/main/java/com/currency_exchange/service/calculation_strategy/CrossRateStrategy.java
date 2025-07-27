@@ -5,6 +5,7 @@ import com.currency_exchange.dto.calculation.CalculationResponseDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
 import com.currency_exchange.entity.ExchangeRate;
+import com.currency_exchange.exception.ExchangeRateNotFoundException;
 import com.currency_exchange.util.Mapper;
 
 import java.math.BigDecimal;
@@ -26,13 +27,10 @@ public class CrossRateStrategy extends CalculationStrategy {
             CurrencyResponseDto baseResponse,
             CurrencyResponseDto targetResponse) {
 
-        ExchangeRate crossToBase = exchangeRatesDao.findByCurrencyIds(crossCurrencyId, base.getId());
-        ExchangeRate crossToTarget = exchangeRatesDao.findByCurrencyIds(crossCurrencyId, target.getId());
+        BigDecimal usdToBaseRate = findCrossRate(crossCurrencyId, base.getId());
+        BigDecimal usdToTargetRate = findCrossRate(crossCurrencyId, target.getId());
+        BigDecimal rate = usdToTargetRate.divide(usdToBaseRate, PRE_ROUNDING, RoundingMode.HALF_UP);
 
-        BigDecimal rate = crossToTarget.getRate().divide(
-                crossToBase.getRate(),
-                PRE_ROUNDING,
-                RoundingMode.HALF_UP);
         BigDecimal convertedAmount = amount.multiply(rate);
         BigDecimal roundedAmount = round(convertedAmount);
 
@@ -43,5 +41,15 @@ public class CrossRateStrategy extends CalculationStrategy {
                 amount,
                 roundedAmount
         );
+    }
+
+    private BigDecimal findCrossRate(Long crossCurrencyId, Long currencyId) {
+        try {
+            ExchangeRate rate = exchangeRatesDao.findByCurrencyIds(crossCurrencyId, currencyId);
+            return rate.getRate();
+        } catch (ExchangeRateNotFoundException e) {
+            ExchangeRate reverseRate = exchangeRatesDao.findByCurrencyIds(currencyId, crossCurrencyId);
+            return BigDecimal.ONE.divide(reverseRate.getRate(), PRE_ROUNDING, RoundingMode.HALF_UP);
+        }
     }
 }
