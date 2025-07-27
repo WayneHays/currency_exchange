@@ -32,7 +32,7 @@ public final class ParameterExtractor {
         CurrencyValidator.validateCreateRequest(params);
 
         String code = extractParam(req, CODE, true);
-        String name = capitalizeWords(req.getParameter(NAME).trim());
+        String name = capitalizeWords(extractParam(req, NAME, false));
         String sign = extractParam(req, SIGN, false);
 
         CurrencyValidator.validateFields(code, name, sign);
@@ -73,20 +73,33 @@ public final class ParameterExtractor {
     }
 
     private static String extractParam(HttpServletRequest req, String name, boolean normalize) {
-        String value = req.getParameter(name).trim().replaceAll("\\s+", "");
+        String value = req.getParameterMap().entrySet().stream()
+                .filter(entry -> entry.getKey().trim().equals(name))
+                .map(entry -> entry.getValue()[0])
+                .findFirst()
+                .orElse(null);
+
+        if (value == null) {
+            throw new InvalidParameterException("Parameter not found: " + name);
+        }
+
+        value = value.trim().replaceAll("\\s+", "");
         return normalize ? value.toUpperCase() : value;
     }
 
     private static String extractRateFromBody(HttpServletRequest req) {
         try (BufferedReader reader = req.getReader()) {
-            String body = reader.lines().collect(Collectors.joining()).trim().replaceAll(" ", "");
+            String body = reader.lines().collect(Collectors.joining()).trim();
 
             String[] pairs = body.split("&");
             for (String pair : pairs) {
                 String[] keyValue = pair.split("=", 2);
-                if (keyValue.length == 2 && RATE.equals(keyValue[0])) {
-                    String decodedValue = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                    return decodedValue.replace(",", ".");
+                if (keyValue.length == 2) {
+                    String decodedKey = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8).trim();
+                    if (RATE.equals(decodedKey)) {
+                        String decodedValue = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                        return decodedValue.replace(",", ".");
+                    }
                 }
             }
             throw new InvalidParameterException(MISSING_PARAMETER_RATE);
