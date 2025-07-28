@@ -43,24 +43,27 @@ REST API для описания валют и обменных курсов. П
    git clone https://github.com/WayneHays/currency_exchange.git
    cd currency_exchange
    ```
+2. **Сборка проекта:**
+
+   В терминале Idea выполните команду mvn clean package.
 
 4. **Деплой в Tomcat:**
-   Прежде всего настроить версию SDK в проекте -> Project Settings -> SDK -> 21;
+   Настроить версию SDK в проекте -> Project Settings -> SDK -> 21;
    
-   В проекте присутствует файл currency_exchange-1.0.war. Необходимо настроить сервер Tomcat:
+   Настроить сервер Tomcat:
    - зайти в меню Run/Debug configurations -> edit configurations -> add new run configuration;
    - в выпадающем списке выбрать Tomcat Server -> local;
    - снять галочку after launch;
    - в графе JRE выбрать 21 версию;
-   - зайти в раздел Deployment -> external source -> выбрать папку с проектом на диске, в ней выбрать currency_exchange-1.0.war;
+   - зайти в раздел Deployment -> external source -> выбрать папку с проектом на диске, в ней выбрать папку target -> currency_exchange-1.0.war;
    - в графе Application context прописать: /
    - нажать ОК;
    - запустить сервер нажав кнопку Run;
 
 6. **Проверка работы:**
-   ```bash
-   curl http://localhost:8080/currencies
-   ```
+
+   Зайти в Postman, импортировать коллекцию запросов из файла currency_exchange.postman_collection.json
+   Доступны все запросы из ТЗ проекта.
 
 ## 📖 API Documentation
 
@@ -143,7 +146,7 @@ GET /exchangeRates
         "baseCurrency": {
             "id": 1,
             "code": "USD",
-            "name": "United States dollar",
+            "name": "US Dollar",
             "sign": "$"
         },
         "targetCurrency": {
@@ -174,11 +177,11 @@ GET /exchangeRate/USDRUB
     "baseCurrency": {
         "id": 1,
         "code": "USD",
-        "name": "United States dollar", 
+        "name": "US Dollar", 
         "sign": "$"
     },
     "targetCurrency": {
-        "id": 3,
+        "id": 2,
         "code": "RUB",
         "name": "Russian Ruble",
         "sign": "₽"
@@ -231,26 +234,6 @@ GET /exchange?from=USD&to=EUR&amount=100
 }
 ```
 
-## 🧪 Тестирование
-
-### Postman Collection:
-   - Скачать: currency_exchange.postman_collection.json
-   - В Postman: Import → Upload Files → выбрать файл
-### Примеры запросов:
-
-```bash
-# Получить все валюты
-curl -X GET http://localhost:8080/currencies
-
-# Добавить валюту
-curl -X POST http://localhost:8080/currency-exchanger/currencies \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "code=GBP&name=British Pound&sign=£"
-
-# Конвертация
-curl -X GET "http://localhost:8080/exchange?from=USD&to=EUR&amount=100"
-```
-
 ## 🗄️ База данных
 
 ### Схема БД:
@@ -270,6 +253,16 @@ CREATE TABLE exchange_rates (
     rate DECIMAL(6) NOT NULL,
     UNIQUE(base_currency_id, target_currency_id)
 );
+
+INSERT INTO currencies(code, full_name, sign)
+    VALUES ('RUB', 'Russian Ruble', '₽'),
+           ('USD', 'US Dollar', '$'),
+           ('EUR', 'EURO', '€');
+
+INSERT INTO exchange_rates(base_currency_id, target_currency_id, rate)
+    VALUES (1,2,0.0127),
+           (1,3,0.0109),
+           (2,3,0.8613);
 ```
 
 ## 🏗️ Архитектура
@@ -282,7 +275,7 @@ CREATE TABLE exchange_rates (
 ├── dto/              # Объекты передачи данных
 ├── exception/        # Кастомные исключения
 ├── filter/           # Фильтры сервлетов
-├── util/             # Утилиты и валидация
+├── util/             # Утилиты
 └── resources/        # Конфигурация
 ```
 
