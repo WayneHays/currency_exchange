@@ -44,25 +44,20 @@ REST API для описания валют и обменных курсов. П
    cd currency_exchange
    ```
 
-2. **Настройка конфигурации:**
-   
-   Изменить `src/main/resources/application.properties`:
-   ```properties
-   # Для локального запуска
-   db.url=jdbc:sqlite:currency_exchange.sqlite
-   db.pool.size=5
-   ```
- 
-3. **Сборка проекта:**
-   ```bash
-   mvn clean package
-   ```
-
 4. **Деплой в Tomcat:**
-   - Скопировать `target/currency_exchange.war` в папку `webapps` Tomcat
-   - Запустить Tomcat: `./bin/startup.sh` (Linux/Mac) или `bin\startup.bat` (Windows)
+   Прежде всего настроить версию SDK в проекте -> Project Settings -> SDK -> 21;
+   
+   В проекте присутствует файл currency_exchange-1.0.war. Необходимо настроить сервер Tomcat:
+   - зайти в меню Run/Debug configurations -> edit configurations -> add new run configuration;
+   - в выпадающем списке выбрать Tomcat Server -> local;
+   - снять галочку after launch;
+   - в графе JRE выбрать 21 версию;
+   - зайти в раздел Deployment -> external source -> выбрать папку с проектом на диске, в ней выбрать currency_exchange-1.0.war;
+   - в графе Application context прописать: /
+   - нажать ОК;
+   - запустить сервер нажав кнопку Run;
 
-5. **Проверка работы:**
+6. **Проверка работы:**
    ```bash
    curl http://localhost:8080/currencies
    ```
