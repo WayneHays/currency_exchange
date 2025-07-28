@@ -14,6 +14,7 @@ REST API для описания валют и обменных курсов. П
 
 ### Особенности реализации:
 - ✅ Автоматическое создание и инициализация базы данных -> просто запустить приложение и сделать запрос
+- ✅ База данных создается в папке \apache-tomcat-"версия"\bin
 - ✅ Стратегия расчета курсов: прямой → обратный → кросс через USD
 - ✅ Валидация входящих параметров
 - ✅ Централизованная обработка исключений
@@ -43,24 +44,30 @@ REST API для описания валют и обменных курсов. П
    git clone https://github.com/WayneHays/currency_exchange.git
    cd currency_exchange
    ```
+2. **Сборка проекта:**
+
+   В терминале Idea выполните команду:
+    ```bash
+    mvn clean package
+    ``` 
 
 4. **Деплой в Tomcat:**
-   Прежде всего настроить версию SDK в проекте -> Project Settings -> SDK -> 21;
+   Настроить версию SDK в проекте -> Project Settings -> SDK -> 21;
    
-   В проекте присутствует файл currency_exchange-1.0.war. Необходимо настроить сервер Tomcat:
+   Настроить сервер Tomcat:
    - зайти в меню Run/Debug configurations -> edit configurations -> add new run configuration;
    - в выпадающем списке выбрать Tomcat Server -> local;
    - снять галочку after launch;
    - в графе JRE выбрать 21 версию;
-   - зайти в раздел Deployment -> external source -> выбрать папку с проектом на диске, в ней выбрать currency_exchange-1.0.war;
+   - зайти в раздел Deployment -> external source -> выбрать папку с проектом на диске, в ней выбрать папку target -> currency_exchange-1.0.war;
    - в графе Application context прописать: /
    - нажать ОК;
-   - запустить сервер нажав кнопку Run;
+   - запустить сервер, нажав кнопку Run;
 
 6. **Проверка работы:**
-   ```bash
-   curl http://localhost:8080/currencies
-   ```
+
+   Зайти в Postman, импортировать коллекцию запросов из файла currency_exchange.postman_collection.json
+   Доступны все запросы из ТЗ проекта.
 
 ## 📖 API Documentation
 
@@ -76,13 +83,19 @@ GET /currencies
 [
     {
         "id": 1,
-        "code": "USD",
-        "name": "United States dollar",
-        "sign": "$"
+        "code": "RUB",
+        "name": "Russian Ruble",
+        "sign": "₽"
     },
     {
         "id": 2,
-        "code": "EUR", 
+        "code": "USD",
+        "name": "US Dollar",
+        "sign": "$"
+    },
+    {
+        "id": 3,
+        "code": "EUR",
         "name": "Euro",
         "sign": "€"
     }
@@ -102,9 +115,9 @@ GET /currency/EUR
 **Ответ:**
 ```json
 {
-    "id": 2,
+    "id": 3,
     "code": "EUR",
-    "name": "Euro", 
+    "name": "EURO",
     "sign": "€"
 }
 ```
@@ -114,17 +127,17 @@ GET /currency/EUR
 POST /currencies
 Content-Type: application/x-www-form-urlencoded
 
-name=Euro&code=EUR&sign=€
+name=Pound Sterling&code=GBP&sign=£
 
 ```
 
 **Ответ:**
 ```json
 {
-    "id": 3,
-    "code": "EUR",
-    "name": "Euro",
-    "sign": "€"
+    "id": 4,
+    "code": "GBP",
+    "name": "Pound Sterling",
+    "sign": "£"
 }
 ```
 
@@ -142,14 +155,46 @@ GET /exchangeRates
         "id": 1,
         "baseCurrency": {
             "id": 1,
-            "code": "USD",
-            "name": "United States dollar",
-            "sign": "$"
+            "code": "RUB",
+            "name": "Russian Ruble",
+            "sign": "₽"
         },
         "targetCurrency": {
             "id": 2,
+            "code": "USD",
+            "name": "US Dollar",
+            "sign": "$"
+        },
+        "rate": 0.0127
+    },
+    {
+        "id": 2,
+        "baseCurrency": {
+            "id": 1,
+            "code": "RUB",
+            "name": "Russian Ruble",
+            "sign": "₽"
+        },
+        "targetCurrency": {
+            "id": 3,
             "code": "EUR",
-            "name": "Euro",
+            "name": "EURO",
+            "sign": "€"
+        },
+        "rate": 0.0109
+    },
+    {
+        "id": 3,
+        "baseCurrency": {
+            "id": 2,
+            "code": "USD",
+            "name": "US Dollar",
+            "sign": "$"
+        },
+        "targetCurrency": {
+            "id": 3,
+            "code": "EUR",
+            "name": "EURO",
             "sign": "€"
         },
         "rate": 0.8613
@@ -164,7 +209,7 @@ GET /exchangeRate/{baseCurrencyCode}{targetCurrencyCode}
 
 **Пример:**
 ```http
-GET /exchangeRate/USDRUB
+GET /exchangeRate/RUBUSD
 ```
 
 **Ответ:**
@@ -173,17 +218,17 @@ GET /exchangeRate/USDRUB
     "id": 1,
     "baseCurrency": {
         "id": 1,
-        "code": "USD",
-        "name": "United States dollar", 
-        "sign": "$"
-    },
-    "targetCurrency": {
-        "id": 3,
         "code": "RUB",
         "name": "Russian Ruble",
         "sign": "₽"
     },
-    "rate": 78.50
+    "targetCurrency": {
+        "id": 2,
+        "code": "USD",
+        "name": "US Dollar",
+        "sign": "$"
+    },
+    "rate": 0.0127
 }
 ```
 
@@ -192,7 +237,26 @@ GET /exchangeRate/USDRUB
 POST /exchangeRates
 Content-Type: application/x-www-form-urlencoded
 
-baseCurrencyCode=USD&targetCurrencyCode=RUB&rate=78.50
+baseCurrencyCode=USD&targetCurrencyCode=RUB&rate=80
+```
+**Ответ:**
+```json
+{
+    "id": 4,
+    "baseCurrency": {
+        "id": 2,
+        "code": "USD",
+        "name": "US Dollar",
+        "sign": "$"
+    },
+    "targetCurrency": {
+        "id": 1,
+        "code": "RUB",
+        "name": "Russian Ruble",
+        "sign": "₽"
+    },
+    "rate": 80
+}
 ```
 
 #### Обновить обменный курс
@@ -200,7 +264,26 @@ baseCurrencyCode=USD&targetCurrencyCode=RUB&rate=78.50
 PATCH /exchangeRate/USDRUB
 Content-Type: application/x-www-form-urlencoded
 
-rate=79.25
+rate=100
+```
+**Ответ:**
+```json
+{
+    "id": 4,
+    "baseCurrency": {
+        "id": 2,
+        "code": "USD",
+        "name": "US Dollar",
+        "sign": "$"
+    },
+    "targetCurrency": {
+        "id": 1,
+        "code": "RUB",
+        "name": "Russian Ruble",
+        "sign": "₽"
+    },
+    "rate": 100
+}
 ```
 
 ### 💱 Обмен валюты
@@ -214,41 +297,21 @@ GET /exchange?from=USD&to=EUR&amount=100
 ```json
 {
     "baseCurrency": {
-        "id": 1,
+        "id": 2,
         "code": "USD",
-        "name": "United States dollar",
+        "name": "US Dollar",
         "sign": "$"
     },
     "targetCurrency": {
-        "id": 2,
-        "code": "EUR", 
-        "name": "Euro",
+        "id": 3,
+        "code": "EUR",
+        "name": "EURO",
         "sign": "€"
     },
     "rate": 0.8613,
-    "amount": 100.00,
+    "amount": 100,
     "convertedAmount": 86.13
 }
-```
-
-## 🧪 Тестирование
-
-### Postman Collection:
-   - Скачать: currency_exchange.postman_collection.json
-   - В Postman: Import → Upload Files → выбрать файл
-### Примеры запросов:
-
-```bash
-# Получить все валюты
-curl -X GET http://localhost:8080/currencies
-
-# Добавить валюту
-curl -X POST http://localhost:8080/currency-exchanger/currencies \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "code=GBP&name=British Pound&sign=£"
-
-# Конвертация
-curl -X GET "http://localhost:8080/exchange?from=USD&to=EUR&amount=100"
 ```
 
 ## 🗄️ База данных
@@ -270,6 +333,16 @@ CREATE TABLE exchange_rates (
     rate DECIMAL(6) NOT NULL,
     UNIQUE(base_currency_id, target_currency_id)
 );
+
+INSERT INTO currencies(code, full_name, sign)
+    VALUES ('RUB', 'Russian Ruble', '₽'),
+           ('USD', 'US Dollar', '$'),
+           ('EUR', 'EURO', '€');
+
+INSERT INTO exchange_rates(base_currency_id, target_currency_id, rate)
+    VALUES (1,2,0.0127),
+           (1,3,0.0109),
+           (2,3,0.8613);
 ```
 
 ## 🏗️ Архитектура
@@ -282,7 +355,7 @@ CREATE TABLE exchange_rates (
 ├── dto/              # Объекты передачи данных
 ├── exception/        # Кастомные исключения
 ├── filter/           # Фильтры сервлетов
-├── util/             # Утилиты и валидация
+├── util/             # Утилиты
 └── resources/        # Конфигурация
 ```
 
