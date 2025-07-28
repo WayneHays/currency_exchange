@@ -1,4 +1,4 @@
-# Currency Exchanger API
+# Currency Exchange API
 
 REST API для описания валют и обменных курсов. Позволяет просматривать и редактировать списки валют и обменных курсов, а также совершать расчёт конвертации произвольных сумм из одной валюты в другую.
 
@@ -245,7 +245,7 @@ GET /exchange?from=USD&to=EUR&amount=100
 
 ```bash
 # Получить все валюты
-curl -X GET http://localhost:8080/currency-exchanger/currencies
+curl -X GET http://localhost:8080/currencies
 
 # Добавить валюту
 curl -X POST http://localhost:8080/currency-exchanger/currencies \
@@ -253,7 +253,7 @@ curl -X POST http://localhost:8080/currency-exchanger/currencies \
   -d "code=GBP&name=British Pound&sign=£"
 
 # Конвертация
-curl -X GET "http://localhost:8080/currency-exchanger/exchange?from=USD&to=EUR&amount=100"
+curl -X GET "http://localhost:8080/exchange?from=USD&to=EUR&amount=100"
 ```
 
 ## 🗄️ База данных
