@@ -73,16 +73,24 @@ public class ExchangeRateService {
     }
 
     public ExchangeRateResponseDto update(CurrencyPairDto dto, BigDecimal rate)
-            throws CurrencyNotFoundException, ExchangeRateNotFoundException, ServiceException {
+            throws ExchangeRateNotFoundException, ServiceException {
         try {
+            boolean updated = exchangeRatesDao.update(
+                    dto.baseCurrencyCode(),
+                    dto.targetCurrencyCode(),
+                    rate);
+
+            if (!updated) {
+                throw new ExchangeRateNotFoundException(
+                        dto.baseCurrencyCode(),
+                        dto.targetCurrencyCode());
+            }
+
             Currency base = currencyDao.findByCode(dto.baseCurrencyCode());
             Currency target = currencyDao.findByCode(dto.targetCurrencyCode());
-            ExchangeRate toUpdate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
-            toUpdate.setRate(rate);
-            ExchangeRate updated = exchangeRatesDao.update(toUpdate);
-            return Mapper.toExchangeRateResponseDto(updated, base, target);
-        } catch (CurrencyNotFoundException e) {
-            throw e;
+            ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
+
+            return Mapper.toExchangeRateResponseDto(exchangeRate, base, target);
         } catch (ExchangeRateNotFoundException e) {
             throw new ExchangeRateNotFoundException(dto.baseCurrencyCode(), dto.targetCurrencyCode());
         } catch (DaoException e) {
