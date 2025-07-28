@@ -23,68 +23,96 @@ import static com.currency_exchange.util.constant.ParameterNames.*;
 public final class ParameterExtractor {
     public static final String MISSING_PARAMETER_RATE = "Missing parameter: rate";
     public static final String FAILED_TO_READ_REQUEST_BODY = "Failed to read request body";
+    public static final String PARAMETER_NOT_FOUND = "Parameter not found: ";
 
     private ParameterExtractor() {
     }
 
     public static CurrencyRequestDto extractCurrencyRequest(HttpServletRequest req) {
-        Map<String, String[]> params = req.getParameterMap();
+        Map<String, String[]> params = normalizeParameterMap(req.getParameterMap());
         CurrencyValidator.validateCreateRequest(params);
 
-        String code = extractParam(req, CODE, true);
-        String name = capitalizeWords(extractParam(req, NAME, false));
-        String sign = extractParam(req, SIGN, false);
+        String code = extractParam(params, CODE, true);
+        String name = capitalizeWords(extractParam(params, NAME, false));
+        String sign = extractParam(params, SIGN, false);
 
         CurrencyValidator.validateFields(code, name, sign);
         return Mapper.toCurrencyRequestDto(name, code, sign);
     }
 
     public static ExchangeRateRequestDto extractExchangeRateRequest(HttpServletRequest req) {
-        Map<String, String[]> params = req.getParameterMap();
+        Map<String, String[]> params = normalizeParameterMap(req.getParameterMap());
         ExchangeRateValidator.validateCreateRequest(params);
 
-        String baseCurrencyCode = extractParam(req, BASE_CURRENCY_CODE, true);
-        String targetCurrencyCode = extractParam(req, TARGET_CURRENCY_CODE, true);
-        String rate = extractParam(req, RATE, false);
+        String baseCurrencyCode = extractParam(params, BASE_CURRENCY_CODE, true);
+        String targetCurrencyCode = extractParam(params, TARGET_CURRENCY_CODE, true);
+        String rate = extractParam(params, RATE, true);
 
         ExchangeRateValidator.validateFields(baseCurrencyCode, targetCurrencyCode, rate);
         return Mapper.toExchangeRateRequestDto(baseCurrencyCode, targetCurrencyCode, rate);
     }
 
     public static CalculationRequestDto extractCalculationRequest(HttpServletRequest req) {
-        Map<String, String[]> params = req.getParameterMap();
+        Map<String, String[]> params = normalizeParameterMap(req.getParameterMap());
         CalculationValidator.validateRequest(params);
 
-        String from = extractParam(req, FROM, true);
-        String to = extractParam(req, TO, true);
-        String amount = extractParam(req, AMOUNT, false);
+        String from = extractParam(params, FROM, true);
+        String to = extractParam(params, TO, true);
+        String amount = extractParam(params, AMOUNT, true);
 
         CalculationValidator.validateFields(from, to, amount);
         return Mapper.toCalculationRequestDto(from, to, amount);
     }
 
     public static BigDecimal extractRate(HttpServletRequest req) {
-        String rate = "PATCH".equals(req.getMethod())
-                ? extractRateFromBody(req)
-                : extractParam(req, RATE, false);
+        String rate;
+
+        if ("PATCH".equals(req.getMethod())) {
+            rate = extractRateFromBody(req);
+        } else {
+            Map<String, String[]> params = normalizeParameterMap(req.getParameterMap());
+            ExchangeRateValidator.validateUpdateRequest(params);
+            rate = extractParam(params, RATE, false);
+        }
 
         ExchangeRateValidator.validateRateField(rate);
         return new BigDecimal(rate);
     }
 
-    private static String extractParam(HttpServletRequest req, String name, boolean normalize) {
-        String value = req.getParameterMap().entrySet().stream()
-                .filter(entry -> entry.getKey().trim().equals(name))
+    private static Map<String, String[]> normalizeParameterMap(Map<String, String[]> originalParams) {
+        return originalParams.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> normalizeParameterName(entry.getKey()),
+                        entry -> normalizeParameterValues(entry.getValue())
+                ));
+    }
+
+    private static String normalizeParameterName(String parameterName) {
+        return parameterName.trim().replaceAll("\\s+", "");
+    }
+
+    private static String[] normalizeParameterValues(String[] values) {
+        return java.util.Arrays.stream(values)
+                .map(value -> value.trim().replaceAll("\\s+", " "))
+                .toArray(String[]::new);
+    }
+
+    private static String extractParam(Map<String, String[]> params, String name, boolean normalize) {
+        String value = params.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(name))
                 .map(entry -> entry.getValue()[0])
                 .findFirst()
                 .orElse(null);
 
         if (value == null) {
-            throw new InvalidParameterException("Parameter not found: " + name);
+            throw new InvalidParameterException(PARAMETER_NOT_FOUND + name);
         }
 
-        value = value.trim().replaceAll("\\s+", "");
-        return normalize ? value.toUpperCase() : value;
+        if (normalize) {
+            value = value.replaceAll("\\s+", "").toUpperCase();
+        }
+
+        return value;
     }
 
     private static String extractRateFromBody(HttpServletRequest req) {
@@ -95,10 +123,13 @@ public final class ParameterExtractor {
             for (String pair : pairs) {
                 String[] keyValue = pair.split("=", 2);
                 if (keyValue.length == 2) {
-                    String decodedKey = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8).trim();
+                    String decodedKey = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                    decodedKey = normalizeParameterName(decodedKey);
+
                     if (RATE.equals(decodedKey)) {
                         String decodedValue = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                        return decodedValue.replace(",", ".");
+                        decodedValue = decodedValue.trim().replaceAll("\\s+", "").replace(",", ".");
+                        return decodedValue;
                     }
                 }
             }
@@ -110,8 +141,8 @@ public final class ParameterExtractor {
     }
 
     private static String capitalizeWords(String input) {
-        if (!input.contains(" ")) {
-            return input.substring(0, 1).toUpperCase() + input.substring(1);
+        if (input == null || input.isEmpty()) {
+            return input;
         }
 
         String[] words = input.split("\\s+");
@@ -121,7 +152,7 @@ public final class ParameterExtractor {
             if (i > 0) result.append(" ");
             if (!words[i].isEmpty()) {
                 result.append(words[i].substring(0, 1).toUpperCase())
-                        .append(words[i].substring(1));
+                        .append(words[i].substring(1).toLowerCase());
             }
         }
         return result.toString();

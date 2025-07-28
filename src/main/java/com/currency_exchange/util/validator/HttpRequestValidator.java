@@ -17,19 +17,7 @@ public final class HttpRequestValidator {
         List<String> missing = new ArrayList<>();
 
         for (String param : requiredParams) {
-            boolean found = params.keySet().stream()
-                    .anyMatch(key -> key.trim().equals(param));
-
-            if (!found) {
-                missing.add(param);
-                continue;
-            }
-
-            String[] values = params.entrySet().stream()
-                    .filter(entry -> entry.getKey().trim().equals(param))
-                    .map(Map.Entry::getValue)
-                    .findFirst()
-                    .orElse(null);
+            String[] values = params.get(param);
 
             if (values == null || values.length == 0 || values[0].trim().isEmpty()) {
                 missing.add(param);
@@ -56,14 +44,6 @@ public final class HttpRequestValidator {
         if (!input.matches(pattern)) {
             throw new InvalidParameterException(errorMessage);
         }
-    }
-
-    private static String[] getParameterByTrimmedKey(Map<String, String[]> params, String key) {
-        return params.entrySet().stream()
-                .filter(entry -> entry.getKey().trim().equals(key))
-                .map(Map.Entry::getValue)
-                .findFirst()
-                .orElse(null);
     }
 }
 

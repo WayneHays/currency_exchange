@@ -29,7 +29,7 @@ public final class DatabaseSchema {
             INSERT INTO currencies(code, full_name, sign)
             VALUES ('RUB', 'Russian Ruble', '₽'),
                    ('USD', 'US Dollar', '$'),
-                   ('EUR', 'EURO', '€');
+                   ('EUR', 'Euro', '€');
             """;
 
     public static final String INSERT_DATA_INTO_EXCHANGE_RATES = """
