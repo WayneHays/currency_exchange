@@ -63,6 +63,10 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
         }
     }
 
+    public List<ExchangeRate> findAll() {
+        return executeQuery(FIND_ALL_SQL);
+    }
+
     public boolean update(String baseCurrencyCode, String targetCurrencyCode, BigDecimal rate) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
@@ -73,16 +77,6 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
 
             int affectedRows = preparedStatement.executeUpdate();
             return affectedRows > 0;
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
-        }
-    }
-
-    public List<ExchangeRate> findAll() {
-        try (var connection = ConnectionManager.get();
-             var preparedStatement = connection.prepareStatement(FIND_ALL_SQL)) {
-            var resultSet = preparedStatement.executeQuery();
-            return buildEntityList(resultSet);
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         }

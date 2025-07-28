@@ -56,6 +56,10 @@ public class CurrencyDao extends BaseDao<Currency> {
         }
     }
 
+    public List<Currency> findAll() {
+        return executeQuery(FIND_ALL_SQL);
+    }
+
     public Currency findByCode(String code) {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(FIND_BY_CODE_SQL)) {
@@ -65,16 +69,6 @@ public class CurrencyDao extends BaseDao<Currency> {
                 return buildEntity(resultSet);
             }
             throw new CurrencyNotFoundException(code);
-        } catch (SQLException e) {
-            throw new DaoException(e.getMessage());
-        }
-    }
-
-    public List<Currency> findAll() {
-        try (var connection = ConnectionManager.get();
-             var prepareStatement = connection.prepareStatement(FIND_ALL_SQL)) {
-            var resultSet = prepareStatement.executeQuery();
-            return buildEntityList(resultSet);
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         }
