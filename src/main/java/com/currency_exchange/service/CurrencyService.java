@@ -18,11 +18,12 @@ public class CurrencyService {
     public static final String FAILED_TO_FIND_ALL_MESSAGE = "Failed to find all currencies";
 
     private static final CurrencyService INSTANCE = new CurrencyService();
+
     private final CurrencyDao currencyDao = CurrencyDao.getInstance();
 
     private CurrencyService() {
     }
-
+    
     public static CurrencyService getInstance() {
         return INSTANCE;
     }

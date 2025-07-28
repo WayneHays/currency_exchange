@@ -37,7 +37,6 @@ public class CalculationService {
         return INSTANCE;
     }
 
-
     public CalculationResponseDto calculate(CalculationRequestDto calculationRequest) {
         Currency base = currencyDao.findByCode(calculationRequest.from());
         Currency target = currencyDao.findByCode(calculationRequest.to());
@@ -46,22 +45,21 @@ public class CalculationService {
         CurrencyResponseDto targetResponse = Mapper.toCurrencyResponseDto(target);
 
         return strategies.stream()
-                .map(strategy -> tryCalculate(
-                        strategy,
-                        base,
-                        target,
-                        calculationRequest.amount(),
-                        baseResponse,
-                        targetResponse))
+                .map(strategy -> tryCalculate(strategy, base, target,
+                        calculationRequest.amount(), baseResponse, targetResponse))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
                 .orElseThrow(() -> new ExchangeRateNotFoundException(base.getCode(), target.getCode()));
     }
 
-    private Optional<CalculationResponseDto> tryCalculate(CalculationStrategy strategy, Currency base, Currency target,
-                                                          BigDecimal amount, CurrencyResponseDto baseResponse,
-                                                          CurrencyResponseDto targetResponse) {
+    private Optional<CalculationResponseDto> tryCalculate(
+            CalculationStrategy strategy,
+            Currency base,
+            Currency target,
+            BigDecimal amount,
+            CurrencyResponseDto baseResponse,
+            CurrencyResponseDto targetResponse) {
         try {
             return Optional.of(strategy.calculate(base, target, amount, baseResponse, targetResponse));
         } catch (ExchangeRateNotFoundException e) {

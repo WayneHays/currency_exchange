@@ -11,7 +11,6 @@ import static jakarta.servlet.http.HttpServletResponse.*;
 
 @WebFilter(value = "/*", filterName = "ExceptionFilter")
 public class ExceptionFilter implements Filter {
-
     public static final String INVALID_PARAMETER_EXCEPTION = "InvalidParameterException";
     public static final String CURRENCY_NOT_FOUND_EXCEPTION = "CurrencyNotFoundException";
     public static final String EXCHANGE_RATE_NOT_FOUND_EXCEPTION = "ExchangeRateNotFoundException";

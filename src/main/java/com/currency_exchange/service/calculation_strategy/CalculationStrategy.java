@@ -18,11 +18,12 @@ public abstract class CalculationStrategy {
         this.exchangeRatesDao = exchangeRatesDao;
     }
 
-    public abstract CalculationResponseDto calculate(Currency base,
-                                                     Currency target,
-                                                     BigDecimal amount,
-                                                     CurrencyResponseDto baseResponse,
-                                                     CurrencyResponseDto targetResponse);
+    public abstract CalculationResponseDto calculate(
+            Currency base,
+            Currency target,
+            BigDecimal amount,
+            CurrencyResponseDto baseResponse,
+            CurrencyResponseDto targetResponse);
 
     protected BigDecimal round(BigDecimal convertedAmount) {
         return convertedAmount.setScale(RESULT_ROUNDING, RoundingMode.HALF_UP);

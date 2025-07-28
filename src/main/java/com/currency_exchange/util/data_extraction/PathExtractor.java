@@ -3,8 +3,8 @@ package com.currency_exchange.util.data_extraction;
 import com.currency_exchange.dto.currency.CurrencyPairDto;
 import com.currency_exchange.exception.InvalidParameterException;
 import com.currency_exchange.util.Mapper;
-import com.currency_exchange.util.validator.CurrencyValidator;
 import com.currency_exchange.util.validator.HttpRequestValidator;
+import com.currency_exchange.util.validator.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 
 import static com.currency_exchange.util.constant.ErrorMessages.*;
@@ -12,6 +12,7 @@ import static com.currency_exchange.util.constant.ValidationPatterns.CODE_PATTER
 import static com.currency_exchange.util.constant.ValidationPatterns.PAIR_PATTERN;
 
 public final class PathExtractor {
+    public static final int CURRENCY_CODE_LENGTH = 3;
 
     private PathExtractor() {
     }
@@ -26,10 +27,10 @@ public final class PathExtractor {
         String pair = extractAndNormalizePath(req, MISSING_PAIR_MESSAGE);
         HttpRequestValidator.validateStringPattern(pair, PAIR_PATTERN, PAIR_ERROR_MESSAGE);
 
-        String baseCurrencyCode = pair.substring(0, 3);
-        String targetCurrencyCode = pair.substring(3);
+        String baseCurrencyCode = pair.substring(0, CURRENCY_CODE_LENGTH);
+        String targetCurrencyCode = pair.substring(CURRENCY_CODE_LENGTH);
 
-        CurrencyValidator.validateCurrenciesAreDifferent(baseCurrencyCode, targetCurrencyCode);
+        ValidationUtils.checkCurrenciesAreDifferent(baseCurrencyCode, targetCurrencyCode);
 
         return Mapper.toCurrencyCodesDto(baseCurrencyCode, targetCurrencyCode);
     }

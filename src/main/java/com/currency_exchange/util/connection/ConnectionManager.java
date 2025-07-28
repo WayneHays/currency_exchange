@@ -87,7 +87,6 @@ public final class ConnectionManager {
         statement.execute(DatabaseSchema.INSERT_DATA_INTO_EXCHANGE_RATES);
     }
 
-
     private static void initConnectionPool() {
         String poolSize = PropertiesUtil.get(POOL_SIZE_KEY);
         int size = poolSize == null ? DEFAULT_POOL_SIZE : Integer.parseInt(poolSize);

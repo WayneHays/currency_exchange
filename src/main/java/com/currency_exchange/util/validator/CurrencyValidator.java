@@ -18,8 +18,4 @@ public final class CurrencyValidator {
         ValidationUtils.validateCurrencyName(name);
         ValidationUtils.validateCurrencySign(sign);
     }
-
-    public static void validateCurrenciesAreDifferent(String baseCode, String targetCode) {
-        ValidationUtils.checkCurrenciesAreDifferent(baseCode, targetCode);
-    }
 }

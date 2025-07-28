@@ -72,7 +72,7 @@ public final class ParameterExtractor {
         } else {
             Map<String, String[]> params = normalizeParameterMap(req.getParameterMap());
             ExchangeRateValidator.validateUpdateRequest(params);
-            rate = extractParam(params, RATE, false);
+            rate = extractParam(params, RATE, true);
         }
 
         ExchangeRateValidator.validateRateField(rate);

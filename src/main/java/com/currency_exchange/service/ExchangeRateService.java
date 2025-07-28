@@ -41,6 +41,8 @@ public class ExchangeRateService {
             ExchangeRate exchangeRate = Mapper.toExchangeRate(dto.rate(), base, target);
             ExchangeRate saved = exchangeRatesDao.save(exchangeRate);
             return Mapper.toExchangeRateResponseDto(saved, base, target);
+        } catch (CurrencyNotFoundException e) {
+            throw e;
         } catch (ExchangeRateAlreadyExistsException e) {
             throw new ExchangeRateAlreadyExistsException(dto.baseCurrencyCode(), dto.targetCurrencyCode());
         } catch (DaoException e) {
@@ -91,8 +93,6 @@ public class ExchangeRateService {
             ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
 
             return Mapper.toExchangeRateResponseDto(exchangeRate, base, target);
-        } catch (ExchangeRateNotFoundException e) {
-            throw new ExchangeRateNotFoundException(dto.baseCurrencyCode(), dto.targetCurrencyCode());
         } catch (DaoException e) {
             throw new ServiceException(FAILED_TO_UPDATE_MESSAGE.formatted(
                     dto.baseCurrencyCode(), dto.targetCurrencyCode()), e);
@@ -106,6 +106,8 @@ public class ExchangeRateService {
             Currency target = currencyDao.findByCode(dto.targetCurrencyCode());
             ExchangeRate exchangeRate = exchangeRatesDao.findByCurrencyIds(base.getId(), target.getId());
             return Mapper.toExchangeRateResponseDto(exchangeRate, base, target);
+        } catch (CurrencyNotFoundException e) {
+            throw e;
         } catch (ExchangeRateNotFoundException e) {
             throw new ExchangeRateNotFoundException(dto.baseCurrencyCode(), dto.targetCurrencyCode());
         } catch (DaoException e) {
