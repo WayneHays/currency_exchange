@@ -7,7 +7,7 @@ import com.currency_exchange.util.validator.HttpRequestValidator;
 import com.currency_exchange.util.validator.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 
-import static com.currency_exchange.util.constant.ErrorMessages.*;
+import static com.currency_exchange.util.constant.ValidationErrorMessages.*;
 import static com.currency_exchange.util.constant.ValidationPatterns.CODE_PATTERN;
 import static com.currency_exchange.util.constant.ValidationPatterns.PAIR_PATTERN;
 

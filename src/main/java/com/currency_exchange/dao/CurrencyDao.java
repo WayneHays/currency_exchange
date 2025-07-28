@@ -13,11 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 public class CurrencyDao extends BaseDao<Currency> {
-    public static final String ID = "id";
     public static final String CODE = "code";
     public static final String FULL_NAME = "full_name";
     public static final String SIGN = "sign";
 
+    public static final String SAVING_CURRENCY_FAILED = "Saving currency failed";
     public static final String SAVE_SQL = "INSERT INTO currencies (code, full_name, sign) VALUES (?,?,?)";
     public static final String FIND_ALL_SQL = "SELECT id, code, full_name, sign FROM currencies";
     public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE id IN (";
@@ -47,7 +47,7 @@ public class CurrencyDao extends BaseDao<Currency> {
                 currency.setId(generatedKeys.getLong(1));
                 return currency;
             }
-            throw new DaoException("Creating currency failed");
+            throw new DaoException(SAVING_CURRENCY_FAILED);
         } catch (SQLException e) {
             if (e.getErrorCode() == DUPLICATE_ERROR_CODE) {
                 throw new CurrencyAlreadyExistsException(currency.getCode());

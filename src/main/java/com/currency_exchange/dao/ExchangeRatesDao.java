@@ -13,21 +13,28 @@ import java.sql.Statement;
 import java.util.List;
 
 public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
-    public static final String ID = "id";
     public static final String BASE_CURRENCY_ID = "base_currency_id";
     public static final String TARGET_CURRENCY_ID = "target_currency_id";
     public static final String RATE = "rate";
+
     public static final String FAILED_TO_RETRIEVE_GENERATED_ID = "Failed to retrieve generated ID";
 
-    public static final String SAVE_SQL = "INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (?,?,?)";
-    public static final String FIND_ALL_SQL = "SELECT id, base_currency_id, target_currency_id, rate FROM exchange_rates";
-    public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE base_currency_id = ? AND target_currency_id = ?";
+    public static final String SAVE_SQL = """
+            INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (?,?,?)
+            """;
+
+    public static final String FIND_ALL_SQL = """
+            SELECT id, base_currency_id, target_currency_id, rate FROM exchange_rates
+            """;
+
     public static final String UPDATE_SQL = """
             UPDATE exchange_rates
             SET rate = ?
             WHERE base_currency_id = (SELECT id FROM currencies WHERE code = ?)
             AND target_currency_id = (SELECT id FROM currencies WHERE code = ?)
             """;
+
+    public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE base_currency_id = ? AND target_currency_id = ?";
 
     private static final ExchangeRatesDao INSTANCE = new ExchangeRatesDao();
 
