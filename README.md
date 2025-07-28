@@ -79,13 +79,19 @@ GET /currencies
 [
     {
         "id": 1,
-        "code": "USD",
-        "name": "United States dollar",
-        "sign": "$"
+        "code": "RUB",
+        "name": "Russian Ruble",
+        "sign": "₽"
     },
     {
         "id": 2,
-        "code": "EUR", 
+        "code": "USD",
+        "name": "US Dollar",
+        "sign": "$"
+    },
+    {
+        "id": 3,
+        "code": "EUR",
         "name": "Euro",
         "sign": "€"
     }
@@ -105,9 +111,9 @@ GET /currency/EUR
 **Ответ:**
 ```json
 {
-    "id": 2,
+    "id": 3,
     "code": "EUR",
-    "name": "Euro", 
+    "name": "EURO",
     "sign": "€"
 }
 ```
@@ -117,17 +123,17 @@ GET /currency/EUR
 POST /currencies
 Content-Type: application/x-www-form-urlencoded
 
-name=Euro&code=EUR&sign=€
+name=Pound Sterling&code=GBP&sign=£
 
 ```
 
 **Ответ:**
 ```json
 {
-    "id": 3,
-    "code": "EUR",
-    "name": "Euro",
-    "sign": "€"
+    "id": 4,
+    "code": "GBP",
+    "name": "Pound Sterling",
+    "sign": "£"
 }
 ```
 
@@ -145,14 +151,46 @@ GET /exchangeRates
         "id": 1,
         "baseCurrency": {
             "id": 1,
+            "code": "RUB",
+            "name": "Russian Ruble",
+            "sign": "₽"
+        },
+        "targetCurrency": {
+            "id": 2,
+            "code": "USD",
+            "name": "US Dollar",
+            "sign": "$"
+        },
+        "rate": 0.0127
+    },
+    {
+        "id": 2,
+        "baseCurrency": {
+            "id": 1,
+            "code": "RUB",
+            "name": "Russian Ruble",
+            "sign": "₽"
+        },
+        "targetCurrency": {
+            "id": 3,
+            "code": "EUR",
+            "name": "EURO",
+            "sign": "€"
+        },
+        "rate": 0.0109
+    },
+    {
+        "id": 3,
+        "baseCurrency": {
+            "id": 2,
             "code": "USD",
             "name": "US Dollar",
             "sign": "$"
         },
         "targetCurrency": {
-            "id": 2,
+            "id": 3,
             "code": "EUR",
-            "name": "Euro",
+            "name": "EURO",
             "sign": "€"
         },
         "rate": 0.8613
@@ -167,7 +205,7 @@ GET /exchangeRate/{baseCurrencyCode}{targetCurrencyCode}
 
 **Пример:**
 ```http
-GET /exchangeRate/USDRUB
+GET /exchangeRate/RUBUSD
 ```
 
 **Ответ:**
@@ -176,17 +214,17 @@ GET /exchangeRate/USDRUB
     "id": 1,
     "baseCurrency": {
         "id": 1,
-        "code": "USD",
-        "name": "US Dollar", 
-        "sign": "$"
-    },
-    "targetCurrency": {
-        "id": 2,
         "code": "RUB",
         "name": "Russian Ruble",
         "sign": "₽"
     },
-    "rate": 78.50
+    "targetCurrency": {
+        "id": 2,
+        "code": "USD",
+        "name": "US Dollar",
+        "sign": "$"
+    },
+    "rate": 0.0127
 }
 ```
 
@@ -195,7 +233,26 @@ GET /exchangeRate/USDRUB
 POST /exchangeRates
 Content-Type: application/x-www-form-urlencoded
 
-baseCurrencyCode=USD&targetCurrencyCode=RUB&rate=78.50
+baseCurrencyCode=USD&targetCurrencyCode=RUB&rate=80
+```
+**Ответ:**
+```json
+{
+    "id": 4,
+    "baseCurrency": {
+        "id": 2,
+        "code": "USD",
+        "name": "US Dollar",
+        "sign": "$"
+    },
+    "targetCurrency": {
+        "id": 1,
+        "code": "RUB",
+        "name": "Russian Ruble",
+        "sign": "₽"
+    },
+    "rate": 80
+}
 ```
 
 #### Обновить обменный курс
@@ -203,7 +260,26 @@ baseCurrencyCode=USD&targetCurrencyCode=RUB&rate=78.50
 PATCH /exchangeRate/USDRUB
 Content-Type: application/x-www-form-urlencoded
 
-rate=79.25
+rate=100
+```
+**Ответ:**
+```json
+{
+    "id": 4,
+    "baseCurrency": {
+        "id": 2,
+        "code": "USD",
+        "name": "US Dollar",
+        "sign": "$"
+    },
+    "targetCurrency": {
+        "id": 1,
+        "code": "RUB",
+        "name": "Russian Ruble",
+        "sign": "₽"
+    },
+    "rate": 100
+}
 ```
 
 ### 💱 Обмен валюты
@@ -217,19 +293,19 @@ GET /exchange?from=USD&to=EUR&amount=100
 ```json
 {
     "baseCurrency": {
-        "id": 1,
+        "id": 2,
         "code": "USD",
-        "name": "United States dollar",
+        "name": "US Dollar",
         "sign": "$"
     },
     "targetCurrency": {
-        "id": 2,
-        "code": "EUR", 
-        "name": "Euro",
+        "id": 3,
+        "code": "EUR",
+        "name": "EURO",
         "sign": "€"
     },
     "rate": 0.8613,
-    "amount": 100.00,
+    "amount": 100,
     "convertedAmount": 86.13
 }
 ```
