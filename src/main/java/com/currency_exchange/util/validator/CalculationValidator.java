@@ -2,8 +2,6 @@ package com.currency_exchange.util.validator;
 
 import java.util.Map;
 
-import static com.currency_exchange.util.constant.HttpParameterNames.*;
-
 public final class CalculationValidator {
 
     private CalculationValidator() {

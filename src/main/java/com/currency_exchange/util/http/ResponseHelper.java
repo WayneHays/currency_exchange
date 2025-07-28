@@ -1,4 +1,4 @@
-package com.currency_exchange.util;
+package com.currency_exchange.util.http;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

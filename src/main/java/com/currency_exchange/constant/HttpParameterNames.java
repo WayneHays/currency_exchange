@@ -1,4 +1,4 @@
-package com.currency_exchange.util.constant;
+package com.currency_exchange.constant;
 
 public final class HttpParameterNames {
     public static final String CODE = "code";

@@ -1,4 +1,4 @@
-package com.currency_exchange.util.constant;
+package com.currency_exchange.constant;
 
 public class ValidationPatterns {
     public static final String NAME_PATTERN = "^[\\p{L}\\s\\-]{2,30}$";

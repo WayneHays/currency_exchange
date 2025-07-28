@@ -1,6 +1,6 @@
 package com.currency_exchange.filter;
 
-import com.currency_exchange.util.ResponseHelper;
+import com.currency_exchange.util.http.ResponseHelper;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletResponse;

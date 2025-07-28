@@ -1,4 +1,4 @@
-package com.currency_exchange.util.data_extraction;
+package com.currency_exchange.util.http;
 
 import com.currency_exchange.dto.currency.CurrencyPairDto;
 import com.currency_exchange.exception.InvalidParameterException;
@@ -7,9 +7,8 @@ import com.currency_exchange.util.validator.HttpRequestValidator;
 import com.currency_exchange.util.validator.ValidationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 
-import static com.currency_exchange.util.constant.ValidationErrorMessages.*;
-import static com.currency_exchange.util.constant.ValidationPatterns.CODE_PATTERN;
-import static com.currency_exchange.util.constant.ValidationPatterns.PAIR_PATTERN;
+import static com.currency_exchange.constant.ValidationPatterns.CODE_PATTERN;
+import static com.currency_exchange.constant.ValidationPatterns.PAIR_PATTERN;
 
 public final class PathExtractor {
     public static final int CURRENCY_CODE_LENGTH = 3;

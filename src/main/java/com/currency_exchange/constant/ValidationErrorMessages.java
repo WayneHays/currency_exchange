@@ -1,4 +1,4 @@
-package com.currency_exchange.util.constant;
+package com.currency_exchange.constant;
 
 public final class ValidationErrorMessages {
     public static final String NAME_ERROR_MESSAGE = "Currency name must be 2-30 latin letters";

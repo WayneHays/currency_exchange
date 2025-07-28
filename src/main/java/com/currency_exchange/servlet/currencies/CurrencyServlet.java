@@ -2,8 +2,8 @@ package com.currency_exchange.servlet.currencies;
 
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.service.CurrencyService;
-import com.currency_exchange.util.ResponseHelper;
-import com.currency_exchange.util.data_extraction.PathExtractor;
+import com.currency_exchange.util.http.PathExtractor;
+import com.currency_exchange.util.http.ResponseHelper;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;

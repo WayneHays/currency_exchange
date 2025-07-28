@@ -4,9 +4,6 @@ import com.currency_exchange.exception.InvalidParameterException;
 
 import java.util.Map;
 
-import static com.currency_exchange.util.constant.ValidationErrorMessages.*;
-import static com.currency_exchange.util.constant.ValidationPatterns.*;
-
 public final class ValidationUtils {
 
     private ValidationUtils() {
