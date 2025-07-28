@@ -1,8 +1,12 @@
 package com.currency_exchange.util.validator;
 
+import com.currency_exchange.constant.ValidationPatterns;
 import com.currency_exchange.exception.InvalidParameterException;
 
 import java.util.Map;
+
+import static com.currency_exchange.constant.ValidationErrorMessages.*;
+import static com.currency_exchange.constant.ValidationPatterns.*;
 
 public final class ValidationUtils {
 
@@ -15,7 +19,7 @@ public final class ValidationUtils {
     }
 
     public static void validateCurrencyCode(String code) {
-        HttpRequestValidator.validateStringPattern(code, CODE_PATTERN, CODE_ERROR_MESSAGE);
+        HttpRequestValidator.validateStringPattern(code, ValidationPatterns.CODE_PATTERN, CODE_ERROR_MESSAGE);
     }
 
     public static void validateRate(String rate) {

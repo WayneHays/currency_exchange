@@ -18,6 +18,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.currency_exchange.constant.HttpParameterNames.*;
+
 public final class ParameterExtractor {
     public static final String MISSING_PARAMETER_RATE = "Missing parameter: rate";
     public static final String FAILED_TO_READ_REQUEST_BODY = "Failed to read request body";
