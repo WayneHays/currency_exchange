@@ -11,8 +11,8 @@ public class ApplicationInitializer implements ServletContextListener {
     private ApplicationContext applicationContext;
 
     @Override
-    public void contextInitialized(ServletContextEvent sce) {
+    public void contextInitialized(ServletContextEvent event) {
         applicationContext = new ApplicationContext();
-        sce.getServletContext().setAttribute(KEY, applicationContext);
+        event.getServletContext().setAttribute(KEY, applicationContext);
     }
 }

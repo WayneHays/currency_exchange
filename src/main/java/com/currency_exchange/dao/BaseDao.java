@@ -12,7 +12,7 @@ public abstract class BaseDao<T> {
     public static final String ID = "id";
     protected static final int DUPLICATE_ERROR_CODE = 19;
 
-    protected List<T> executeQuery(String sql) throws DaoException {
+    protected List<T> executeQuery(String sql) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(sql)) {
             var resultSet = preparedStatement.executeQuery();
@@ -22,8 +22,6 @@ public abstract class BaseDao<T> {
         }
     }
 
-    protected abstract T buildEntity(ResultSet resultSet) throws SQLException;
-
     protected List<T> buildEntityList(ResultSet resultSet) throws SQLException {
         List<T> entities = new ArrayList<>();
         while (resultSet.next()) {
@@ -31,4 +29,6 @@ public abstract class BaseDao<T> {
         }
         return entities;
     }
+
+    protected abstract T buildEntity(ResultSet resultSet) throws SQLException;
 }

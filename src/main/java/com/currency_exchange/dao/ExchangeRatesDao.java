@@ -36,7 +36,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
 
     public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE base_currency_id = ? AND target_currency_id = ?";
 
-    public ExchangeRate save(ExchangeRate exchangeRate) throws ExchangeRateAlreadyExistsException, DaoException {
+    public ExchangeRate save(ExchangeRate exchangeRate) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(
                      SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -61,11 +61,11 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
         }
     }
 
-    public List<ExchangeRate> findAll() throws DaoException {
+    public List<ExchangeRate> findAll() {
         return executeQuery(FIND_ALL_SQL);
     }
 
-    public boolean update(String baseCurrencyCode, String targetCurrencyCode, BigDecimal rate) throws DaoException {
+    public boolean update(String baseCurrencyCode, String targetCurrencyCode, BigDecimal rate) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(UPDATE_SQL)) {
 
@@ -80,7 +80,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
         }
     }
 
-    public ExchangeRate findByCurrencyIds(Long baseId, Long targetId) throws ExchangeRateNotFoundException, DaoException {
+    public ExchangeRate findByCurrencyIds(Long baseId, Long targetId) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(FIND_BY_IDS_SQL)) {
             preparedStatement.setLong(1, baseId);

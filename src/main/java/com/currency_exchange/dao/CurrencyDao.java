@@ -18,12 +18,13 @@ public class CurrencyDao extends BaseDao<Currency> {
     public static final String SIGN = "sign";
 
     public static final String SAVING_CURRENCY_FAILED = "Saving currency failed";
+
     public static final String SAVE_SQL = "INSERT INTO currencies (code, full_name, sign) VALUES (?,?,?)";
     public static final String FIND_ALL_SQL = "SELECT id, code, full_name, sign FROM currencies";
     public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE id IN (";
     public static final String FIND_BY_CODE_SQL = FIND_ALL_SQL + " WHERE CODE = ?";
 
-    public Currency save(Currency currency) throws CurrencyAlreadyExistsException, DaoException {
+    public Currency save(Currency currency) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(
                      SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -51,7 +52,7 @@ public class CurrencyDao extends BaseDao<Currency> {
         return executeQuery(FIND_ALL_SQL);
     }
 
-    public Currency findByCode(String code) throws CurrencyNotFoundException, DaoException {
+    public Currency findByCode(String code) {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(FIND_BY_CODE_SQL)) {
             prepareStatement.setString(1, code);
@@ -65,7 +66,7 @@ public class CurrencyDao extends BaseDao<Currency> {
         }
     }
 
-    public Map<Long, Currency> findByIds(List<Long> ids) throws DaoException {
+    public Map<Long, Currency> findByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return new HashMap<>();
         }

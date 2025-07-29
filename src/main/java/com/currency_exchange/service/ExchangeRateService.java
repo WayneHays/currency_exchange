@@ -29,8 +29,7 @@ public class ExchangeRateService {
         this.exchangeRatesDao = exchangeRatesDao;
     }
 
-    public ExchangeRateResponseDto save(ExchangeRateRequestDto dto)
-            throws CurrencyNotFoundException, ExchangeRateAlreadyExistsException, ServiceException {
+    public ExchangeRateResponseDto save(ExchangeRateRequestDto dto) {
         try {
             Currency base = currencyDao.findByCode(dto.baseCurrencyCode());
             Currency target = currencyDao.findByCode(dto.targetCurrencyCode());
@@ -47,7 +46,7 @@ public class ExchangeRateService {
         }
     }
 
-    public List<ExchangeRateResponseDto> findAll() throws ServiceException {
+    public List<ExchangeRateResponseDto> findAll() {
         try {
             List<ExchangeRate> rates = exchangeRatesDao.findAll();
             List<Long> currencyIds = new ArrayList<>();
@@ -70,8 +69,7 @@ public class ExchangeRateService {
         }
     }
 
-    public ExchangeRateResponseDto update(CurrencyPairDto dto, BigDecimal rate)
-            throws CurrencyNotFoundException, ExchangeRateNotFoundException, ServiceException {
+    public ExchangeRateResponseDto update(CurrencyPairDto dto, BigDecimal rate) {
         try {
             boolean updated = exchangeRatesDao.update(
                     dto.baseCurrencyCode(),
@@ -95,8 +93,7 @@ public class ExchangeRateService {
         }
     }
 
-    public ExchangeRateResponseDto findByPair(CurrencyPairDto dto)
-            throws CurrencyNotFoundException, ExchangeRateNotFoundException, ServiceException {
+    public ExchangeRateResponseDto findByPair(CurrencyPairDto dto) {
         try {
             Currency base = currencyDao.findByCode(dto.baseCurrencyCode());
             Currency target = currencyDao.findByCode(dto.targetCurrencyCode());

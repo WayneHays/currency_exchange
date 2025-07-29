@@ -23,7 +23,7 @@ public class CurrencyService {
         this.currencyDao = currencyDao;
     }
 
-    public CurrencyResponseDto save(CurrencyRequestDto dto) throws CurrencyAlreadyExistsException, ServiceException {
+    public CurrencyResponseDto save(CurrencyRequestDto dto) {
         try {
             Currency currency = Mapper.toCurrency(dto);
             Currency saved = currencyDao.save(currency);
@@ -35,7 +35,7 @@ public class CurrencyService {
         }
     }
 
-    public CurrencyResponseDto findByCode(String code) throws CurrencyNotFoundException, ServiceException {
+    public CurrencyResponseDto findByCode(String code) {
         try {
             Currency currency = currencyDao.findByCode(code);
             return Mapper.toCurrencyResponseDto(currency);
@@ -46,7 +46,7 @@ public class CurrencyService {
         }
     }
 
-    public List<CurrencyResponseDto> findAll() throws ServiceException {
+    public List<CurrencyResponseDto> findAll() {
         try {
             return currencyDao.findAll().stream()
                     .map(Mapper::toCurrencyResponseDto)
