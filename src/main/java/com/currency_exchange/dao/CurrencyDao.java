@@ -23,15 +23,6 @@ public class CurrencyDao extends BaseDao<Currency> {
     public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE id IN (";
     public static final String FIND_BY_CODE_SQL = FIND_ALL_SQL + " WHERE CODE = ?";
 
-    private static final CurrencyDao INSTANCE = new CurrencyDao();
-
-    private CurrencyDao() {
-    }
-
-    public static CurrencyDao getInstance() {
-        return INSTANCE;
-    }
-
     public Currency save(Currency currency) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(

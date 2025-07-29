@@ -1,5 +1,6 @@
 package com.currency_exchange.servlet.currencies;
 
+import com.currency_exchange.config.ApplicationContext;
 import com.currency_exchange.dto.currency.CurrencyRequestDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.service.CurrencyService;
@@ -15,7 +16,13 @@ import java.util.List;
 
 @WebServlet("/currencies")
 public class CurrenciesServlet extends HttpServlet {
-    private final CurrencyService currencyService = CurrencyService.getInstance();
+    private CurrencyService currencyService;
+
+    @Override
+    public void init() {
+        ApplicationContext context = (ApplicationContext) getServletContext().getAttribute("applicationContext");
+        this.currencyService = context.getCurrencyService();
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

@@ -19,22 +19,17 @@ import java.util.Optional;
 
 public class CalculationService {
     private static final Long CROSS_CURRENCY_ID = 2L;
-    private static final CalculationService INSTANCE = new CalculationService();
 
-    private final CurrencyDao currencyDao = CurrencyDao.getInstance();
+    private final CurrencyDao currencyDao;
     private final List<CalculationStrategy> strategies;
 
-    private CalculationService() {
-        ExchangeRatesDao exchangeRatesDao = ExchangeRatesDao.getInstance();
+    public CalculationService(CurrencyDao currencyDao, ExchangeRatesDao exchangeRatesDao) {
+        this.currencyDao = currencyDao;
         this.strategies = List.of(
                 new DirectRateStrategy(exchangeRatesDao),
                 new ReverseRateStrategy(exchangeRatesDao),
                 new CrossRateStrategy(exchangeRatesDao, CROSS_CURRENCY_ID)
         );
-    }
-
-    public static CalculationService getInstance() {
-        return INSTANCE;
     }
 
     public CalculationResponseDto calculate(CalculationRequestDto calculationRequest) {

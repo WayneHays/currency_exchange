@@ -36,15 +36,6 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
 
     public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE base_currency_id = ? AND target_currency_id = ?";
 
-    private static final ExchangeRatesDao INSTANCE = new ExchangeRatesDao();
-
-    private ExchangeRatesDao() {
-    }
-
-    public static ExchangeRatesDao getInstance() {
-        return INSTANCE;
-    }
-
     public ExchangeRate save(ExchangeRate exchangeRate) {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(

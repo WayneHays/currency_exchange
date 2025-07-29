@@ -21,16 +21,12 @@ public class ExchangeRateService {
     public static final String FAILED_TO_UPDATE_MESSAGE = "Failed to update exchange rate: [%s -> %s]";
     public static final String FAILED_TO_FIND_BY_PAIR_MESSAGE = "Failed to find exchange rate by pair [%s -> %s]";
 
-    private static final ExchangeRateService INSTANCE = new ExchangeRateService();
+    private final CurrencyDao currencyDao;
+    private final ExchangeRatesDao exchangeRatesDao;
 
-    private final ExchangeRatesDao exchangeRatesDao = ExchangeRatesDao.getInstance();
-    private final CurrencyDao currencyDao = CurrencyDao.getInstance();
-
-    private ExchangeRateService() {
-    }
-
-    public static ExchangeRateService getInstance() {
-        return INSTANCE;
+    public ExchangeRateService(CurrencyDao currencyDao, ExchangeRatesDao exchangeRatesDao) {
+        this.currencyDao = currencyDao;
+        this.exchangeRatesDao = exchangeRatesDao;
     }
 
     public ExchangeRateResponseDto save(ExchangeRateRequestDto dto)

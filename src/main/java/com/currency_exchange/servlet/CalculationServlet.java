@@ -1,5 +1,6 @@
 package com.currency_exchange.servlet;
 
+import com.currency_exchange.config.ApplicationContext;
 import com.currency_exchange.dto.calculation.CalculationRequestDto;
 import com.currency_exchange.dto.calculation.CalculationResponseDto;
 import com.currency_exchange.service.CalculationService;
@@ -14,7 +15,13 @@ import java.io.IOException;
 
 @WebServlet("/exchange")
 public class CalculationServlet extends HttpServlet {
-    private final CalculationService calculationService = CalculationService.getInstance();
+    private CalculationService calculationService;
+
+    @Override
+    public void init() {
+        ApplicationContext applicationContext = (ApplicationContext) getServletContext().getAttribute("applicationContext");
+        this.calculationService = applicationContext.getCalculationService();
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {

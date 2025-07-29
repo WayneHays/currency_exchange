@@ -1,5 +1,6 @@
 package com.currency_exchange.servlet.exchange_rates;
 
+import com.currency_exchange.config.ApplicationContext;
 import com.currency_exchange.dto.currency.CurrencyPairDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
 import com.currency_exchange.service.ExchangeRateService;
@@ -17,7 +18,13 @@ import java.math.BigDecimal;
 
 @WebServlet("/exchangeRate/*")
 public class ExchangeRateServlet extends HttpServlet {
-    private final ExchangeRateService exchangeRateService = ExchangeRateService.getInstance();
+    private ExchangeRateService exchangeRateService;
+
+    @Override
+    public void init() {
+        ApplicationContext context = (ApplicationContext) getServletContext().getAttribute("applicationContext");
+        this.exchangeRateService = context.getExchangeRateService();
+    }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
