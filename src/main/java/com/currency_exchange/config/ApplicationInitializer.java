@@ -6,11 +6,13 @@ import jakarta.servlet.annotation.WebListener;
 
 @WebListener
 public class ApplicationInitializer implements ServletContextListener {
+    public static final String KEY = "applicationContext";
+
     private ApplicationContext applicationContext;
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         applicationContext = new ApplicationContext();
-        sce.getServletContext().setAttribute("applicationContext", applicationContext);
+        sce.getServletContext().setAttribute(KEY, applicationContext);
     }
 }
