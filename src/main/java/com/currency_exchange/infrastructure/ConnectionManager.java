@@ -1,7 +1,5 @@
 package com.currency_exchange.infrastructure;
 
-import com.currency_exchange.config.PropertiesUtil;
-
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
