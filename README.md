@@ -4,7 +4,7 @@ REST API для описания валют и обменных курсов. П
 
 ## 📋 Описание проекта
 
-Проект реализован в соответствии с ТЗ: https://zhukovsd.github.io/java-backend-learning-course/Projects/CurrencyExchange/
+Проект реализован в соответствии с ТЗ: https://zhukovsd.github.io/java-backend-learning-course/projects/currency-exchange/
 
 Приложение представляет серверное REST API, построенное на архитектурном принципе MVC (Model-View-Controller):
 
