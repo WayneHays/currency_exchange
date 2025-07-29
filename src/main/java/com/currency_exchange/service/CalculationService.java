@@ -6,6 +6,7 @@ import com.currency_exchange.dto.calculation.CalculationRequestDto;
 import com.currency_exchange.dto.calculation.CalculationResponseDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.entity.Currency;
+import com.currency_exchange.exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.ExchangeRateNotFoundException;
 import com.currency_exchange.service.calculation_strategy.CalculationStrategy;
 import com.currency_exchange.service.calculation_strategy.CrossRateStrategy;
@@ -32,7 +33,8 @@ public class CalculationService {
         );
     }
 
-    public CalculationResponseDto calculate(CalculationRequestDto calculationRequest) {
+    public CalculationResponseDto calculate(CalculationRequestDto calculationRequest)
+            throws CurrencyNotFoundException, ExchangeRateNotFoundException {
         Currency base = currencyDao.findByCode(calculationRequest.from());
         Currency target = currencyDao.findByCode(calculationRequest.to());
 

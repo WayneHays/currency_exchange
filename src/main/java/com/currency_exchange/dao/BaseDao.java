@@ -12,7 +12,7 @@ public abstract class BaseDao<T> {
     public static final String ID = "id";
     protected static final int DUPLICATE_ERROR_CODE = 19;
 
-    protected List<T> executeQuery(String sql) {
+    protected List<T> executeQuery(String sql) throws DaoException {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(sql)) {
             var resultSet = preparedStatement.executeQuery();

@@ -23,7 +23,7 @@ public class CurrencyDao extends BaseDao<Currency> {
     public static final String FIND_BY_IDS_SQL = FIND_ALL_SQL + " WHERE id IN (";
     public static final String FIND_BY_CODE_SQL = FIND_ALL_SQL + " WHERE CODE = ?";
 
-    public Currency save(Currency currency) {
+    public Currency save(Currency currency) throws CurrencyAlreadyExistsException, DaoException {
         try (var connection = ConnectionManager.get();
              var preparedStatement = connection.prepareStatement(
                      SAVE_SQL, Statement.RETURN_GENERATED_KEYS)) {
@@ -47,11 +47,11 @@ public class CurrencyDao extends BaseDao<Currency> {
         }
     }
 
-    public List<Currency> findAll() {
+    public List<Currency> findAll() throws DaoException {
         return executeQuery(FIND_ALL_SQL);
     }
 
-    public Currency findByCode(String code) {
+    public Currency findByCode(String code) throws CurrencyNotFoundException, DaoException {
         try (var connection = ConnectionManager.get();
              var prepareStatement = connection.prepareStatement(FIND_BY_CODE_SQL)) {
             prepareStatement.setString(1, code);
@@ -65,7 +65,7 @@ public class CurrencyDao extends BaseDao<Currency> {
         }
     }
 
-    public Map<Long, Currency> findByIds(List<Long> ids) {
+    public Map<Long, Currency> findByIds(List<Long> ids) throws DaoException {
         if (ids == null || ids.isEmpty()) {
             return new HashMap<>();
         }
