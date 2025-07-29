@@ -36,12 +36,9 @@ public class CalculationService {
         Currency base = currencyDao.findByCode(calculationRequest.from());
         Currency target = currencyDao.findByCode(calculationRequest.to());
 
-        CurrencyResponseDto baseResponse = Mapper.toCurrencyResponseDto(base);
-        CurrencyResponseDto targetResponse = Mapper.toCurrencyResponseDto(target);
-
         return strategies.stream()
                 .map(strategy -> tryCalculate(strategy, base, target,
-                        calculationRequest.amount(), baseResponse, targetResponse))
+                        calculationRequest.amount()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
@@ -52,10 +49,10 @@ public class CalculationService {
             CalculationStrategy strategy,
             Currency base,
             Currency target,
-            BigDecimal amount,
-            CurrencyResponseDto baseResponse,
-            CurrencyResponseDto targetResponse) {
+            BigDecimal amount) {
         try {
+            CurrencyResponseDto baseResponse = Mapper.toCurrencyResponseDto(base);
+            CurrencyResponseDto targetResponse = Mapper.toCurrencyResponseDto(target);
             return Optional.of(strategy.calculate(base, target, amount, baseResponse, targetResponse));
         } catch (ExchangeRateNotFoundException e) {
             return Optional.empty();

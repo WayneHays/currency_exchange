@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public abstract class BaseDao<T> {
     public static final String ID = "id";
@@ -17,6 +18,26 @@ public abstract class BaseDao<T> {
              var preparedStatement = connection.prepareStatement(sql)) {
             var resultSet = preparedStatement.executeQuery();
             return buildEntityList(resultSet);
+        } catch (SQLException e) {
+            throw new DaoException(e.getMessage());
+        }
+    }
+
+    protected Optional<T> executeQuerySingle(String sql, Object... parameters) {
+        try (var connection = ConnectionManager.get();
+             var preparedStatement = connection.prepareStatement(sql)) {
+
+            for (int i = 0; i < parameters.length; i++) {
+                preparedStatement.setObject(i + 1, parameters[i]);
+            }
+
+            var resultSet = preparedStatement.executeQuery();
+
+            if (resultSet.next()) {
+                return Optional.of(buildEntity(resultSet));
+            }
+            return Optional.empty();
+
         } catch (SQLException e) {
             throw new DaoException(e.getMessage());
         }
