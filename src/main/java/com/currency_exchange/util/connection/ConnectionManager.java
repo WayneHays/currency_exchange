@@ -14,9 +14,9 @@ import java.util.concurrent.BlockingQueue;
 public final class ConnectionManager {
     private static final String URL_KEY = "db.url";
     private static final String POOL_SIZE_KEY = "db.pool.size";
-    private static final Integer DEFAULT_POOL_SIZE = 5;
-    private static final String DRIVER_CLASS_PATH = "org.sqlite.JDBC";
+    private static final String DRIVER_CLASS_KEY = "db.driverClassPath";
     private static final String DATABASE_INIT_ERROR_MESSAGE = "Database initialization failed";
+    private static final Integer DEFAULT_POOL_SIZE = 5;
 
     private static BlockingQueue<Connection> pool;
     private static boolean databaseInitialized = false;
@@ -40,7 +40,8 @@ public final class ConnectionManager {
 
     private static void loadDriver() {
         try {
-            Class.forName(DRIVER_CLASS_PATH);
+            String driverClassPath = PropertiesUtil.get(DRIVER_CLASS_KEY);
+            Class.forName(driverClassPath);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
