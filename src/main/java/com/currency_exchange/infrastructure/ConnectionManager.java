@@ -1,7 +1,6 @@
-package com.currency_exchange.util.connection;
+package com.currency_exchange.infrastructure;
 
-import com.currency_exchange.util.PropertiesUtil;
-import com.currency_exchange.util.database.DatabaseSchema;
+import com.currency_exchange.config.PropertiesUtil;
 
 import java.lang.reflect.Proxy;
 import java.sql.Connection;

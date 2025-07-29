@@ -1,4 +1,4 @@
-package com.currency_exchange.util.database;
+package com.currency_exchange.infrastructure;
 
 public final class DatabaseSchema {
     public static final String DATABASE_EXISTS_CHECK = "SELECT 1 FROM currencies LIMIT 1";

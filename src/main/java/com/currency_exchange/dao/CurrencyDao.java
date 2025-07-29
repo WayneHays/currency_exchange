@@ -4,7 +4,7 @@ import com.currency_exchange.entity.Currency;
 import com.currency_exchange.exception.CurrencyAlreadyExistsException;
 import com.currency_exchange.exception.CurrencyNotFoundException;
 import com.currency_exchange.exception.DaoException;
-import com.currency_exchange.util.connection.ConnectionManager;
+import com.currency_exchange.infrastructure.ConnectionManager;
 
 import java.sql.*;
 import java.util.Collections;

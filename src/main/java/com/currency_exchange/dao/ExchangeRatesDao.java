@@ -6,7 +6,7 @@ import com.currency_exchange.entity.ExchangeRateData;
 import com.currency_exchange.exception.DaoException;
 import com.currency_exchange.exception.ExchangeRateAlreadyExistsException;
 import com.currency_exchange.exception.ExchangeRateNotFoundException;
-import com.currency_exchange.util.connection.ConnectionManager;
+import com.currency_exchange.infrastructure.ConnectionManager;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -27,7 +27,7 @@ public class ExchangeRatesDao extends BaseDao<ExchangeRate> {
     public static final String TARGET_CODE = "target_code";
     public static final String TARGET_NAME = "target_name";
     public static final String TARGET_SIGN = "target_sign";
-    
+
     public static final String SAVE_SQL = """
             INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (?,?,?)
             """;
