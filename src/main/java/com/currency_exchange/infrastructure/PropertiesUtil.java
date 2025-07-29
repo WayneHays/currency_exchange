@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public final class PropertiesUtil {
+    public static final String PROPERTIES_FILE_NAME = "application.properties";
+
     private static final Properties PROPERTIES = new Properties();
 
     static {
@@ -19,11 +21,10 @@ public final class PropertiesUtil {
     }
 
     private static void loadProperties() {
-        try (InputStream resourceAsStream = PropertiesUtil.class.getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream resourceAsStream = PropertiesUtil.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE_NAME)) {
             PROPERTIES.load(resourceAsStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-
 }

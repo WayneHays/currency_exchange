@@ -1,6 +1,7 @@
 package com.currency_exchange.servlet.currencies;
 
 import com.currency_exchange.config.ApplicationContext;
+import com.currency_exchange.config.ApplicationInitializer;
 import com.currency_exchange.dto.currency.CurrencyRequestDto;
 import com.currency_exchange.dto.currency.CurrencyResponseDto;
 import com.currency_exchange.service.CurrencyService;
@@ -20,7 +21,8 @@ public class CurrenciesServlet extends HttpServlet {
 
     @Override
     public void init() {
-        ApplicationContext context = (ApplicationContext) getServletContext().getAttribute("applicationContext");
+        ApplicationContext context = (ApplicationContext) getServletContext()
+                .getAttribute(ApplicationInitializer.APPLICATION_CONTEXT_ATTRIBUTE);
         this.currencyService = context.getCurrencyService();
     }
 

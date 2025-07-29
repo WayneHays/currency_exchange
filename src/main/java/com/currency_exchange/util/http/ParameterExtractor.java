@@ -1,5 +1,6 @@
 package com.currency_exchange.util.http;
 
+import com.currency_exchange.constant.ValidationErrorMessages;
 import com.currency_exchange.dto.calculation.CalculationRequestDto;
 import com.currency_exchange.dto.currency.CurrencyRequestDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateRequestDto;
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 import static com.currency_exchange.constant.HttpParameterNames.*;
 
 public final class ParameterExtractor {
-    public static final String MISSING_PARAMETER_RATE = "Missing parameter: rate";
-    public static final String FAILED_TO_READ_REQUEST_BODY = "Failed to read request body";
-    public static final String PARAMETER_NOT_FOUND = "Parameter not found: ";
+    private static final String PARAMETER_SEPARATOR = "&";
+    private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final int MAX_KEY_VALUE_PARTS = 2;
+
+    private static final String PATCH_METHOD = "PATCH";
 
     private ParameterExtractor() {
     }
@@ -67,7 +70,7 @@ public final class ParameterExtractor {
     public static BigDecimal extractRate(HttpServletRequest req) {
         String rate;
 
-        if ("PATCH".equals(req.getMethod())) {
+        if (PATCH_METHOD.equals(req.getMethod())) {
             rate = extractRateFromBody(req);
         } else {
             Map<String, String[]> params = normalizeParameterMap(req.getParameterMap());
@@ -105,7 +108,7 @@ public final class ParameterExtractor {
                 .orElse(null);
 
         if (value == null) {
-            throw new InvalidParameterException(PARAMETER_NOT_FOUND + name);
+            throw new InvalidParameterException(ValidationErrorMessages.PARAMETER_NOT_FOUND + name);
         }
 
         if (normalize) {
@@ -119,24 +122,25 @@ public final class ParameterExtractor {
         try (BufferedReader reader = req.getReader()) {
             String body = reader.lines().collect(Collectors.joining()).trim();
 
-            String[] pairs = body.split("&");
+            String[] pairs = body.split(PARAMETER_SEPARATOR);
             for (String pair : pairs) {
-                String[] keyValue = pair.split("=", 2);
-                if (keyValue.length == 2) {
+                String[] keyValue = pair.split(KEY_VALUE_SEPARATOR, MAX_KEY_VALUE_PARTS);
+                if (keyValue.length == MAX_KEY_VALUE_PARTS) {
                     String decodedKey = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
                     decodedKey = normalizeParameterName(decodedKey);
 
                     if (RATE.equals(decodedKey)) {
                         String decodedValue = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
-                        decodedValue = decodedValue.trim().replaceAll("\\s+", "").replace(",", ".");
+                        decodedValue = decodedValue.trim().replaceAll("\\s+", "")
+                                .replace(",", ".");
                         return decodedValue;
                     }
                 }
             }
-            throw new InvalidParameterException(MISSING_PARAMETER_RATE);
+            throw new InvalidParameterException(ValidationErrorMessages.MISSING_PARAMETER_RATE);
 
         } catch (IOException e) {
-            throw new InvalidParameterException(FAILED_TO_READ_REQUEST_BODY);
+            throw new InvalidParameterException(ValidationErrorMessages.FAILED_TO_READ_REQUEST_BODY);
         }
     }
 

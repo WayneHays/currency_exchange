@@ -10,6 +10,9 @@ public final class ValidationErrorMessages {
     public static final String PAIR_ERROR_MESSAGE = "Path must be 6 latin letters like USDRUB";
     public static final String MISSING_CURRENCY_CODE_MESSAGE = "Missing currency code";
     public static final String MISSING_PAIR_MESSAGE = "Missing currency pair codes";
+    public static final String MISSING_PARAMETER_RATE = "Missing parameter: rate";
+    public static final String PARAMETER_NOT_FOUND = "Parameter not found: ";
+    public static final String FAILED_TO_READ_REQUEST_BODY = "Failed to read request body";
 
     private ValidationErrorMessages() {
     }

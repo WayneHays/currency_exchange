@@ -1,6 +1,7 @@
 package com.currency_exchange.servlet;
 
 import com.currency_exchange.config.ApplicationContext;
+import com.currency_exchange.config.ApplicationInitializer;
 import com.currency_exchange.dto.calculation.CalculationRequestDto;
 import com.currency_exchange.dto.calculation.CalculationResponseDto;
 import com.currency_exchange.service.CalculationService;
@@ -19,7 +20,8 @@ public class CalculationServlet extends HttpServlet {
 
     @Override
     public void init() {
-        ApplicationContext applicationContext = (ApplicationContext) getServletContext().getAttribute("applicationContext");
+        ApplicationContext applicationContext = (ApplicationContext) getServletContext()
+                .getAttribute(ApplicationInitializer.APPLICATION_CONTEXT_ATTRIBUTE);
         this.calculationService = applicationContext.getCalculationService();
     }
 

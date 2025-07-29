@@ -11,8 +11,10 @@ import static com.currency_exchange.constant.ValidationErrorMessages.*;
 import static com.currency_exchange.constant.ValidationPatterns.CODE_PATTERN;
 import static com.currency_exchange.constant.ValidationPatterns.PAIR_PATTERN;
 
+
 public final class PathExtractor {
     public static final int CURRENCY_CODE_LENGTH = 3;
+    public static final int LEADING_SLASH_LENGTH = 1;
 
     private PathExtractor() {
     }
@@ -40,6 +42,6 @@ public final class PathExtractor {
         if (path == null || "/".equals(path)) {
             throw new InvalidParameterException(errorMessage);
         }
-        return path.substring(1).trim().replaceAll("\\s+", "").toUpperCase();
+        return path.substring(LEADING_SLASH_LENGTH).trim().replaceAll("\\s+", "").toUpperCase();
     }
 }

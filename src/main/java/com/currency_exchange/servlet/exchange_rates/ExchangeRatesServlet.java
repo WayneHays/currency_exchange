@@ -1,6 +1,7 @@
 package com.currency_exchange.servlet.exchange_rates;
 
 import com.currency_exchange.config.ApplicationContext;
+import com.currency_exchange.config.ApplicationInitializer;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateRequestDto;
 import com.currency_exchange.dto.exchange_rate.ExchangeRateResponseDto;
 import com.currency_exchange.service.ExchangeRateService;
@@ -20,7 +21,8 @@ public class ExchangeRatesServlet extends HttpServlet {
 
     @Override
     public void init() {
-        ApplicationContext context = (ApplicationContext) getServletContext().getAttribute("applicationContext");
+        ApplicationContext context = (ApplicationContext) getServletContext()
+                .getAttribute(ApplicationInitializer.APPLICATION_CONTEXT_ATTRIBUTE);
         this.exchangeRateService = context.getExchangeRateService();
     }
 
